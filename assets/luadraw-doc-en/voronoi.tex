@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-3-Geometric-Constructions.tex (demo: Voronoi diagram)
+\begin{luadraw}{name=voronoi}
+local ld = luadraw
+local g = ld.graph:new{ bbox=true, margin={0,0,0,0}, size={10,10}}
+local i = ld.cpx.I
+local S = {0.285+1.46*i,1.556-0.142*i,2.344+1.313*i,-2.38+1.218*i,1.548-0.624*i,
+0.969+1.819*i,-0.086-2.191*i,-0.477+1.834*i,-0.904+1.322*i,-2.892+0.025*i}
+local V = ld.voronoi(S)
+local colors = ld.getpalette(ld.rainbow,#V)
+for k,T in ipairs(V) do
+    local A, polygon = table.unpack(T)
+    g:Dpolyline(polygon,true,"color=white, line width=1.2pt,fill="..colors[k])
+    g:Ddots(A,"mark=x,white,scale=2,line width=1.2pt")-- A is one of the points of S
+end
+g:Dpolyline(ld.delaunay(S),true,"dotted,line width=0.6pt") -- Delaunay triangles
+g:Show()
+\end{luadraw}

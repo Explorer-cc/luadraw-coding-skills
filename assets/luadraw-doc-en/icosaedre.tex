@@ -1,0 +1,29 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-5-Dscene3d-Method.tex (demo: Construction of an icosahedron)
+\begin{luadraw}{name=icosaedre}
+local ld = luadraw
+local M = ld.pt3d.M
+
+local g = ld.graph3d:new{window={-2.25,2.25,-2,2}, viewdir={40,60},bg="gray",size={10,10},margin={0,0,0,0}}
+ld.Hiddenlines = false
+local phi = (1+math.sqrt(5))/2 -- golden ratio
+local A1, B1, C1, D1 = M(phi,-1,0), M(phi,1,0), M(-phi,1,0), M(-phi,-1,0) -- in the plane z=0
+local A2, B2, C2, D2 = M(0,phi,1), M(0,phi,-1), M(0,-phi,-1), M(0,-phi,1) -- in the plane x=0
+local A3, B3, C3, D3 = M(1,0,phi), M(-1,0,phi), M(-1,0,-phi), M(1,0,-phi) -- in the plane y=0
+local ico = {
+{A1,B1,A3}, {B1,A1,D3}, {D1,C1,C3}, {C1,D1,B3},
+{B2,A2,B1}, {A2,B2,C1}, {D2,C2,A1}, {C2,D2,D1},
+{B3,A3,A2}, {A3,B3,D2}, {D3,C3,B2}, {C3,D3,C2},
+{A1,A3,D2}, {B1,A2,A3}, {A2,C1,B3}, {D1,D2,B3},
+{B2,B1,D3}, {A1,C2,D3}, {B2,C3,C1}, {C2,D1,C3} }
+g:Dscene3d(
+    g:addFacet({A2,B2,C2,D2},{color="Navy",twoside=false,opacity=0.8}),
+    g:addFacet({A1,B1,C1,D1},{color="Crimson",twoside=false,opacity=0.8}),
+    g:addFacet({A3,B3,C3,D3},{color="Chocolate",twoside=false,opacity=0.8}),
+    g:addPolyline(ld.facetedges(ico), {color="Gold",width=12}), -- drawing edges only
+    g:addDots({A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3}, {color="black",scale=1.2}),
+    g:addLabel("A1",A1,{style="W",dist=0.1}, "B1",B1,{style="S"}, "C2",C2,{}, "C3",C3,{},
+        "A3",A3,{style="N"}, "D1",D1,{}, "A2",A2,{}, "D2",D2,{}, "B3",B3,{style="E"},
+        "C1",C1,{}, "B2",B2,{}, "D3",D3,{style="W"} )
+)
+g:Show()
+\end{luadraw}

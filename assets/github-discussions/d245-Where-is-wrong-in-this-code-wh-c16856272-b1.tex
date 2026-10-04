@@ -1,0 +1,20 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16856272 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=Dinequalities}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-3,3,-5,2}, size={10,10}}
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = function(x) return x^3 - 3*x-2 end
+local h = function(x) return x - 2 end
+g:Dinequalities({f,'>', h,'<'}, {view={-1,3,-5,2},draw_options="draw=none,fill=pink,fill opacity=0.6"})
+g:Dinequalities({f,'>', h,'<'}, {view={-3,-1,-5,2},draw_options="draw=none,fill=pink,fill opacity=0.6"})
+g:Dcartesian(h, {draw_options="blue, line width=0.8pt"}); g:Dlabel("$C_h$",Z(-2.5,-3.75),{node_options="blue"})
+g:Dcartesian(f, {draw_options="red, line width=0.8pt"}); g:Dlabel("$C_f$",Z(2,-2),{pos="E",node_options="red"})
+g:Show()
+\end{luadraw}
+\end{document} 

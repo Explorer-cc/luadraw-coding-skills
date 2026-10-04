@@ -1,0 +1,17 @@
+% source: https://github.com/pfradin/luadraw/discussions/78#discussioncomment-14360550 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=volume}
+local g = graph3d:new{window3d={0,3,-3,3,0,2},window={-0.5,3,-1.75,2},bbox=true,viewdir={280,70},size={12,12}}
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local O,A, B,C,D = Origin, M(1,0,0), M(2,0,0)
+local R, r = 3/2, 1
+g:Dpolyline3d({{-3*vecJ, 3*vecJ},{O, 3*vecI},{O, 2*vecK}},"arrows={-Stealth[scale=1.5]}")
+g:Dfrustum(A,R,r,vecI,B,{color = "Orange"})
+g:Dpolyline3d({B, 3*vecI}); g:Dpolyline3d({O, B},"dashed")
+g:Dlabel3d("$x$",3*vecI,{pos="E"},"$y$",3*vecJ,{pos="N"},"$z$",2*vecK,{})
+g:Show()
+\end{luadraw}
+\end{document} 

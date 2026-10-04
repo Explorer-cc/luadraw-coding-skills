@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222176 (pfradin, block 1)
+\begin{luadraw}{name=spherical}
+local g = graph3d:new{window={-4,5,-4,5},viewdir={20,70},size={10,10}}
+require 'luadraw_spherical'
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a = 4
+local O = Origin
+local P = parallelep(O,a*vecI,a*vecJ,a*vecK)
+local G = isobar3d(P.vertices)
+P = shift3d(P,-G)
+local R = pt3d.abs(P.vertices[1])
+g:Define_sphere({radius=R,color="orange"} )
+g:DSpolyline({{O,5*vecI},{O,5*vecJ},{O,5*vecK}},{arrows=1})
+g:DScircle({a/2*vecK,vecK}); g:DScircle({-a/2*vecK,vecK})
+g:DSpolyline( facetedges(P) ); g:DSlabel("$O$",O,{pos="W"})
+g:Dspherical()
+g:Dlabel3d("$x$",5*vecI,{pos="SW"},"$y$",5*vecJ,{pos="E"},"$z$",5*vecK,{pos="N"})
+g:Show()
+\end{luadraw}

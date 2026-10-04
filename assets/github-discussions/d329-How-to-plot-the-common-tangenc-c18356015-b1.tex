@@ -1,0 +1,35 @@
+% source: https://github.com/pfradin/luadraw/discussions/329#discussioncomment-18356015 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=common_tangent}
+local ld = luadraw
+local cpx = ld.cpx
+local det = cpx.det
+local Z, Zp = cpx.Z, cpx.Zp
+local h = 1e-6
+local g = ld.graph:new{  size={10,10} }
+-- functions
+local function f(t) return Z(t,t^2) end
+local function k(t) return Z(t,3*math.cos(t)) end
+-- calculus
+local function diff(f,t) return (f(t+h)-f(t-h))/(2*h) end
+local function F(x,y) return det(diff(k,y), diff(f,x)) end -- x = parameter for f, y = parameter for k
+local function G(x,y) return det(k(y)-f(x), diff(f,x)) end
+local L1 = ld.implicit(F,-5,5,-5,5, {50,50})
+local L2 = ld.implicit(G,-5,5,-5,5, {50,50})
+local I = ld.interL(L1,L2)
+--drawing
+g:Dparametric(f, {t={-5,5}, draw_options="thick,red"})
+g:Dparametric(k, {t={-5,5}, draw_options="thick,blue"})
+if I ~= nil then 
+    for _,z in ipairs(I) do
+        g:Dtangent(f,z.re)
+        g:Ddots({f(z.re), k(z.im)})
+    end
+end
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,49 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-polyhedrons.tex (demo: Polyhedra from the \emph{luadraw\_polyhedrons)
+\begin{luadraw}{name=polyhedrons}
+local ld = luadraw
+local M, Origin = ld.pt3d.M, ld.pt3d.Origin
+local i = ld.cpx.I
+local poly = require 'luadraw_polyhedrons' -- chargement du module
+
+local g = ld.graph3d:new{bg="LightGray", size={10,10}}
+g:Labelsize("small"); ld.Hiddenlines = false
+-- en haut à gauche 
+g:Saveattr(); g:Viewport(-5,0,0,5); g:Coordsystem(-5,5,-5,5,true)
+local T,S,A,F = poly.icosahedron(Origin,M(0,2,4.5),true) 
+g:Dscene3d(
+    g:addFacet(F, {color="Crimson",opacity=0.8}),
+    g:addPolyline(A, {color="Pink", width=8}),
+    g:addDots(S) )
+g:Dlabel("Icosahedron",5*i,{})
+g:Restoreattr()
+-- en haut à droite
+g:Saveattr()
+g:Viewport(0,5,0,5); g:Coordsystem(-5,5,-5,5,true)
+local T,S,A,F1,F2 = poly.truncatedtetrahedron(Origin,M(0,0,5),true) -- Full output, display in a 3D scene
+g:Dscene3d(
+    g:addFacet(F1, {color="Crimson",opacity=0.8}),
+    g:addFacet(F2, {color="Gold"}),
+    g:addPolyline(A, {color="Pink", width=8}),
+    g:addDots(S) )
+g:Dlabel("Truncated Tetrahedron",5*i,{})
+g:Restoreattr()
+-- en bas à gauche
+g:Saveattr(); g:Viewport(-5,0,-5,0); g:Coordsystem(-5,5,-5,5,true)
+local T,S,A,F1,F2,F3 = poly.rhombicosidodecahedron(Origin,M(0,0,4.5),true)
+g:Dscene3d(
+    g:addFacet(F1, {color="Crimson",opacity=0.8}),
+    g:addFacet(F2, {color="Gold",opacity=0.8}), g:addFacet(F3, {color="ForestGreen"}),
+    g:addPolyline(A, {color="Pink", width=8}), g:addDots(S) )
+g:Dlabel("Rhombicosidodecahedron",-5*i,{})
+g:Restoreattr()
+-- en bas à droite
+g:Saveattr(); g:Viewport(0,5,-5,0); g:Coordsystem(-5,5,-5,5,true)
+local T,S,A,F1 = poly.small_stellated_dodecahedron(Origin,M(0,0,5),true)
+g:Dscene3d(
+    g:addFacet(F1, {color="Crimson",opacity=0.8}),
+    g:addPolyline(A, {color="Pink", width=8}),
+    g:addDots(S) )
+g:Dlabel("Small Stellated Dodecahedron",-5*i,{})
+g:Restoreattr()
+g:Show()
+\end{luadraw}

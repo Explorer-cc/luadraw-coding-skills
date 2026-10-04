@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222132 (pfradin, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/729038/drawing-latitudinal-line-on-a-sphere-associated-with-a-given-angle-of-elevation
+\begin{document}
+
+\begin{luadraw}{name=prism}
+local g = graph3d:new{window={-6,6,-7,7},viewdir={30,60},size={10,10}}
+local i = cpx.I
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local P1 = {-3*vecK, vecK}
+local v = M(0,-0.2,1) -- direction
+local P2 = {-3*vecK+6*v,vecK}
+local T = map(toPoint3d, polyreg(0,1.5+i,5))
+local A1, A2, A3, A4, A5 = table.unpack( proj3dO(T,P1,v) )
+local A11, A22, A33, A44, A55 = table.unpack( proj3dO(T,P2,v) )
+g:Dscene3d(
+    g:addPlane(P2,{edge=true}), g:addPlane(P1,{edge=true}),
+    g:addPoly(prism({A1,A2,A3,A4,A5},6*v), {backcull=true}),
+    g:addLine({A1,v}), g:addLine({A2,v}), g:addLine({A3,v}), g:addLine({A4,v}), g:addLine({A5,v}),
+    g:addPolyline({A1,A2,A3,A4,A5,A1}), g:addPolyline({A11,A22,A33,A44,A55,A11})
+)
+g:Show()
+\end{luadraw}
+\end{document}

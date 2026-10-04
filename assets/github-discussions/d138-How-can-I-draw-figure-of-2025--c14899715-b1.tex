@@ -1,0 +1,17 @@
+% source: https://github.com/pfradin/luadraw/discussions/138#discussioncomment-14899715 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\begin{document}
+\begin{luadraw}{name=squares}
+local g = graph:new{margin={0,0,0,0}, size={12,12}}
+local i = cpx.I
+local shaded_band = {-5-5*i,5-5*i,5+5*i,-5+5*i,"l","cl", -4-4*i,"m",-4+4*i,4+4*i,4-4*i,"l","cl"} -- it's a path
+local scale, nb = 0.65, 20
+for k = 1, nb do
+    g:Dpath(shaded_band,"draw=none,fill=black!60")
+    g:Scale(scale)
+end
+g:Show() 
+\end{luadraw}
+\end{document}

@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16859686 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=Dinequalitiesge}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+local g = ld.graph:new{window={-1,4,-2,2}, size={10,10}, bbox=false}
+
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = function(x) return x*(x-1)*(x-2)*(x-3)  end
+local h = function(x) return 0 end
+g:Ddomain1(f,{ x={0,3},draw_options="draw=none,fill=pink,fill opacity=0.6"})
+g:Dcartesian(h, {draw_options="blue, line width=0.8pt"}); g:Dlabel("$C_h$",Z(-2.5,-3.75),{node_options="blue"})
+g:Dcartesian(f, {draw_options="red, line width=0.8pt"});
+g:Show()
+\end{luadraw}
+\end{document} 

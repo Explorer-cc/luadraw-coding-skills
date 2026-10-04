@@ -1,0 +1,111 @@
+% source: https://github.com/pfradin/luadraw/discussions/255#discussioncomment-16972573 (pfradin, block 1)
+\documentclass[border=2mm]{standalone}% compile with lualatex only 
+\usepackage[svgnames]{xcolor} 
+\usepackage[3d]{luadraw} 
+\usepackage{fourier-otf} 
+
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+function ld.parabola(A,B,C)
+    A = cpx.toComplex(A)
+    B = cpx.toComplex(B)
+    C = cpx.toComplex(C)
+
+    return function(t)
+        return A*(t-1)*(t-2)/2
+             - B*(t)*(t-2)
+             + C*(t)*(t-1)/2
+    end
+end
+\end{luacode*}
+
+\newcommand*{\fillColor}{LightBlue}
+
+\begin{document}
+\begin{luadraw}{name=polygon1}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{window={-4,4,-5,3}, size={10,10}}
+--g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(8)
+local O, A, B = Z(0,0), Z(-2, -4), Z(2, -4)
+local I= (A+B)/2 + cpx.abs(B-A)/(2*math.tan(36*ld.deg))*Z(0,1)
+local C, D, E
+local polygon = ld.polyreg(I,A,5)
+B,C,D,E,A = table.unpack( polygon )
+g:Dpolyline(polygon, true)
+local P = ld.parabola(A,O,B)
+-- fill
+local Lab = ld.parametric(P,0,2)[1]
+local Lea = ld.rotate(Lab,-72,I)
+g:Writeln("\\begin{scope}[opacity=0.6,transparency group]")
+for k = 0, 4 do
+    g:Beginclip( ld.polyline2path(Lea) )
+        g:Dpolyline(Lab,"draw=none,fill=\fillColor")
+    g:Endclip()
+    g:Rotate(72,I)
+end
+g:Writeln("\\end{scope}")
+g:IDmatrix()
+-- curves
+g:Lineoptions("solid", "ForestGreen")
+for i = 0, 4 do
+  g:Dparametric(P, {t={0, 2}})
+  g:Rotate(72,I)
+end
+g:IDmatrix()
+-- dots and labels
+g:Ddots({A, B, C, D, E, I}, "color=DimGray")
+g:Dlabel("$A$", A, {pos="SW"}, 
+       "$B$", B, {pos="SE"}, 
+       "$C$", C, {pos="E"}, 
+       "$D$", D, {pos="N"}, 
+       "$E$", E, {pos="W"}, 
+       "$I$", I, {pos="NW"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=polygon2}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{window={-4,4,-5,3}, size={10,10}}
+--g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(8)
+local O, A, B = Z(0,0), Z(-2, -4), Z(2, -4)
+local I= (A+B)/2 + cpx.abs(B-A)/(2*math.tan(36*ld.deg))*Z(0,1)
+local C, D, E
+local polygon = ld.polyreg(I,A,5)
+B,C,D,E,A = table.unpack( polygon )
+g:Dpolyline(polygon, true)
+local P = ld.parabola(A,O,B)
+-- fill (needs 5 clipping)
+local Lab = ld.parametric(P,0,2)
+for k = 0, 4 do
+    g:Beginclip( ld.polyline2path(Lab) )
+    Lab = ld.rotate(Lab,72,I)
+end
+g:Dpolyline(polygon,"draw=none,fill=\fillColor")
+for k = 0, 4 do
+    g:Endclip()
+end
+-- curves
+g:Lineoptions("solid", "ForestGreen")
+for i = 0, 4 do
+  g:Dparametric(P,{t={0,2}}); g:Rotate(72,I)
+end
+g:IDmatrix()
+-- dots and labels
+g:Ddots({A, B, C, D, E, I}, "color=DimGray")
+g:Dlabel("$A$", A, {pos="SW"}, 
+       "$B$", B, {pos="SE"}, 
+       "$C$", C, {pos="E"}, 
+       "$D$", D, {pos="N"}, 
+       "$E$", E, {pos="W"}, 
+       "$I$", I, {pos="NW"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,81 @@
+% source: https://github.com/pfradin/luadraw/discussions/217#discussioncomment-18602511 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local M, Mc = pt3d.M, pt3d.Mc
+local cos, sin, pi, deg = math.cos,math.sin, math.pi, ld.deg
+    
+local draw = function(g, S) -- draw axes and surface
+    g:BeginOnPlane({Origin, vecI,vecJ}, {labeldir="auto"})
+        g:Daxes(nil, {limits={{-3,2.5},{-2.5,2.5}}, arrows="-stealth", 
+            legend={"$x$", "$y$"}, legendpos={1,1}, legendsep={0,0}, legendstyle={"E","N"}})
+    g:EndOnPlane()
+    g:Dfacet(S, {usepalette={ld.palGasFlame,"x"}, opacity=0.8, edgecolor="lightgray", edgewidth=1})
+end
+
+function ld.solid1()
+    local g = ld.graph3d:new{window3d = {-2,2,-2,2,0,4},adjust2d=true,size={12,12}, bbox=false}
+    local p1 = function(u,v) return Mc(2,u,4*v*math.abs(sin(u))) end
+    local p2 = function(u,v) return M(2*cos(u),2*(1-2*v)*sin(u),4*sin(u)) end
+    local S1 = ld.surface(p1,0,2*pi,0,1,{100,2})
+    local S2 = ld.surface(p2,0,pi,0,1,{50,2})
+    local u = 35*deg
+    g:Dpolyline3d({ p1(u,0), p1(-u,0)}, "blue,line width=0.8")
+    draw(g, ld.concat(S1,S2) )
+    g:Dpolyline3d( {p1(u,0), p1(u,1), p1(-u,1),p1(-u,0)}, "blue,line width=0.8")
+    g:Sendtotex()
+end
+
+function ld.solid2()
+    local g = ld.graph3d:new{window3d = {-2,2,-2,2,0,4},adjust2d=true,size={12,12}, bbox=false}
+    local p = function(u,v) return M(2*cos(u), 2*(1-v)*sin(u), 2*v*math.sqrt(3)*math.abs(sin(u))) end
+    local S = ld.surface(p,0,2*pi,0,1,{100,2})
+    local u = 35*deg
+    g:Dpolyline3d({ p(u,0), p(-u,0)}, "blue,line width=0.8")
+    draw(g, S)
+    g:Dpolyline3d( {p(u,0), p(u,1), p(-u,0)}, "blue,line width=0.8")
+    g:Sendtotex()
+end
+
+function ld.solid3()
+    local g = ld.graph3d:new{window3d = {-2,2,-2,2,0,4},adjust2d=true,size={12,12}, bbox=false}
+    local p = function(u,v) return M(2*cos(u), 2*sin(u)*sin(v), 2*sin(u)*cos(v)) end
+    local S = ld.surface(p,0,pi,pi/2,-pi/2,{20,20})
+    local u = 35*deg
+    g:Dpolyline3d({ p(u,pi/2), p(u,-pi/2)}, "blue,line width=0.8")
+    draw(g, S)
+    g:Darc3d( p(u,pi/2), 2*cos(u)*vecI, p(u,-pi/2), 2*sin(u), 1, vecI, "blue,line width=0.8")
+    g:Sendtotex()
+end
+
+function ld.solid4()
+    local g = ld.graph3d:new{window3d = {-2,2,-2,2,0,4},adjust2d=true,size={12,12}, bbox=false}
+    local p = function(u,v) return M(2*cos(u), 2*(1-v)*sin(u), 2*v*math.abs(sin(u))) end
+    local S = ld.surface(p,0,2*pi,0,1,{100,2})
+    local u = 35*deg
+    g:Dpolyline3d({ p(u,0), p(-u,0)}, "blue,line width=0.8")
+    draw(g, S)
+    g:Dpolyline3d( {p(u,0), p(u,1), p(-u,0)}, "blue,line width=0.8")
+    g:Sendtotex()
+end
+\end{luacode*}
+
+\begin{document}
+
+\begin{tabular}{c|c}
+\directlua{luadraw.solid1()}%
+&
+\directlua{luadraw.solid2()}%
+\\\hline\\
+\directlua{luadraw.solid3()}%
+&
+\directlua{luadraw.solid4()}%
+\end{tabular}
+
+\end{document} 

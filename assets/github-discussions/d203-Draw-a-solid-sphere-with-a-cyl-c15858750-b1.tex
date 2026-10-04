@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/203#discussioncomment-15858750 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=cutted_sphere1}
+local g = graph3d:new{size={10,10},bbox=false}
+local R, h = 4, 3.5
+local S = sphere(Origin,R,35,35)
+S = cutfacet(S, {h*vecK,-vecK}) -- to cut the top of S
+S = cutfacet(S, {-h*vecK,vecK}) -- to cut the bottom of S
+g:Dfacet(S, {usepalette={palRainbow,"z"} })
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=cutted_sphere2}
+local g = graph3d:new{size={10,10},bbox=false}
+local R, h = 4, 3.5
+local theta = math.asin(h/R)
+local p = function(t) return M(0,R*math.cos(t),R*math.sin(t)) end
+local S = rotcurve(p, -theta, theta, {Origin,-vecK}, 0,360, {grid={30,30}})
+g:Dfacet(S, {usepalette={palRainbow,"z"}, mode=mShadedOnly })
+g:Show()
+\end{luadraw} 
+\end{document}

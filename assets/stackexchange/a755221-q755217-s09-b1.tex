@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/755221 (question 755217, score 9, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/755217/how-to-shade-an-region-bounded-by-curves
+\begin{document}
+\begin{luadraw}{name=shade_region}
+local g = graph:new{}
+local f = function(x) return 1/x end
+local h = function(x) return -1/x end
+g:Ddomain2(f,h,{x={-1,4},draw_options="fill=pink"})
+g:Daxes({0,1,1})
+g:Linewidth(8)
+g:Dcartesian(h,{draw_options="red",discont=true})
+local a,b = 1.5*Z(1,1.5), Z(3,1)
+g:Beginclip({a,0,b,"l"})
+g:Ddomain1(f,{x={0,4},draw_options="draw=none,fill=green,fill opacity=0.3"})
+g:Endclip()
+g:Dcartesian(f,{draw_options="blue",discont=true})
+g:Dpath({a,0,b,"l"})
+g:Show()
+\end{luadraw}
+\end{document}

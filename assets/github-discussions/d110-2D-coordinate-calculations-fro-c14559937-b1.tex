@@ -1,0 +1,82 @@
+% source: https://github.com/pfradin/luadraw/discussions/110#discussioncomment-14559937 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+%%%
+% src::
+%     url = https://tex.stackexchange.com/a/751717/6880
+%%%
+
+\documentclass{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name = spherical-triangle}
+require 'luadraw_spherical'
+
+local graphview = graph3d:new{
+  window  = {-4, 4, -3, 5},
+  viewdir = {25, 70},
+  size    = {10, 10}
+}
+
+graphview:Linewidth(6)
+Hiddenlinestyle = "dashed"
+Hiddenlines     = true
+
+arrowBstyle = "-stealth"
+
+local O, R =  Origin, 3
+-- Caution: you must always define the sphere first, the sM function for example, uses the sphere data
+graphview:Define_sphere({center = O, radius = R})
+
+local veci, vecj, veck = graphview:Proj3d(vecI), graphview:Proj3d(vecJ), graphview:Proj3d(vecK)
+local kx, ky, kz = (R+1)/cpx.abs(veci), (R+1)/cpx.abs(vecj), (R+1)/cpx.abs(veck)
+-- veci is a direction vector of the projection of the Ox axis and 
+-- the projection of the 3d point O+kx*vecI is: o+kx*veci (o is the projection of O) 
+-- and its distance to o is R+1
+
+local A, B = sM(-50, 60), sM(-10, 60)
+local C, D, N = sM(50, 70), sM(170, 70), sM(90, 0)
+
+graphview:DSfacet(
+  {N, A, B},
+  {fill = "brown", fillopacity = 0.6}
+)
+
+graphview:DSfacet(
+  {N, C, D},
+  {fill = "brown", fillopacity = 0.6}
+)
+
+graphview:DSpolyline(
+  {
+    {O, O + kx * vecI},
+    {O, O + ky * vecJ},
+    {O, O + kz * vecK}},
+    {arrows = 1, width = 6, color = "blue"}
+)
+
+graphview:DScircle(
+  {O, vecK},       -- Plan du grand cercle.
+  {color = "red"}
+)
+
+graphview:Dspherical()
+
+graphview:Dlabel3d(
+  "$N$", N, {pos = "NW"},
+  "$O$", O, {pos = "S"},
+  "$x$", O + kx * vecI, {pos = "SW"},
+  "$y$", O + ky * vecJ , {pos = "E"},
+  "$z$", O + kz * vecK , {pos = "N"},
+  "$A$", A, {pos = "S"},
+  "$B$", B, {},
+  "$C$", C, {pos = "E"},
+  "$D$", D, {pos = "S"}
+)
+graphview:Show()
+\end{luadraw}
+\end{document}

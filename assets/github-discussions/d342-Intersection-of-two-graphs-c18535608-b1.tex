@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/342#discussioncomment-18535608 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=logo}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+
+local g = ld.graph:new{ window={-2,2,-2,2}, size={10,10} }
+
+local function logo(center, radius)
+    local scale = 2*radius/3
+    local function pattern(offset) -- a white strip
+        local a, b = -1, Z(1,0.25) 
+        local v1, v2, v4, v3 = (b-a)/2+i/3, (a-b)/2-i/4, (b-a)/2+i/6, (a-b)/2-i/2
+        local P = {a,"m",a+v1,b+v2,b,"b",b+v3,a+v4,a,"b"}
+        local mat = {center+offset, Z(scale,0), Z(0,scale)}
+        return ld.mtransform(P,mat)
+    end
+    local sep = Z(0,radius/10)
+    return ld.concat( {center+radius,center,"c"}, pattern(sep), pattern(3*sep), pattern(-sep), pattern(-3*sep) )
+end
+
+g:Dpath(logo(0,2), "draw=none,fill=blue")
+g:Show()
+\end{luadraw}
+\end{document}

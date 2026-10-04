@@ -1,0 +1,40 @@
+% source: https://tex.stackexchange.com/a/763643 (question 611938, score 4, block 1)
+% Source - https://tex.stackexchange.com/a/763640
+% Posted by Explorer
+% Retrieved 2026-06-11, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=cone_sphere}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+    local g = ld.graph3d:new{viewdir={0,80}, window={-3,11,-3,3.5},size={10,10}}
+    ld.Hiddenlinestyle = "dashed"
+    local R = 2
+    local Cyl = ld.cylinder(-R*vecK,2*R*vecK,R)
+    local equ = g:Intersection3d(Cyl,{Origin,vecK})
+    local U = g:ScreenX()
+    local O1, O2, V = Origin, 8*U, R*vecK
+    local A1, B1 = O1+V, O2+V
+    local M1, M2 = (A1+B1)/2, (A1+B1)/2-2*V    
+    local A2, B2 = O2+1.5*V, O2+1.5*V+R*U
+    --left
+    g:Dsphere(O1,R,{color="Lime", mode=ld.mBorder})
+    g:Dcylinder(O1-V,R,O1+V, {color="white", opacity=0.3})
+    g:Dedges(equ, {hidden=true})
+    -- right
+    g:Dcone(O2+V,R,O2, {color="red"})
+    g:Dcone(O2-V,R,O2, {color="red", hiddenstyle="noline"})
+    g:Dcylinder(O2-V,R,O2+V, {color="white", opacity=0.3})
+    -- lines and labels
+    g:Dpolyline3d({ {A1,B1}, {A1-2*V,B1-2*V}, {O2, O2+2*V}, 
+        {O2+R*U+V, O2+R*U+2.5*V}},"dashed")
+    g:Dpolyline3d( {{M1,M2},{A2,B2}}, "Stealth-Stealth")
+    g:Dlabel3d( "$2R$",(M1+M2)/2,{pos="E"}, "$R$",(A2+B2)/2,{pos="N"} )
+    g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,55 @@
+% source: https://tex.stackexchange.com/a/749782 (question 749285, score 2, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749285/colored-rectangle-with-colored-zigzag-lines-inside-it
+\begin{luacode*}
+function zizag(a,b,h)
+-- a and b are two 2d points (complex numbers)
+-- h = height  of wave
+-- returns a path
+    h = h or 0.5
+    local n = math.floor(cpx.abs(b-a)/(1.5*h)) -- number of zigzag
+    local up,down = {a}, {"b"} -- to build path
+    local pas = (b-a)/n
+    local v = cpx.I*(b-a)
+    v = h*v/cpx.abs(v)
+    local w = 5*v/12
+    local x1, x2, c, d = a, a+pas
+    for k = 1, n do
+        c, d = (3*x1+x2)/4, (x1+3*x2)/4
+        insert(up,{c+v,d-v,x2,"b"})
+        down = concat({"b",d-w,c+w,x1},down)
+        x1 = x2; x2 = x2+pas
+    end
+    table.remove(down,1)
+    return concat(up,down)
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=zigzag}
+local g = graph:new{window={-5,5,-5,5},size={12,12},margin={0,0,0,0}}
+local i = cpx.I
+g:Linejoin("round"); g:Linewidth(8)
+
+local a,b,c,d = -3-2*i,3-2*i,3+2*i,-3+2*i
+local u1,u2,u3,u4 = -0.5+2*i,-3-0.5*i,-0.5-2*i,3
+local alpha, beta = -0.5+i, 1.5-0.25*i
+g:Dpolyline({{a,d},{b,c}},"cyan")
+g:Dpolyline({{c,d},{b,a}},"Crimson")
+g:Dpolyline({a,c},"olive")
+g:Dpath( zizag(u1,alpha), "draw=none,fill=black"); g:Dpath( zizag(u3,beta), "draw=none,fill=black")
+g:Dpath( zizag(u2,alpha), "draw=none,fill=red"); g:Dpath( zizag(u4,beta), "draw=none,fill=red")
+g:Dpath( zizag(beta,alpha), "draw=none,fill=blue")
+g:Linestyle("solid")
+g:Ddots({alpha,beta},"scale=2")
+g:Dlabel("$1$",u1,{pos="N",node_options="red"}, "$1$",u3,{pos="S"},
+"$2$",u2,{pos="W",node_options="cyan"}, "$2$",u4,{pos="E"},
+"$3$",1.5+i,{pos="N",dir={3+2*i,-2+3*i},node_options="olive"},
+"$I$",-(1.5+i)/2,{pos="N",dir={3+2*i,-2+3*i},node_options="SteelBlue"},
+"$II$",-(1.5+i)/2,{pos="S",dir={3+2*i,-2+3*i},node_options="SteelBlue"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/108#discussioncomment-14550040 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/483849/draw-a-calotte-within-a-sphere?rq=1
+\begin{document}
+\begin{luadraw}{name=half_cylinder}
+local g = graph3d:new{size={10,10},viewdir={70,70}}
+require 'luadraw_spherical'
+Hiddenlines = true; Hiddenlinestyle = "dashed";g:Linewidth(4);
+local R,r= 4,3
+local h = math.sqrt(R^2-r^2)
+local O,T= Origin,M(0,0,h)
+local P = {T,vecK}
+local L = circle3d(T,r,vecK)[1]
+table.remove(L) -- because the last point is the same than the fisrt
+g:Define_sphere({radius=R, opacity=0.3})
+g:Dcone(O,h*vecK,r,{color="DarkBlue"})
+g:DSfacet(L, {fill="blue",fillopacity=0.6,style="noline"})  -- the calotte
+g:DScircle(P,{color="red",width=8})
+g:Dspherical()
+local t1,t2 = table.unpack( solve(function(t) return pt3d.det(g.Normal,T+Mc(r,t,0),Mc(r,t+math.pi/2,0)) end,-math.pi,math.pi) )
+local A, B = T+Mc(r,t1,0), T+Mc(r,t2,0)
+g:Darc3d(B,O,A,0.75,1,"->")
+g:Ddots3d({O,T})
+g:Dlabel3d( "$O$",O,{pos="S"}, "$T$",T,{pos="N"},"$\\alpha$",0.5*vecK,{})
+ g:Show()
+\end{luadraw}
+\end{document}

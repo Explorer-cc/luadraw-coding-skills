@@ -1,0 +1,30 @@
+% source: https://tex.stackexchange.com/a/749795 (question 749785, score 8, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749785/how-to-draw-this-nested-heptagon-with-proper-length-scale
+\begin{document}
+\begin{luadraw}{name=heptagon}
+local g = graph:new{size={12,12}}
+local r, R = 1, 3
+local H = polyreg(0,r,7) -- small heptagon
+local names = {"A","B","C","D","E","F","G"}
+local seg = {}
+g:Dpolyline(H,true,"dotted")
+for k = 1, 7 do
+    local j = k%7+1
+    table.insert(seg,{H[j], H[j]+R*(H[j]-H[k])})
+end
+local K = interL(circle(0,R), seg) -- intersection between circle and half lines [A,B'), [B',C'), ...
+g:Dcircle(0,R)
+g:Dpolyline(K,true) -- big heptagon A,B,C,D,E,F,G
+g:Ddots(concat(K,H,{0}))
+for k = 1, 7 do
+    local j = k%7+1
+    g:Dpolyline({H[j],K[k]})
+    g:Dlabel(names[k].."'",1.3*H[k],{}, names[j], 1.15*K[k],{})
+end
+g:Show()
+\end{luadraw}
+\end{document}

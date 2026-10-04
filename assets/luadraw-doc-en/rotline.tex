@@ -1,0 +1,12 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Example with rotline)
+\begin{luadraw}{name=rotline}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{window={-4,4,-4,4},size={10,10}}
+local L = {M(0,0,4),M(0,4,0),M(0,0,-4)} -- list of points in the yz plane
+local axe = {pt3d.Origin, pt3d.vecK}
+local S = ld.rotline(L,axe,0,360,{nbdots=5}) -- point 1 and point 5 are confused
+g:Dfacet(S,{color="Crimson",edgecolor="Gold",opacity=0.8})
+g:Show()
+\end{luadraw}

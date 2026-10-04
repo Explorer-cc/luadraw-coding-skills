@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/763857 (question 569452, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/569452/plane-intersecting-sphere-with-tikz-and-tikz-3d
+\begin{document}
+\begin{luadraw}{name=plane_sphere}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M = pt3d.M
+local O, vI, vJ, vK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sin, cos, pi = math.sin, math.cos, math.pi
+
+local g = ld.graph3d:new{ viewdir={"ortho",20,70}, window={-7,6.25,-4,4}, 
+    size={12,12}, bbox=false }
+require 'luadraw_spherical'
+local P = {M(0,0,1.5), vK} -- plane
+local tg_points = {}
+g:Define_sphere( {center=O, radius=3, color="orange", edgestyle="noline", 
+    arrowABstyle="stealth-stealth", opacity=0.6} )
+g:DScircle(P,{width=6, out=tg_points, hidden=false, color="red", width=8})
+local A, B = table.unpack( tg_points )
+local I, r, n = ld.interPS(P, {O,3})
+local V, Ub, Uf = (B-A)/2, 3*vI, 5*vI
+local back_plane = {A, A-V, A-V-Ub, B+V-Ub, B+V, B, "l", I, A, r, 1, vK, "ca"}
+local front_plane = {A, A-V, A-V+Uf, B+V+Uf, B+V, B, "l", I, A, r, -1, vK, "ca"}
+g:Dpath3d( back_plane, 'draw=blue!60,fill=blue,fill opacity=0.7')
+g:DSpolyline({A-V-Ub, B+V-Ub, B+V+Uf, A-V+Uf}, {close=true, color="blue", width=8})
+g:DSdots({O,I})
+g:DSseg({I,(I+99*B)/100}, {arrows=2})
+g:DSseg({O,(I+99*B)/100}, {arrows=2})
+g:DSlabel("$I$",I,{pos="N"}, "$O$",O,{}, "$r$", (I+B)/2, {}, 
+"$R$", (O+B)/2,{pos="NW"})
+g:Dspherical()
+g:Dpath3d( front_plane, 'draw=none,fill=blue,fill opacity=0.7')
+g:Show()
+\end{luadraw}
+\end{document}

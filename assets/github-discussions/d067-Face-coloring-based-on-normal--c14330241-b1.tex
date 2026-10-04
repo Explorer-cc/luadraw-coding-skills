@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/67#discussioncomment-14330241 (pfradin, block 1)
+\begin{luadraw}{name = triceratops-palette-color.luadraw}
+local file = "obj/triceratops.obj"
+
+local polyhedron, window_def = read_obj_file(file)
+
+local graphview = graph3d:new{
+  window3d = window_def,
+  adjust2d = true,
+  viewdir  = {35,60}, --{-110, -20},
+  size     = {10, 10},
+}
+
+graphview:Linejoin("round")
+
+graphview:Dpoly(polyhedron)
+
+graphview:Show()
+\end{luadraw}

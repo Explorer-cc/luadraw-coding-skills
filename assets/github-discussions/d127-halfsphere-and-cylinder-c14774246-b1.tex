@@ -1,0 +1,33 @@
+% source: https://github.com/pfradin/luadraw/discussions/127#discussioncomment-14774246 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/625977/how-to-delete-the-sphere-that-is-inside-the-cylinder
+\begin{luadraw}{name=half_sphere_cylinder}
+local g = graph3d:new{ bbox=false, size={10,10}, viewdir={30,60}}
+local sin, cos, sqrt, pi = math.sin, math.cos, math.sqrt, math.pi
+local O, R = Origin, 4
+local A, r = R/2*vecJ, R/2
+local base = circle3d(A,r,vecK)[1] --circular base of the cylinder (list of 3d points)
+local Cylborder = {}
+for _, C in ipairs(base) do -- we project each point C of the base onto the half-sphere
+    table.insert(Cylborder,C + sqrt(R^2-pt3d.abs2(C))*vecK)
+end -- Cylborder is now the intersection between the half-sphere and the cylinder
+local Cyl = prism(reverse(Cylborder),-4*vecK,true) -- Cyl is a prism whose base is Cylborder
+Cyl = cutpoly(Cyl,{O,vecK}) -- cuted with the xy plane
+local Cylv, Cylh = g:Classifyfacet(Cyl) -- visible facets, hidden facets
+local U, V = O-R*g:ScreenX(), O+R*g:ScreenX() -- to draw the outline of the shalf sphere
+-- back sphere
+g:Dpath3d({U,O,V,R,1,-vecK,"ca",O,U,R,1,g.Normal,"ca"}, "fill = Crimson!30")
+-- back cylinder
+g:Dpolyline3d(border(Cylh),"left color=ForestGreen!50, right color=ForestGreen!25, middle color=ForestGreen!10, fill opacity=0.8")
+-- front cylinder
+g:Dpolyline3d(border(Cylv),true,"left color=ForestGreen!50, right color=ForestGreen, middle color=ForestGreen!10, fill opacity=0.9")
+-- front sphere
+table.insert(Cylborder,2,"m"); table.insert(Cylborder,"l") -- hole in the sphere
+g:Dpath3d(concat({U,O,V,R,1,vecK,"ca",O,U,R,1,g.Normal,"ca"}, Cylborder), "ball color=Crimson, even odd rule, fill opacity=0.7, line width=0.8pt")
+g:Show()
+\end{luadraw}
+\end{document} 

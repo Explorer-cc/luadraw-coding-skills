@@ -1,0 +1,75 @@
+% source: https://github.com/pfradin/luadraw/discussions/111#discussioncomment-14570983 (pfradin, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usetikzlibrary{shadings}  % use of a particular shading
+%https://tex.stackexchange.com/questions/139114/differential-equation-direction-plot-with-pgfplots
+\begin{document}
+\begin{luadraw}{name=champ}
+local x1,x2,y1,y2 = -3,3,-3,3
+local g = graph:new{window={x1-0.5,x2+0.5,y1-0.5,y2+0.5},bg="",size={10,10}}
+
+local f = function(x,y) -- éq. diff. y'= x^2+y^2-1=f(x,y)
+    return x^2+y^2-1
+end
+
+local A = Z(0,1/2) -- initial condition
+local n = 20
+local deltaX, deltaY, long = (x2-x1)/n, (y2-y1)/n
+local long = math.min(deltaX,deltaY)-0.1
+local values, key = {}
+local vectors, v = {}
+local Min, Max = math.huge, -math.huge
+for i = 0, n do
+    local x = x1+deltaX*i
+    local x1 = x+deltaX/2
+    for j = 0, n do
+        local y = y1+deltaX*j
+        local y1 = y+deltaY/2
+        key = i.."/"..j
+        local img = f(x,y)
+        if img < Min then Min = img end
+        if img > Max then Max = img end
+        values[key] = img
+        if (i<n) and (j<n) then
+            local v = Z(1,f(x1,y1))
+            v = v/cpx.abs(v)*long -- normalization of v
+            table.insert(vectors, {Z(x1,y1), Z(x1,y1)+v} )
+        end
+    end
+end
+local pal = {Purple,Indigo,Blue,Green,Yellow,Orange,Red}
+local left_colors, right_colors, color = {}, {}
+for j = 0,n do 
+    key = "0/"..j
+    color = mixcolor(palette(pal,(values[key]-Min)/(Max-Min),true),0.5,White,0.5) -- to replace the *fill opacity=0.5" option
+    table.insert(right_colors, color)
+end
+-- paint
+local eps = 1e-2 -- to widen the squares a little
+for i = 0, n-1 do
+    local x = x1+deltaX*i
+    left_colors = right_colors
+    right_colors = {}
+    for j = 0,n do 
+        key = i.."/"..j
+        color = mixcolor(palette(pal,(values[key]-Min)/(Max-Min),true),0.5,White,0.5)
+        table.insert(right_colors, color)
+    end
+    for j = 0, n-1 do
+        local y = y1+deltaX*j
+        local color0 = left_colors[j+1]
+        local color1 = right_colors[j+1]
+        local color2 = right_colors[j+2]
+        local color3 = left_colors[j+2]
+        local options = "upper left="..color3..",upper right="..color2..",lower left="..color0..",lower right="..color1
+        g:Dpolyline({Z(x-eps,y-eps),Z(x+deltaX+eps,y-eps),Z(x+deltaX+eps,y+deltaY+eps),Z(x-eps,y+deltaY+eps)}, "draw=none,fill opacity=0.5,"..options)
+    end
+end
+g:Dgradbox({Z(x1,y1),Z(x2,y2),1,1} ,{originloc=0,originnum={0,0},nbsubdiv={3,3}})
+g:Dpolyline(vectors, "-latex,darkgray")
+g:Dodesolve(f, A.re, A.im, {t={x1,x2},draw_options="red,line width=0.8pt",nbdots=150,clip={-2.5,2.25,y1,y2}})
+g:Dlabeldot("$A$", A, {pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

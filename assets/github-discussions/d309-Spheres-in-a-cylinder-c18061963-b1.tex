@@ -1,0 +1,71 @@
+% source: https://github.com/pfradin/luadraw/discussions/309#discussioncomment-18061963 (pfradin, block 1)
+\documentclass[border=2 mm ]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+%%https://tex.stackexchange.com/questions/399112/how-can-i-draw-some-spheres-inside-a-cylinder/399121#399121
+%%https://tex.stackexchange.com/questions/282961/how-draw-a-cylinder-with-3-balls
+\begin{luadraw}{name=cylinder_automated_spheres}
+local ld = luadraw -- version 3.1
+local cpx, pt3d = ld.cpx, ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local cos, sin, pi = math.cos, math.sin,  math.pi
+local R = 2           
+local num_spheres = 7
+local k = num_spheres * 2 * R  
+local g = ld.graph3d:new{window={-R-1, R+1, -1, k }, viewdir={0,80}, size={10,12}}
+ld.Hiddenlinestyle = "dashed"
+ld.Hiddenlines = true
+local colors = {"Red", "Orange", "Gold", "Green", "Blue", "Indigo", "Violet"}
+local centers = {O, M(0,0,k)}
+local spheres = {}
+for i = 1, num_spheres do
+    local z_center = (2 * i - 1) * R
+    local I_center = M(0, 0, z_center)
+    local color_index = ((i - 1) % #colors) + 1
+    local current_color = colors[color_index]
+    table.insert(spheres, {I_center, current_color})
+    table.insert(centers, I_center)
+end
+table.sort(spheres, function(s1,s2) return g:Observer_distance(s1[1])<g:Observer_distance(s2[1]) end)
+g:Ddots3d(centers)
+for _, S in ipairs(spheres) do
+    g:Dsphere(S[1],R,{mode=ld.mBorder, edgecolor=S[2], edgestyle="dashed"})
+end
+g:Dcylinder(O, k*vecK, R, {edgecolor="green"}) 
+g:Show()
+\end{luadraw}
+
+
+\begin{luadraw}{name=cylinder_automated_spheres2}
+local ld = luadraw -- version 3.1
+local cpx, pt3d = ld.cpx, ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local cos, sin, pi = math.cos, math.sin,  math.pi
+local R = 2           
+local num_spheres = 7
+local k = num_spheres * 2 * R  
+local g = ld.graph3d:new{window={-R-1, R+1, -1, k }, viewdir={0,80}, size={10,12}}
+ld.Hiddenlinestyle = "dashed"
+ld.Hiddenlines = true
+local colors = {"Red", "Orange", "Gold", "Green", "Blue", "Indigo", "Violet"}
+local centers = {O, M(0,0,k)}
+local spheres = {}
+for i = 1, num_spheres do
+    local z_center = (2 * i - 1) * R
+    local I_center = M(0, 0, z_center)
+    local color_index = ((i - 1) % #colors) + 1
+    local current_color = colors[color_index]
+    table.insert(spheres, {I_center, current_color})
+    table.insert(centers, I_center)
+end
+table.sort(spheres, function(s1,s2) return g:Observer_distance(s1[1])<g:Observer_distance(s2[1]) end)
+g:Ddots3d(centers)
+for _, S in ipairs(spheres) do
+    g:Dsphere(S[1],R,{color=S[2],mode=ld.mBorder, opacity=0.6, edgestyle="noline"})
+end
+g:Dcylinder(O, k*vecK, R, {edgecolor="Blue"}) 
+g:Show()
+\end{luadraw}
+\end{document}

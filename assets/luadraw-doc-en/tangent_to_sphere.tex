@@ -1,0 +1,31 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: Tangents to the sphere from a point)
+\begin{luadraw}{name=tangent_to_sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, M = pt3d.Origin, pt3d.M
+
+local g = ld.graph3d:new{window={-4,5.5,-4,4},viewdir={30,60},size={10,10}}
+require 'luadraw_spherical'
+ld.Hiddenlines=true; g:Linewidth(6)
+local O, I = Origin, M(0,6,0)
+local S,S1 = {O, 3}, {(I+O)/2,pt3d.abs(I-O)/2}
+-- the circle of tangency is the intersection between spheres S and S1
+local C,r,n = ld.interSS(S,S1) 
+local L = ld.circle3d(C,r,n)[1] -- list of 3D points on the circle
+local dots, lines = {}, {}
+-- draw
+g:Define_sphere({opacity=1})
+g:DScircle({C,n},{color="red"})
+for k = 1, math.floor(#L/4) do
+    local A = L[4*(k-1)+1]
+    table.insert(dots,A)
+    table.insert(lines,{I, 2*A-I})
+end
+g:DSpolyline(lines ,{color="gray"})
+g:DSstars(dots) -- drawing points on the sphere
+g:DSdots({O,I});  -- points in the scene
+g:DSlabel("$I$",I,{pos="S",node_options="red"},"$O$",O,{})
+g:Dspherical()
+g:Dseg3d({O,dots[1]},"gray,dashed"); g:Dangle3d(O,dots[1],I,0.2,"gray")
+g:Show() 
+\end{luadraw}

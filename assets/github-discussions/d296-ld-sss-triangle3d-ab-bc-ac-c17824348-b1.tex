@@ -1,0 +1,34 @@
+% source: https://github.com/pfradin/luadraw/discussions/296#discussioncomment-17824348 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/617569/how-to-construct-the-point-s-of-this-tetrahedron/617592#617592
+\begin{luadraw}{name=interSSS}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local g = ld.graph3d:new{window={-5,7,-6,7},viewdir={280,60},size={10,10}} 
+ld.Hiddenlinestyle = "dashed"
+local ab,bc,ac,sa,sb,sc =3,4,5,6,7,8
+sss_triangle = ld.sss_triangle -- patch
+interSS = ld.interSS -- - patch
+local P = ld.sss_triangle3d(ab,bc,ac)
+local A,B,C = table.unpack(P)
+local S1,S2,S3 = {A, sa},{B, sb},{C, sc}
+local S,T = ld.interSSS(S1, S2, S3)
+local PS = ld.pyramid({A,B,C},S)
+local PT = ld.pyramid({A,B,C},T)
+ld.Hiddenlines = true
+g:Dscene3d(
+ g:addPoly(PS,{edge=true,color="LightBlue"}),
+  g:addPoly(PT,{edge=true, color="Orange"})
+    )
+g:Ddots3d({A,B,C,S,T})
+g:Dlabel3d( "$A$",A,{pos="W"}, "$B$",B,{pos="E"}, "$C$",C,{pos="E"},"$S$",S,{pos="N"},"$T$",T,{pos="S"})
+g:Show()
+sss_triangle = nil
+interSS = nil
+\end{luadraw} 
+\end{document} 

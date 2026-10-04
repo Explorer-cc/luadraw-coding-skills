@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222103 (pfradin, block 1)
+\begin{luadraw}{name=solid_circle2}
+local g = graph3d:new{window={-6.5,6.5,-6,6},viewdir={-65,60},bg="Beige",size={12,12}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"
+local S = function(x) return 1.5-math.sin(x/2) end
+local a, x, b, d = -4, 0, 4, 3
+local A, B, X = M(a,0,0), M(b,0,0), M(x,0,0)
+local Pa, Px, Pb = {A,vecI}, {X,vecI}, {B,vecI}
+local v = rotate3d(vecK,-30,{Origin,vecI})
+local C, D = A+S(a)*v, A-S(a)*v
+local p1 = function(t) return t*vecI+S(t)*v end
+local bottle, wall = rotcurve(p1,a,b,{Origin,vecI},0,360,{addwall=1})
+local section = circle3d(X,S(x),vecI)
+g:Dscene3d(
+    g:addWall(wall), 
+    g:addPlane(Pa,{edge=true,color="LightGray",contrast=0.25,opacity=0.8}),
+    g:addPlane(Px,{edge=true,color="LightGray",contrast=0.25,opacity=0.8}),
+    g:addPlane(Pb,{edge=true,color="LightGray",contrast=0.25,opacity=0.8}),
+    g:addFacet(section, {color="gray", edge=true}),
+    g:addFacet(bottle, {color="LightBlue", opacity=0.6}),
+    g:addLine({A-d*vecK,vecI}),
+    g:addCircle(A,S(a),vecI),
+    g:addCircle(B,S(b),vecI)
+)
+g:Dpolyline3d({{A,A-d*vecK}, {X,X-d*vecK},{B,B-d*vecK}}, "dashed")
+g:Dlabel3d("$a$",A-d*vecK,{pos="S"}, "$x$",X-d*vecK,{},"$b$",B-d*vecK,{},
+    "$P$", M(a,3.75,3.75),{pos="SW",dir={vecJ,vecK},node_options="draw"},
+    "$Q$", M(b,3.75,3.75),{})
+g:Show()
+\end{luadraw}

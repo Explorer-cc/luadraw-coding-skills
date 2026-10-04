@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/165#discussioncomment-15311247 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=pyramid}
+local g = graph3d:new{window3d={-13,15,-13,13,-7,5}, adjust2d=true, size={12,12}, viewdir={60,60}, bbox=false}
+Hiddenlinestyle = "dashed"
+local ab,bc,ac =26,28,30
+local T =  sss_triangle3d(ab,bc,ac)
+local A,B,C = table.unpack(T)
+local I, R, n = incircle3d(A,B,C)
+local S = M(I.x,I.y,R*math.tan(60*deg))
+local D = dproj3d(I,{A,B-A})
+local E = dproj3d(I,{A,C-A})
+local F = dproj3d(I,{B,C-B})
+local P = tetra(S,A-S,C-S,B-S)
+
+g:Dpoly(P, {mode=mShadedHidden,color="Crimson"})
+g:Dpolyline3d({{S,I,D},{E,I,F}}, Hiddenlinestyle)
+g:Dcircle3d(I, R, n,"Blue,"..Hiddenlinestyle)
+g:Ddots3d({A,B,C,I,S,D,E,F})
+g:Dlabel3d( "$A$",A,{pos="E"}, "$B$",B,{pos="W"}, "$C$",C,{pos="S"}, 
+"$I$",I,{pos="S"},"$S$",S,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/246#discussioncomment-16867306 (pfradin, block 1)
+\documentclass[]{standalone}% compile with lualatex
+\usepackage{luacode}
+\begin{document}
+
+\begin{luacode}
+local f = function(x, y, opt)
+    opt = opt or {}
+    opt.sg = opt.sg or '+'
+    if opt.sg == '+' then return x+y
+    else
+        return x-y
+    end
+end
+
+local x = 
+  f(2,
+    2,
+    {sg='+'}
+    ) -- < this causes an error with luacode, but not luacode*
+tex.print("Result ="..x)
+\end{luacode}
+\end{document}

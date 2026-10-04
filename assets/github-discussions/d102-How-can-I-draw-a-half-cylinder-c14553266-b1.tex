@@ -1,0 +1,35 @@
+% source: https://github.com/pfradin/luadraw/discussions/102#discussioncomment-14553266 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=half_cylinder}
+local g = graph3d:new{size={10,10},viewdir={30,60},bbox=false}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+
+function part_cylinder(A,angle,h,axe,nbfacet,open)
+    nbfacet = nbfacet or 35
+    open = open or false
+    local A1 = dproj3d(A,axe)
+    local pas = angle/nbfacet
+    local v = pt3d.normalize(axe[2])
+    local base,t = {A1,A}, pas
+    for k = 1,nbfacet do
+        table.insert(base,rotate3d(A,t,axe))
+        t = t + pas
+    end
+    return prism(base,h*v,open)
+end
+
+local A, angle, h, axe = 3*vecK, 45, 4, {Origin,vecI}
+local C = A+h*vecI
+local D = rotate3d(C,angle,axe)
+local Cyl = part_cylinder(A,angle,h,axe,20)
+g:Dpoly(Cyl, {color="cyan",mode=mShadedOnly})
+g:Ddots3d(A); g:Dseg3d({-2*vecI,(h+2)*vecI},"->"); g:Dpolyline3d({{Origin,-0.5*vecK},{h*vecI,h*vecI-0.5*vecK}},"dotted")
+g:Dseg3d({-0.5*vecK,-0.5*vecK+h*vecI},"<->"); g:Darc3d(C,h*vecI,D,1,1,"->")
+g:Dlabel3d("$A$",A,{pos="NE"}, "axe", -2*vecI,{pos="E"}, 
+"$h$", h/2*vecI-0.5*vecK,{pos="SE"},"angle",A/2+h*vecI,{pos="W"} )
+ g:Show()
+\end{luadraw}
+\end{document}

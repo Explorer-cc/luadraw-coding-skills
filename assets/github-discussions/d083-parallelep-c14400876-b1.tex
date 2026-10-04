@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/83#discussioncomment-14400876 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{siunitx}
+\begin{document}
+%https://tex.stackexchange.com/questions/302539/putting-labels-on-a-cube-with-perspective
+    \begin{luadraw}{name=cube_09_15_2025}
+  local g = graph3d:new{window={-5,8,-5,10},viewdir={20,60},size={10,10}}
+ g:Linewidth(4); Hiddenlines = true; g:Labelcolor("Red");g:Labelsize("footnotesize")
+Hiddenlinestyle = "dashed"
+local a, b, h = 6,8,10
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+g:Dpoly(P,{mode =4,edgecolor="Blue"})
+g:Dlabel3d(
+    b.." \\si{cm}",M(a,b/2,0),{dir={vecJ,-vecI},pos="S"},
+    a.." \\si{cm}",M(a/2,b,0),{dir={-vecI,-vecJ}},
+    h.." \\si{cm}",M(a,0,h/2),{dir={vecK,vecI},pos="N"},
+    "right face",M(a/2,b,h/2),{dir={-vecK,-vecI},pos={}},  -- dir={-vecK,vecJ} is wrong, vecJ is not in this plane
+    "top face",M(a/2,b/2,h),{dir={vecJ,-vecI}},
+        "left face",M(a/2,0,h/2),{dir={-vecK,-vecI}}, -- dir={-vecK,vecJ} is wrong, vecJ is not in this plane
+        "bottom face",M(a/2,b/2,0),{dir={vecJ,-vecI}},
+        "front face",M(a,b/2,h/2),{dir={vecJ,vecK}}, -- dir={vecK,-vecJ} is curious, why verticaly ?
+        "back face",M(0,b/2,h/2),{dir={vecJ,vecK}}  -- dir={vecJ,-vecI} is wrong, -vecI is not in this plane
+    ) 
+g:Show()
+\end{luadraw}
+\end{document}

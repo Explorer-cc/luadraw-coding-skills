@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/186#discussioncomment-15664798 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=sphere}
+    local g = graph3d:new{
+        window3d={-4,4,-4,4,-4,4},
+        window={-5,5,-5,5},
+        size={10,10}, bbox=false
+    }
+    local f = function(t) return M(0,t,0.17*t^2-4) end -- parabola in the yz-plane
+    local P = rotcurve(f,0,3,{Origin,vecK},360,0, {grid={20,40}})  -- paraboloid
+    local S = {Origin, 4}
+    g:Rotate3d(45,{Origin,M(1,1,1)})
+    local head = 4*vecK
+    local a = f(2.75) -- we choose a point on the paraboloid near the edge
+    local b, c = rotate3d(a,120,{Origin,vecK}), rotate3d(a,240,{Origin,vecK})
+    g:Dfacet(P,{hiddenstyle="solid", hiddencolor="LightGray"})
+    g:Dpolyline3d({{head,a},{head,b},{head,c}}, "double=gray,double distance=2pt")
+    g:Dcylinder(head,vecK/2,0.25, {color="SlateGray",hiddenstyle="noline"})
+    local I = -2.5*vecK
+    local L = reverse(g:Proj3d(border(P))[1])
+    g:Beginclip( polyline2path(L), true)
+        g:Dcircle3d(I+0.125*M(1,1/2,0),3,vecK,"fill=lightgray")
+    g:Endclip()
+    g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,33 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-povray.tex (demo: Villarceau circles)
+\begin{luadraw}{name=Villarceau_circles}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-6.5,6.5,-5,5},margin={0,0,0,0}, size={10,10}, viewdir={20,65}}
+require "luadraw_povray"
+local R, r = 3, 1
+local N = ld.rotate3d(vecK, math.asin(r/R)*ld.rad, {Origin, vecJ})
+local P = {Origin, -N}
+-- using povray
+g:Pov_new({bg=ld.LightGray})
+g:Pov_torus(Origin, R, r, vecK, {color=ld.SteelBlue, clipplane=P})
+g:Pov_plane(P,{color=ld.SeaGreen, opacity=0.4, edge=true, scale=0.9})
+g:Pov_axes(Origin,{color=ld.Gold,arrows=1})
+g:Pov_dots(Origin, {dotscale=1.5})
+g:Pov_circle( M(0,r,0),R,N,{color=ld.Crimson, width=12})
+g:Pov_circle( M(0,-r,0),R,N,{color=ld.Crimson, width=12})
+g:Pov_exec()
+-- drawing
+g:Pov_show()
+local F = g:Plane2facet(P,0.9)
+g:Dpolyline3d({{-r*vecJ,-r*vecJ+vecK},{-(R+r)*vecJ,-(R+r)*vecJ+vecK}})
+g:Dpolyline3d({{r*vecJ,r*vecJ+vecK},{(R+r)*vecJ,(R+r)*vecJ+vecK}})
+g:Dpolyline3d({{-r*vecJ+vecK,-(R+r)*vecJ+vecK}, {r*vecJ+vecK,(R+r)*vecJ+vecK}}, "stealth-stealth")
+g:Ddots3d({-r*vecJ, r*vecJ})
+g:Dlabel3d("$x$",5*vecI,{pos="SW"},"$y$", 5*vecJ,{pos="SE"}, "$z$",5*vecK,{pos="N"},
+  "$R$", -(R/2+r)*vecJ+vecK, {}, "$R$", (R/2+r)*vecJ+vecK, {},
+  "bitangent plane to the torus", F[1], {pos="NW", dir={vecJ,pt3d.prod(N,vecJ)}},
+  "$-r$",-r*vecJ,{pos="S"}, "$r$", r*vecJ,{} )
+g:Show()
+\end{luadraw}

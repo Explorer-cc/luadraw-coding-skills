@@ -1,0 +1,43 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: Adding paths)
+\begin{luadraw}{name=spherical_strip}
+local ld = luadraw
+local M, Ms = ld.pt3d.M, ld.pt3d.Ms
+local g = ld.graph3d:new{ viewdir={30,70} }
+require 'luadraw_spherical'
+local R = 4
+g:Define_sphere({radius=R, arrowBstyle="-stealth", opacity=0.65})
+local sphere_strip = function(p1,p2,n)
+    n = n or math.ceil((p2-p1)/5)
+    p1 = p1*ld.deg; p2 = p2*ld.deg
+    return ld.surface( function(u,v) return Ms(R,u,v) end, 2*math.pi, 0, p1, p2,{50,n})
+end
+local color1, color2 = "SteelBlue", "orange"
+local strips ={ {10,40}, {85,95}, {110, 130}, {140,170} } -- angles
+local O, I, J, K, A, B = M(0,0,0), M(1,0,0), M(0,1,0), M(0,0,1), ld.sM(50,10), ld.sM(50,40)
+local B1 = ld.pxy(B)
+local S = {}
+for _, p in ipairs(strips) do
+    ld.insert(S, sphere_strip(p[1],p[2]))
+end
+local Sv, Sh = g:Classifyfacet(S)
+local back = ld.polyline2path3d( ld.border(Sh) )
+local front = ld.polyline2path3d( ld.border(Sv) )
+--drawing
+g:DSaddback(back, "draw=none,even odd rule,left color="..color1.."!50,right color="..color1.."!80, fill opacity=0.6")
+g:DSaddfront(front, "draw=none,even odd rule,ball color="..color1..", fill opacity=0.6")  
+for _, p in ipairs(strips) do
+    g:DScircle({ld.sM(0,p[1]), M(0,0,1)}, {color="ForestGreen", width=8})
+    g:DScircle({ld.sM(0,p[2]), M(0,0,1)}, {color="ForestGreen", width=8})
+end
+g:DSaddinside({A,O,B,B1,O}, "line width=0.8,dashed") -- polyline
+g:DSaddinside({I,O,B1,2,1,"ca"}, "line width=0.8,-stealth") -- path
+g:DSaddinside({A,O,B,2,1,"ca"}, "line width=0.8,-stealth")
+g:DSstars({A,B}, {fill="black", scale=0.75}); g:DSdots(B1)
+g:DSlabel("$B'$",B1,{pos="E"}, "$A$",1.05*A,{pos="W"}, "$B$",1.05*B,{pos="NE"})
+g:DSarc({A,B},1)
+g:DSpolyline( {{M(-5,0,0), M(5,0,0)}, {M(0,-5,0), M(0,5,0)}, {M(0,0,-5), M(0,0,5)}}, {arrows=1}) -- axes
+g:DScircle( {O,K})
+g:Dspherical()
+g:Dlabel3d("$x$",5*I,{pos="S"}, "$y$",5*J,{}, "$z$",5*K,{pos="N"})
+g:Show()
+\end{luadraw}

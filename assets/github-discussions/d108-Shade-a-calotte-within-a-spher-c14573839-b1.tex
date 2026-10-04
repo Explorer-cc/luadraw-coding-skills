@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/108#discussioncomment-14573839 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/483849/draw-a-calotte-within-a-sphere?rq=1
+\begin{document}
+\begin{luadraw}{name=calotte_spĥere}
+local g = graph3d:new{size={10,10},viewdir={70,70}}
+Hiddenlines = true; Hiddenlinestyle = "dashed";g:Linewidth(4);
+local R,r= 4,3
+local h = math.sqrt(R^2-r^2)
+local O,T= Origin,M(0,0,h)
+local P = {T,-vecK}
+local S = poly2facet( sphere(O,R,50,50) )
+local S = cutfacet(S,P)
+S = g:Classifyfacet(S)
+local t1,t2 = table.unpack( solve(function(t) return pt3d.det(g.Normal,T+Mc(r,t,0),Mc(r,t+math.pi/2,0)) end,-math.pi,math.pi) )
+local A, B = T+Mc(r,t1,0), T+Mc(r,t2,0)
+
+g:Dcone(O,h*vecK,r,{color="orange"})
+g:Dpolyline3d( border(S), "ball color = orange")
+g:Dpolyline3d({A,O,B},"dashed")
+g:Darc3d(B,O,A,0.75,1,"->")
+g:Ddots3d({O,T})
+g:Dlabel3d( "$O$",O,{pos="S"}, "$T$",T,{pos="N"},"$\\alpha$",0.5*vecK,{})
+g:Show()
+\end{luadraw}
+\end{document}

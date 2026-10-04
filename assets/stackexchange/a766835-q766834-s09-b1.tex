@@ -1,0 +1,13 @@
+% source: https://tex.stackexchange.com/a/766835 (question 766834, score 9, block 1)
+% Source - https://tex.stackexchange.com/q/766834
+% Posted by D G
+% Retrieved 2026-10-01, License - CC BY-SA 4.0
+\documentclass[tikz,border=1cm,12pt]{standalone}
+
+\begin{document}
+\begin{tikzpicture}[ultra thick]
+    \draw (0,0) circle (3.5);
+    \filldraw[fill=red,even odd rule]
+        \foreach \i in {3,2.5,...,0}{(0,0) circle (\i)};
+\end{tikzpicture}
+\end{document}

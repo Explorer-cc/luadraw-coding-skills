@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-shadedforms.tex (demo: Shaded region)
+\begin{luadraw}{name=Dshadedregion}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{window={-4.5,6,-4.5,5}, size={10,10},bg="lightgray", bbox=false}
+g:Labelsize("small")
+require 'luadraw_shadedforms'
+local pal = require 'luadraw_palettes'
+local L1, L2 = -2, 2
+local f = function(x,y) 
+    local z = Z(x,y)
+    return (cpx.abs(z-L1)-cpx.abs(z-L2))^2
+end
+g:Dshadedregion({4,0,4,3,"e"}, pal.getPal(pal.Grays,{reverse=true}), {values=f, grid={20,20}})
+g:Show()
+\end{luadraw}

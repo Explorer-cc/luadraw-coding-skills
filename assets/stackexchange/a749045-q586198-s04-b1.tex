@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/749045 (question 586198, score 4, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%draw-sphere-and-curved-surface-with-tikz
+\begin{luadraw}{name=sphere_surface}
+local g = graph3d:new{size={12,12}}
+g:Linejoin("round")
+local cosh, sinh, a = math.cosh, math.sinh, 1.5
+local p = function(t) return M(cosh(t),-a,sinh(t)) end
+local q = function(t) return M(-cosh(t),-a,sinh(t)) end
+local S1 = curve2cylinder(p,-1,1,2*a*vecJ)
+local S2 = curve2cylinder(q,-1,1,2*a*vecJ)
+g:Dfacet(S2,{mode=5,color="LightBlue",opacity=0.6})
+g:Dsphere(Origin,1,{mode=2,color="orange"})
+g:Dfacet(S1,{mode=5,color="LightBlue",opacity=0.6})
+g:Dpolyline3d( {{vecK,3*vecK}, {vecJ,3*vecJ}, {vecI,3*vecI}}, "->")
+g:Dballdots3d(vecI,"red",0.5)
+g:Dlabel3d( "$x$",3*vecI,{pos="SW"},"$y$",3*vecJ,{pos="E"},"$z$",3*vecK,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

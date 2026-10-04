@@ -1,0 +1,12 @@
+% source: https://tex.stackexchange.com/a/761107 (question 761052, score 6, block 1)
+\documentclass[border=5pt]{standalone}%compile with lualatex only
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/761052/
+\begin{document}
+\begin{luadraw}{name=intersection_auto}
+local g = graph:new{bbox=false}
+local A, uA, C, uC = 0, Zp(1,37*deg), 5, Zp(1,137*deg)
+g:Dpolyline( {A, interD({A,uA},{C,uC}), C}, true, "thick")
+g:Show()
+\end{luadraw}
+\end{document}

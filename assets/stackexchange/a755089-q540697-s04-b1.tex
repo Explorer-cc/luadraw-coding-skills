@@ -1,0 +1,33 @@
+% source: https://tex.stackexchange.com/a/755089 (question 540697, score 4, block 1)
+\documentclass[10pt,border=5pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/540697/how-to-draw-the-neighbourhood-of-an-open-set
+\begin{document}
+\begin{luadraw}{name=open_set}
+local i = cpx.I
+local g = graph:new{window={-5,5,-3,4},bbox=false}
+g:Linewidth(8)
+local shape = path({-2.0508+2.9774*i,-1.0221+3.7641*i,0.9465+3.3917*i,0.8245+2.2769*i,
+"b",0.7109+1.2379*i,0.4696+1.251*i,1.112+0.416*i,"b",1.8684-0.5673*i,
+1.1099-1.2711*i,0.3858-1.6263*i,"b",-0.416-2.0197*i,-1.6418-2.1467*i,
+-2.2163-1.5356*i,"b",-2.9274-0.7791*i,-1.4448-0.4312*i,-1.9138+0.4614*i,
+"b",-2.3716+1.3329*i,-3.1846+2.1104*i,-2.0508+2.9774*i,"b"})[1] -- first component
+table.remove(shape) -- remove the last point
+local strip = line2strip(shape,1,true)
+g:Dpath(strip)
+g:Dpolyline(shape,true,"fill=lightgray")
+strip = line2strip(shape,0.25,true,false)
+g:Dpath(strip,"fill=white"); g:Dpath(strip,"pattern=crosshatch") 
+local a = shape[#shape-18]
+local b = shape[#shape-5]-0.5
+local c = shape[30]-0.15
+local d = shape[50]+0.15
+g:Dlabel("$A_j$", a-1,{pos="W"}); g:Dseg({a-1,a},"-stealth")
+g:Dlabel("$U$", b-1,{pos="W"}); g:Dseg({b-1,b},"-stealth")
+g:Dlabel("$\\delta(z)=4^{-j}$", c+1.5,{pos="E"}); g:Dseg({c,c+1.5},"stealth-")
+g:Dlabel("$\\delta(z)=4^{-j-1}$", d+1.5,{pos="E"}); g:Dseg({d,d+1.5},"stealth-")
+g:Show()
+\end{luadraw}
+\end{document}

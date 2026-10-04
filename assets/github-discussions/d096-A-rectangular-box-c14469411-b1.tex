@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/96#discussioncomment-14469411 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\definecolor{PaleGray}{gray}{0.8} % gray!20
+ \begin{luadraw}{name=cube_one_color}
+local g = graph3d:new{window={-6,1.5,-1.5,7},viewdir={165,70},size={8,8}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a, b, h = 4,4,4
+local P = parallelep(Origin, a*vecI,a*vecJ,h*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+local f = poly2facet(P) -- conversion to facet
+local d = {F,G-F}
+f[2] = rotate3d(f[2],30,d) -- we turn the second facet
+g:Dscene3d( g:addFacet(f,{color="PaleGray",contrast=0.5,edge=true, edgecolor="gray"}) )
+g:Show()
+\end{luadraw}
+\end{document}

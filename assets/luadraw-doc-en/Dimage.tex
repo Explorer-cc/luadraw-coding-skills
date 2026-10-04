@@ -1,0 +1,19 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Importing an Image)
+\begin{luadraw}{name=Dimage}
+local ld = luadraw
+local Z, i = ld.cpx.Z, ld.cpx.I
+local g = ld.graph:new{margin={0,0,0,0}, size={10,10},bg="green!30"}
+local filename = ld.cachedir.."flower.jpg"
+local g_options = "width=4.5cm,height=4.5cm"
+g:Dimage(filename,Z(-5,5),{pos="SE", graphics_options=g_options})
+g:Dimage(filename,Z(5,5),{pos="SE", matrix={0,-1,i}, graphics_options=g_options})
+g:Rotate(180)
+g:Dimage(filename,Z(-5,5),{pos="SE", graphics_options=g_options})
+g:IDmatrix()
+g:Dimage(filename,Z(-5,-5),{pos="SE", matrix={0,1,-i}, graphics_options=g_options})
+g:Dlabel( "Original", Z(-5,5),{pos="SE"},
+"Vertical symmetry", Z(5,5), {pos="SW"},
+"Rotation (global)", Z(5,-5), {pos="NW"},
+"Horizontal symmetry", Z(-5,-5), {pos="NE"} )
+g:Show()
+\end{luadraw}

@@ -1,0 +1,39 @@
+% source: https://github.com/pfradin/luadraw/discussions/291#discussioncomment-17646319 (pfradin, block 1)
+\documentclass[tikz]{standalone}
+\usepackage{fourier-otf}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name=sphere_triangle, exec=false}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M,O,K = pt3d.M,pt3d.Origin,pt3d.vecK
+local deg,sin,cos = ld.deg,math.sin,math.cos
+local g = ld.graph3d:new{size={8,8},viewdir={30,70}}
+require "luadraw_spherical"
+local sM = ld.sM
+g:Linecolor("white")
+g:Define_sphere({color="black",edgecolor="white", mode=ld.mGrid, hiddenstyle="noline"})
+local A,B,C = sM(0.15,0.2,1), sM(1,-0.35,-0.4), sM(-0.25,1,-0.35)
+g:DSfacet({A,B,C},{color="red",width=10})
+g:Dspherical()
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=saddle_surface}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{size={10,10},window3d={-2,2,-2,2,-2,2},window={-2,1.5,-3,1.5}, viewdir={-80,45}}
+local f = function(x,y) return x^2-y^2 end
+local A, B, C = M(-1,0,f(-1,0)), M(1,-0.5,f(1,-0.5)), M(-0.5,-1,f(-0.5,-1)) -- three points on the surface
+local a, b, c = ld.pxy(A,-2), ld.pxy(B,-2), ld.pxy(C,-2) -- their projections on the z=-2 plane
+local P = ld.prism({a,c,b},M(0,0,4))
+local S = ld.cartesian3d(f,-1.2,1.2,-1.5,1.5,{25,25})
+local S2 = ld.clip3d(S, P) -- part of S inside P
+g:Dfacet(S,{color="black",mode=ld.mShaded,edge=true,edgecolor="white"})
+g:Dpolyline3d(ld.border(S2),true,"draw=red,line width=2pt")
+g:Show()
+\end{luadraw}
+\end{document}

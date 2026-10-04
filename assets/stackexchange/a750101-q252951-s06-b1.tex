@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/750101 (question 252951, score 6, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/252951/howto-tikz-3d-plot-of-an-object
+\begin{document}
+\begin{luadraw}{name=integration_domain}
+local g = graph3d:new{window3d={-2,2,-2,3,0,8}, adjust2d=true,viewdir={-30,50},size={12,12,0}}
+g:Linejoin("round")
+local h = function(x) return 3*x^2-1 end
+local k = function(x) return 3-x^2 end
+local P = planeEqn(-1,-1,-1,4)
+local D = map(toPoint3d,domain3(h,k,-3,3,50,false,0)) -- domain in xy-plane
+local lateral,s,D1 = cutfacet( poly2facet( prism(D,8*vecK,true) ), P)
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="LightGray"})
+g:Filloptions("fdiag","ForestGreen"); g:Linestyle("noline"); g:Dpolyline3d(D,true)
+g:Filloptions("none"); g:Linestyle("solid")
+g:Savematrix(); g:Setmatrix(g:Proj3d({Origin,vecI,vecJ})) -- to draw on xy-plane
+g:Dcartesian(h,{x={-2/math.sqrt(3),2/math.sqrt(3)},draw_options="line width=0.8pt,Navy"})
+g:Dcartesian(k,{x={-2,2},draw_options="line width=0.8pt,Crimson"})
+g:Restorematrix()
+g:Dfacet(lateral,{edgecolor="gray",edgewidth=2,color="Pink", opacity=0.3})
+g:Dpolyline3d(D1,true,"draw=none,fill=cyan,fill opacity=0.8")
+g:Dpolyline3d( g:Plane2facet(P),true,"cyan") --trace of the plane on the 3d box
+g:Show()
+\end{luadraw}
+\end{document}

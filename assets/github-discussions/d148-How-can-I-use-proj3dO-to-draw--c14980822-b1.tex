@@ -1,0 +1,58 @@
+% source: https://github.com/pfradin/luadraw/discussions/148#discussioncomment-14980822 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fouriernc}
+\begin{document}
+%
+\begin{luadraw}{name=central_projection}
+local z0 = -3
+local g = graph3d:new{window3d={-5,8,-5,8,z0,5},adjust2d=true, bbox=false,viewdir=perspective("yz",0.35,60),size={10,10}}
+g:Linewidth(6); Hiddenlinestyle = "dotted"; Hiddenlines = true
+require 'luadraw_polyhedrons'
+local light = M(-5,-5,5)
+local center = M(-1,-1,-1)
+local proj = function(A)
+    return proj3dO(A,{z0*vecK,vecK},A-light)
+end
+local P = cube(center, M(-1,-0.5,z0))
+local shadow = cvx_hull3d( ftransform3d(P.vertices,proj) )[1] -- here we know that the shade is convex
+local beam = pyramid( reverse(shadow),light,true)
+local beamV,beamH = g:Classifyfacet(beam)
+
+g:Dfacet(g:Plane2facet({z0*vecK,vecK}), {color="lightgray", contrast=0})
+g:Dseg3d({M(-5,-5,z0), light})
+g:Dballdots3d(light,"Yellow",2)
+g:Dpolyline3d( shadow, true, "draw=none,fill=DarkGray,fill opacity=0.9") 
+g:Dfacet(beamH, {color="yellow",opacity=0.4,mode=mShadedOnly} )
+g:Dpoly(P, {color="cyan",mode=mShadedHidden})
+g:Dfacet(beamV, {color="yellow",opacity=0.4,mode=mShadedOnly} )
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=central_projection2}
+local g = graph3d:new{window3d={-5,8,-5,8,-3,5},adjust2d=true, bbox=false,viewdir=perspective("yz",0.35,60),size={10,10}}
+g:Linewidth(6); Hiddenlinestyle = "dashed"; Hiddenlines = true
+local r, z0 = 2, -3
+local center = M(-1,-1,-1)
+local S = {center, r} -- sphere
+local light = M(-5,-5,5)
+local I,R = (light+center)/2, pt3d.abs(center-light)/2
+
+local proj = function(A) -- central projection from light to z=z0 plane
+    return proj3dO(A,{z0*vecK,vecK},A-light)
+end
+
+local J,r1,n = interSS(S, {I,R} ) -- circle of "tangence" to the sphere resulting from light
+local shadow = ftransform3d(circle3d(J,r1,n)[1],proj)
+local beam = pyramid(shadow,light,true)
+--g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray"})
+g:Dfacet(g:Plane2facet({z0*vecK,vecK}), {color="lightgray", contrast=0})
+g:Dseg3d({M(-5,-5,z0), light})
+g:Dballdots3d(light,"Yellow",2)
+g:Dpolyline3d( shadow, true, "draw=none,fill=DarkGray,fill opacity=0.8") 
+g:Dsphere(center,r,{color="Cyan",mode=mBorder})
+g:Dpoly( beam, {color="yellow",opacity=0.4,backcull=true,contrast=0.5,mode=mShadedOnly} )
+g:Show()
+\end{luadraw}
+\end{document} 

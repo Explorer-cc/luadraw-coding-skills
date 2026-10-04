@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/230#discussioncomment-16140452 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier}
+\begin{document}
+\begin{luadraw}{name=axis_vector}
+local g = graph3d:new{ 
+    window3d={-1,9,-1,9,-1,9}, 
+    window={-6,8,-5,8},
+    viewdir=perspective("xy",0.8,60),  -- changing here, 60 instead of 45 degrees
+    size={12,12} 
+}
+local O,delta,P = Origin,-3, M(6.5, 6, 4)
+local Pxz = pxz(P)
+local Px,Pz,Py = px(Pxz), pz(Pxz), py(P)
+local t1, t2, t3 = M(delta, 0, P.z), M(delta,0, 0), M(delta, P.y, 0)
+
+g:Dpolyline3d({{O, 7*vecI}, {O, 7*vecJ}, {O, 7*vecK}}, "-Stealth,solid,black, line width=1pt")
+g:Dlabel3d("$x$", 7.2*vecI, {}, "$y$", 7.2*vecJ, {}, "$z$", 7.2*vecK, {})
+
+g:Dpolyline3d({{P,Py}, {P,Pxz}, {Pxz,Px}, {Pxz,t1},{O,Pxz}}, "dashed,blue,thick")
+g:Dpolyline3d({{O,t2}, {Py,t3}}, "dashed,black,thick")
+
+g:Dpolyline3d({{t1,t2}, {t2,t3}, {Pxz,Pz}}, "Stealth-Stealth,dashed,magenta,thick")
+
+g:Dseg3d({O, P}, "-latex,RosyBrown,line width=4pt")
+g:Dpolyline3d({{O, 2.5*vecI}, {O, 2.5*vecJ}, {O, 2.5*vecK}}, "-latex,cyan,line width=3pt")
+
+g:Ddots3d({P,Pxz,Px,Py,Pz}, "RosyBrown", 1.5)
+
+g:Dpath3d({Px,O,P,4,1,"ca",O,"l"}, "draw=none,opacity=0.2,fill=blue")
+g:Darc3d(Px, O, P, 4, 1, "-Stealth,thick,blue,ultra thick")
+g:Dpath3d({Py,O,P,4,1,"ca",O,"l"}, "draw=none,opacity=0.2,fill=green")
+g:Darc3d(Py, O, P, 4, 1, "-Stealth,thick,green,ultra thick")
+g:Dpath3d({Pz,O,P,4,1,"ca",O,"l"}, "draw=none,opacity=0.2,fill=violet")
+g:Darc3d(Pz, O, P, 4, 1, "-Stealth,thick,violet,ultra thick")
+
+-- g:Dlabel3d(...)
+g:Show()
+\end{luadraw}
+\end{document}

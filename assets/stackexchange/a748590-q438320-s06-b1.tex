@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/748590 (question 438320, score 6, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=sphere_pyramid}
+local g = graph3d:new{window={-5,6,-6,6},viewdir={130,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local O = Origin
+local R,d = 5,3
+local r = math.sqrt(R^2-d^2)
+local S = sphere(O,R,100,100) 
+local I1 = g:Intersection3d(S,{d*vecK,vecK})
+local I2 = g:Intersection3d(S,{Origin,vecK})
+g:Dedges(I2,{hidden=true, hiddenstyle="solid", visible=false})
+g:Dcone(Origin,d*vecK,r,{color="Crimson"})
+g:Dsphere(O,R,{color="cyan", mode=2, opacity=0.4}) 
+g:Dedges(I1,{hidden=false})
+g:Dedges(I2,{hidden=false})
+g:Dlabel3d("$O$",O,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

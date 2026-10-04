@@ -1,0 +1,65 @@
+% source: https://github.com/pfradin/luadraw/discussions/140#discussioncomment-15060971 (pfradin, block 1)
+\documentclass[boder=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+
+\colorlet{myOrange}{orange!35}%
+
+\begin{luadraw}{name=tubes}
+local g = graph3d:new{window={-6,6,-4,7},bg="lightgray!30" }
+Hiddenlines = false; Hiddenlinestyle = "noline"
+g:Linewidth(2); g:Linecolor("Orange")
+local O, r = Origin, 0.5
+local R  = r*math.sqrt(2)
+local S = sphere(O,R)
+local C = parallelep(M(-r,-r,-r), 2*r*vecI,2*r*vecJ,2*r*vecK)
+local crossing_base = clip3d(S,C)
+
+local crossing = function(center)
+    return shift3d(crossing_base,center)
+end
+
+local Shift = function(L,u)
+    local f = function(A)
+        if isPoint3d(A) then return A+u else return A end
+    end
+    return ftransform3d(L,f)
+end
+
+local grid_base = {} -- list of {center, "type"}
+for y = -4, 4  do
+    local A = y*2*r*vecJ
+    if y%3 == 0 then
+        table.insert(grid_base, {A,"c"})
+        table.insert(grid_base, {A+2*r*vecI,"x"})
+        table.insert(grid_base, {A-2*r*vecI,"x"})
+        table.insert(grid_base, {A+2*r*vecK,"z"})
+        table.insert(grid_base, {A-2*r*vecK,"z"})
+    else
+        table.insert(grid_base, {A,"y"})
+    end
+end
+
+local k = 6*r
+local grid = concat(grid_base,Shift(grid_base,k*vecI),Shift(grid_base,-k*vecI))
+grid = concat(grid, Shift(grid,k*vecK))
+table.sort(grid, function(e1,e2) return pt3d.dot(e1[1],g.Normal) < pt3d.dot(e2[1],g.Normal) end)
+
+for _,elt in ipairs(grid) do
+    local A, mode = table.unpack(elt)
+    if mode == "c" then -- crossing
+        g:Dfacet(crossing(A), {color="myOrange",contrast=0,backcull=true,edgecolor="myOrange",mode=mShaded})
+    elseif mode == "x" then
+        g:Dcylinder(A-r*vecI,r,A+r*vecI, {color="orange"})
+    elseif mode == "y" then
+        g:Dcylinder(A-r*vecJ,r,A+r*vecJ, {color="orange"})
+    elseif mode == "z" then
+        g:Dcylinder(A-r*vecK,r,A+r*vecK, {color="orange"})
+    end
+end 
+
+g:Show()
+\end{luadraw}
+\end{document} 

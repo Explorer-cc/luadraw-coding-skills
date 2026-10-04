@@ -1,0 +1,31 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-decorations.tex (demo: 3D Decorations)
+\begin{luadraw}{name=decorations3d}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Z = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, ld.cpx.Z
+
+local g = ld.graph3d:new{size={10,10}}
+require 'luadraw_decorations'
+g:Dline3d(-5*vecI,5*vecI, {label="$x$",anchor=5*vecI,pos="S",draw_options="-stealth"},true)
+g:Dline3d(-5*vecJ,5*vecJ, {label="$y$",anchor1d=1,pos="SE",draw_options="-stealth"},true)
+g:Dcircle3d(Origin, 3, vecK, {label="$(C)$",anchor1d=0,pos="SE",
+    dir={vecJ,-vecI}, draw_options="red,thick", node_options="red"})
+local nb = 15
+local H = ld.linspace(0,3,nb)
+for k = 1, nb-1 do
+    local z = H[k]
+    local r = math.sqrt(9-z^2)
+    g:Darc3d(M(0,-r,z),z*vecK,M(0,r,z),r,-1,vecK,"thin, red!30")
+end
+g:Dpath3d({-3*vecJ,Origin,3*vecK,3,-1,vecI,"ca",3*vecK,"l","cl"},
+    "draw=none,pattern color=black!60,pattern=north west lines")
+g:Dseg3d({Origin,5*vecK}, 
+    {label="$z$",anchor2d=Z(0,1),pos="N",draw_options="-stealth"})   
+g:Dseg3d({-3*vecJ,3*vecK}, {label="$3\\sqrt 2$\\,cm", pos="S", dir={M(0,1,1),M(0,-1,1)},
+    ticks=2, draw_options="<->"}) 
+g:Dseg3d({3*vecJ,3*vecK}, 
+    {ticks=2, label="$3$", anchor=3*vecJ,pos="S",dir={vecJ,vecK}}) 
+g:Dpath3d({-3*vecJ,Origin,3*vecJ,3,-1,vecI,"ca"}, 
+    {label="$S$", anchor1d=0.5, pos="N",dist=0.15,draw_options="red,thick", node_options="red"})
+g:Show()
+\end{luadraw}

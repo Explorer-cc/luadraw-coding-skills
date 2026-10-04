@@ -1,0 +1,130 @@
+% source: https://github.com/pfradin/luadraw/discussions/288#discussioncomment-17645146 (pfradin, block 1)
+\documentclass[border=2pt,12pt]{standalone}% biên dịch bằng lualatex
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+
+function ld.graph3d:Cone_tangency(B, R, V, H) -- or Cone_tangency(B, R, H, options)
+    if not pt3d.isPoint3d(H) then -- format B, R, H
+        H = V; V = H-B
+    end
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    local O, I, J = ld.orthoframe({B, V})
+    local mat, H1 = self.matrix3d, H
+    if not ld.isID3d(mat) then
+        O, I, J = ld.mtransform3d(O,mat), ld.mLtransform3d(I,mat), ld.mLtransform3d(J,mat)
+        H1 = ld.mtransform3d(H,mat)
+    end
+    local f = function(t)
+        local  A = O + R*(cos(t)*I+sin(t)*J)
+        local N = self.Normal
+        if ld.projection_mode == "central" then N = ld.camera-A end
+        return pt3d.det(N, A-H1, R*(-sin(t)*I+cos(t)*J) )
+    end
+    local T = ld.solve(f,-pi,pi)
+        if (T ~= nil) and (#T >= 2) then
+        local M1, M2 = O+R*(cos(T[1])*I+sin(T[1])*J), O+R*(cos(T[2])*I+sin(T[2])*J)
+        if not ld.isID3d(mat) then
+            return ld.mtransform3d({M1, M2}, ld.invmatrix3d(mat))
+        else
+            return {M1, M2}
+        end
+    end
+end
+
+function ld.graph3d:Cylinder_tangency(B, R, V, H) -- or Cylinder_tangency(B, R, H)
+    if not pt3d.isPoint3d(H) then -- format B, R, H
+        H = V; V = H-B
+    end
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    local O, I, J = ld.orthoframe({B, V})
+    local mat, H1 = self.matrix3d, H
+    if not ld.isID3d(mat) then
+        O, I, J = ld.mtransform3d(O,mat), ld.mLtransform3d(I,mat), ld.mLtransform3d(J,mat)
+        H1 = ld.mtransform3d(H,mat)
+    end
+    local f = function(t)
+        local  A = O + R*(cos(t)*I+sin(t)*J)
+        local N = self.Normal
+        if ld.projection_mode == "central" then N = ld.camera-A end
+        return pt3d.det(N, V, R*(-sin(t)*I+cos(t)*J) )
+    end
+    local T = ld.solve(f,-pi,pi)
+        if (T ~= nil) and (#T >= 2) then
+        local M1, M2 = O+R*(cos(T[1])*I+sin(T[1])*J), O+R*(cos(T[2])*I+sin(T[2])*J)
+        if not ld.isID3d(mat) then
+            return ld.mtransform3d({M1, M2}, ld.invmatrix3d(mat))
+        else
+            return {M1, M2, M1+V, M2+V}
+        end
+    end
+end
+
+function ld.graph3d:Frustum_tangency(B, R, r, V, H) -- or Frustum_tangency(B, R, H)
+    if r == R then 
+        return self:Cylinder_tangency(B,R,V,H)
+    end
+    if not pt3d.isPoint3d(H) then -- format B, R, H
+        H = V; V = H-B
+    end
+    local k = r/R
+    local S = (H-k*B)/(1-k)
+    local P = self:Cone_tangency(B,R,V,S)
+    if P ~= nil then
+        return ld.concat(P, ld.scale3d(P, k, S))
+    end
+end
+
+function ld.graph3d:Sphere_tangency(C, R, P) -- C=center, R=radius, P=plane
+    local B, r, n = ld.interPS(P, {C,R})
+    if B == nil then return end
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    local O, I, J = ld.orthoframe({B,n})
+    local mat, C1 = self.matrix3d, C
+    local invmat = ld.invmatrix3d(mat)
+    if not ld.isID3d(mat) then
+        O, I, J = ld.mtransform3d(O,mat), ld.mLtransform3d(I,mat), ld.mLtransform3d(J,mat)
+        C1 = ld.mtransform3d(C,mat)
+    end
+    local f = function(t)
+        local A1 = O + r*(cos(t)*I+sin(t)*J)
+        local A = ld.mtransform3d(A1,invmat)
+        local N = self.Normal
+        if ld.projection_mode == "central" then N = ld.camera-A1 end
+        return pt3d.dot( ld.mLtransform3d(N, invmat), C-A)
+    end
+    local T = ld.solve(f,-pi,pi)
+        if (T ~= nil) and (#T >= 2) then
+        local M1, M2 = O+r*(cos(T[1])*I+sin(T[1])*J), O+r*(cos(T[2])*I+sin(T[2])*J)
+        if not ld.isID3d(mat) then
+            return ld.mtransform3d({M1, M2}, invmat)
+        else
+            return {M1, M2}
+        end
+    end
+end
+\end{luacode*}
+
+\begin{document}
+
+\begin{luadraw}{name=frustum}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local g = ld.graph3d:new{window={-6,6,-2,10},viewdir={60,60},size={10,10}}
+ld.Hiddenlinestyle = "dashed"
+local R, r, h = 3,5,4
+local B = M(0,0,h)
+local O1, O2, B1, B2 = table.unpack( g:Frustum_tangency(O,R,r,O+B) )
+g:Dcylinder(B,r,M(0,0,7), {color="white"}) 
+g:Dpath3d( {B1, "m", O1, "l", O, O2, R, 1, "ca", B2, "l"})
+g:Darc3d(O1, O, O2, R, -1, "dashed")
+g:Dlabel3d("$O$",O,{pos="S"},"$B$",B,{pos="W"})
+g:Show()
+\end{luadraw}
+\end{document}

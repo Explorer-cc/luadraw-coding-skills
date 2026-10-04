@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/255#discussioncomment-16948635 (pfradin, block 1)
+\documentclass[border=2mm ]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=implicit}
+local ld = luadraw
+local g = ld.graph:new{ window = {-1, 5, -1, 5}, size = {10, 10} }
+--g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I  
+local A, B, C,D = 4*i, 0, 4, 4 + 4*i
+local E, F, P, Q = 2 + 3*i, 1 + 2*i, 2 + i, 3 + 2*i 
+local f1 = function(x, y) return x   + 3/4*(y-2)^2-3  end
+local f2 = function(x, y) return x - 3/4*(y-2)^2 - 1 end
+local f3 = function(x) return - 3/4*(x-2)^2  + 3 end
+local f4 = function(x) return  3/4*(x-2)^2  + 1 end
+local f5 = function(x) return -x+4 end -- (AC) line
+g:Ddots({A,B,C,D,E,F,P,Q})
+g:Linecolor("magenta") 
+local filloptions = "draw=none,pattern= north west lines, pattern color=cyan"
+g:Linewidth(8) 
+for _ = 1, 2 do
+    for _ = 1, 4 do
+        g:Dinequalities({f4,'>',f3,'>',f5,'<'}, {draw_options=filloptions})
+        g:Rotate(90,Z(2,2))
+    end
+    g:Setmatrix( ld.matrixof(function(z) return ld.sym(z,{A,C-A}) end) ) -- symmetry with respect to (AC)
+end
+g:IDmatrix()
+g:Dimplicit(f1, {view = {0, 4, 0, 4}})
+g:Dimplicit(f2, {view = {0, 4, 0, 4} })
+g:Dcartesian(f3, {x={0,4}})
+g:Dcartesian(f4, {x={0,4}})
+g:Dlabel("$A$",A, {pos="N"}, "$D$",D, {},"$B$",B, {pos="S"},
+    "$C$", C, {}, "$E$",E, {pos="S"},"$F$",F, {pos="E"},"$P$",P, {pos="N"},
+    "$Q$",Q, {pos="W"})
+g:Dpolyline({{A,B,C,D,A}},"color = blue") 
+g:Show()
+\end{luadraw}
+\end{document}

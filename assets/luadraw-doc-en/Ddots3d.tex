@@ -1,0 +1,26 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: A tetrahedron and the centers of gravity of each face)
+\begin{luadraw}{name=Ddots3d}
+local ld = luadraw
+local pt3d = ld.pt3d
+local vecI, vecJ, vecK, M = pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{viewdir={15,60},bbox=false,size={8,8}}
+local A, B, C, D = 4*M(1,0,-0.5), 4*M(-1/2,math.sqrt(3)/2,-0.5), 4*M(-1/2,-math.sqrt(3)/2,-0.5), 4*M(0,0,1)
+local u, v, w = B-A, C-A, D-A
+-- drawing of the center of gravity of hidden faces
+for _, F in ipairs({{A,B,C},{B,C,D}}) do
+local G, u = pt3d.isobar3d(F), pt3d.prod(F[2]-F[1],F[3]-F[1])
+g:Dcrossdots3d({G,u}, "blue",0.75)
+g:Dpolyline3d({{F[1],G,F[2]},{G,F[3]}},"dotted")
+end
+-- drawing of the tetrahedron constructed on A, B, C and D
+g:Dpoly( ld.tetra(A,u,v,w),{mode=ld.mShaded,opacity=0.7,color="Crimson"})
+-- drawing of the center of gravity of visible faces
+for _, F in ipairs({{A,B,D},{A,C,D}}) do
+    local G, u = pt3d.isobar3d(F), pt3d.prod(F[2]-F[1],F[3]-F[1])
+    g:Dcrossdots3d({G,u}, "blue",0.75)
+    g:Dpolyline3d({{F[1],G,F[2]},{G,F[3]}},"dotted")
+end
+g:Dballdots3d({A,B,C,D}, "orange") --vertices
+g:Show()
+\end{luadraw}

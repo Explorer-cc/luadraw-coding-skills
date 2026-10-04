@@ -1,0 +1,86 @@
+% source: https://tex.stackexchange.com/a/765685 (question 121852, score 5, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+%https://tex.stackexchange.com121852/how-can-i-draw-two-intersecting-spheres-with-highlighted-intersection
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+function ld.graph3d:Dcut_sphere(C,R,P, options)
+-- P is a plane, P = {A,n}
+-- draw the sphere {C,R} cut by P (part in then half-plane containing n)
+-- options: the same as for the Dsphere method plus options.visibletrace="" (contour of clip) and hiddentrace
+    options.visibletrace = options.visibletrace or "" -- visible part of intersection
+    options.hiddentrace = options.hiddentrace or ""
+    local T = self:Sphere_tangency(C,R,P)
+    local W, Vtrace, Htrace
+    local O, R1, N = table.unpack( self:Sphere_outline(C,R).data )
+    local c, r, n = ld.interPS(P, {C,R})
+    if #T == 0 then
+        local B = ld.proj3d(C,P)
+        if pt3d.abs(B-C) > R then -- no intersection
+            if pt3d.dot(B-C,P[2]) > 0 then self:Dsphere(C,R,options) end
+            return 
+        elseif pt3d.dot(C-B,P[2]) > 0 then
+            if self:Cosine_incidence(n,c)>0 then
+                W = ld.circle3db(O,R1,N)
+                Htrace = ld.circle3db(c, r, n)
+            else
+                W = ld.concat( ld.circle3db(O,R1,N), ld.circle3db(c, r, n) )
+                Vtrace = ld.circle3db(c, r, n)
+            end
+        else 
+            if self:Cosine_incidence(n,c)>0 then
+                W = ld.circle3db(c, r, n)
+            end
+            Vtrace = ld.circle3db(c, r, n)
+        end
+    else
+        local A, B = table.unpack( T )
+        c, r, n = ld.interPS(P, {C,R})
+        if pt3d.det(A-c, N, P[2]) < 0 then A, B = B, A end
+        local sens = 1
+        if pt3d.det(B-O,P[2],N) < 0 then sens = -1 end
+        W = {A,"m",c,B,r,1,n,"ca",O,A,R1,sens,N,"ca"}
+        Vtrace = {A,"m",c,B,r,1,n,"ca"}
+        Htrace = {A,"m",c,B,r,-1,n,"ca"}
+    end
+    if W ~= nil then
+        self:Beginclip( W )
+            self:Dsphere(C,R,options)
+        self:Endclip()
+    end
+    if options.visibletrace ~= "" then
+        self:Dpath3d(Vtrace, options.visibletrace)
+    end
+    if options.hiddentrace ~= "" then
+        self:Dpath3d(Htrace, options.hiddentrace)
+    end
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=sphere_intersection}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-5,5,-5,3}, viewdir={20,60} }
+local O1, O2 = M(3,0,0), M(1,3,0.5)
+local R1, R2 = 3, 2
+local n = O2-O1
+local t = (R1^2-R2^2)/(2*pt3d.abs2(O2-O1))
+local J = (O1+O2)/2+t*(O2-O1)
+local P = {J, n}
+local r = math.sqrt(R2^2-pt3d.abs2(O2-J))
+local H = J + r*pt3d.normalize( pt3d.prod(n,vecK) )
+g:Dcut_sphere(O1,R1, P, {color="cyan", mode=ld.mBorder})
+g:Dcut_sphere(O2,R2, P, {color="orange", mode=ld.mBorder, opacity=0.7})
+g:Dcircle3d(J,r,n,"draw=none,pattern=crosshatch")
+g:Dcut_sphere(O2,R2, {J,-n}, {color="orange", mode=ld.mBorder,opacity=0.3})
+g:Dcut_sphere(O1,R1, {J,-n}, {color="cyan", mode=ld.mBorder, opacity=0.7,
+    visibletrace="Gold,line width=0.8", hiddentrace="dashed,Gold,line width=0.8"})
+g:Dlabel3d( "$P$",H,{pos="NE",node_options="Gold"}, "$O_1$", O1, {pos="N",node_options="gray"}, "$O_2$", O2, {})
+g:Ddots3d({O1,O2},"gray"); g:Ddots3d(H,"Gold")
+g:Show()
+\end{luadraw}
+\end{document}

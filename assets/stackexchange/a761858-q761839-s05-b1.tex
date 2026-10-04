@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/761858 (question 761839, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/761839/solving-cyclic-overlap-of-occlusion-for-triangles
+\begin{document}
+\begin{luadraw}{name= draw_facets}
+local g = graph3d:new{viewdir={60,60}, size={10,10}}
+local f1, f2, f3 = {-2*vecI,2*vecI,M(2,0.5,0)}, {M(0.5,-0.5,-0.2),M(1,-0.5,-0.2),M(1,5,0.8)}, {M(2,4,-0.3), M(2,3.5,-0.3), M(-1.5,-0.5,0.6)}
+g:Labelsize("footnotesize")
+g:Shift3d(-2.5*vecK)
+g:Dscene3d( -- automatically partition the space with facet planes
+    g:addFacet(f1, {color="red",edge=true,edgewidth=12}), 
+    g:addFacet(f2,{color="green",edge=true,edgewidth=12}), 
+    g:addFacet(f3,{color="blue",edge=true,edgewidth=12}) )
+g:Shift3d(6*vecK)
+g:Dmixfacet(f1,{color="red",edgewidth=12},f2,{color="green"},f3,{color="blue"}) --painter's algorithm
+g:Dlabel("the painter's algorithm (incorrect result here)",Z(0,5),{pos="S"},
+"with the Dscene3d() method",Z(0,-0.5),{pos="S"})
+g:Show() 
+\end{luadraw}
+\end{document}

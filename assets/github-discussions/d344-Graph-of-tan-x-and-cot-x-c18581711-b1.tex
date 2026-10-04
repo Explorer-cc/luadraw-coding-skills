@@ -1,0 +1,53 @@
+% source: https://github.com/pfradin/luadraw/discussions/344#discussioncomment-18581711 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=tanx}
+local ld = luadraw
+local Z = ld.cpx.Z
+local a = 6
+local pi, tan = math.pi, math.tan
+local g = ld.graph:new{window = {-2*pi-1, 2*pi+1, -a, a},size = {12, 7}}
+
+for k = -2, 1 do
+    local x0 = pi/2 + k*pi
+    g:Dline(Z(x0,-a), Z(x0, a), "dashed,blue")
+end
+g:Daxes({0,pi/2,1},{limits={{-a-1,a+1.25},"auto"},labeltext={"\\pi",""}, legend={"$x$","$y$"}, labelden={2,1},arrows="-Stealth",labelpos={"bottom","none"},xyticks={0,0}, xnode_options='fill=white'})
+
+g:Dcartesian(
+    tan, {
+        x = {-2*pi, 2*pi},
+        discont = true,
+        draw_options = "red"
+    })
+g:Show()
+\end{luadraw}
+
+
+\begin{luadraw}{name=cotx}
+local ld = luadraw
+local Z = ld.cpx.Z
+local pi, tan = math.pi, math.tan
+local cot = function(x) return math.cos(x) / math.sin(x) end
+local a = 6
+local g = ld.graph:new{window = {-2*pi-1, 2*pi+1, -a, a}, size = {12, 7}}
+
+for k = -2, 2 do
+    if k ~= 0 then
+        local x0 = k*pi
+        g:Dline(Z(x0,-a), Z(x0, a), "dashed,blue")
+    end
+end
+g:Daxes({0,pi/2,1},{limits={{-a-1,a+1.25},"auto"},labeltext={"\\pi",""}, legend={"$x$","$y$"}, labelden={2,1},arrows="-Stealth",labelpos={"bottom","none"},xyticks={0,0}, xnode_options='fill=white'})
+g:Dcartesian(
+    cot, {
+        x = {-2*pi, 2*pi},
+        discont = true,
+        draw_options = "red"
+    })
+g:Show()
+\end{luadraw}
+\end{document}

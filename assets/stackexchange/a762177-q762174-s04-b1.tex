@@ -1,0 +1,20 @@
+% source: https://tex.stackexchange.com/a/762177 (question 762174, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/762174/how-to-embed-a-domain-curve-in-a-parametric-surface-using-lua
+\begin{document}
+\begin{luadraw}{name=curve_on_surface}
+local g = graph3d:new{size ={12,12}, bg="lightgray"}
+local C1 = cylinder(-5*vecK,1,5*vecK,35,true)
+local C2 = rotate3d(C1, 90, {Origin, vecI})
+local L1 = parametric3d( function(t) return Mc(1.025,3*t,2*t) end, -2.5, 2.5,30,false,1)
+local L2 = rotate3d(L1, 90, {Origin, vecI})
+g:Dscene3d(
+    g:addPoly(C1, {color="LightBlue", contrast=0.75}), g:addPoly(C2, {color="LightBlue", contrast=0.75}),
+    g:addPolyline( concat(L1,L2), {color="red", hidden=true, width=12}),
+    g:addAxes(Origin, {arrows=1, color="Brown", hidden=true}) )
+g:Show()
+\end{luadraw}
+\end{document}

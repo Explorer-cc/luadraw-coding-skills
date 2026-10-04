@@ -1,0 +1,18 @@
+% source: https://tex.stackexchange.com/a/755557 (question 630572, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/630572/how-to-plot-this-parametric-curve
+\begin{document}
+\begin{luadraw}{name=parametric_curve}
+local ld = luadraw
+local cos, sin, pi, i = math.cos, math.sin, math.pi, ld.cpx.I
+local g = ld.graph:new{window={-5,2,-7,4}, size={12,12}}
+local f = function(t) return (cos(t)+t*sin(t))+i*(sin(t)-t*cos(t)) end
+g:Daxes({0,1,1}, {grid=true, nbsubdiv={1,1}, arrows="-stealth"})
+g:Dparametric(f,{t={0,pi}, draw_options="red, line width=0.8pt"})
+g:Dparametric(f,{t={pi,2*pi}, draw_options="blue, line width=0.8pt"})
+g:Show()
+\end{luadraw}
+\end{document}

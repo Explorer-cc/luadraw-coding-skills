@@ -1,0 +1,51 @@
+% source: https://tex.stackexchange.com/a/757546 (question 757538, score 5, block 1)
+\documentclass[]{standalone} % compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+\begin{luacode*}
+nbimages = 36
+\end{luacode*}
+
+% images creation
+\begin{luacode*}
+local cos, sin, pi, i  = math.cos, math.sin, math.pi, cpx.I
+local g = graph:new{ window={-8,8,-8,8}, bg="gray", size={12,12} }
+
+-- declarations
+local T = linspace(0,360,nbimages+1)
+local R, r, n = 4.5, 1.5, 5
+local p = function(t) return  Z(R*cos(t)+r*cos(n*t), R*sin(t)+r*sin(n*t)) end
+
+-- create the image number k, this function must be global
+function makeframe(k) -- do not modify this line
+    local t = T[k]*deg
+    local L = parametric(p,0,t)
+    local E, P = Zp(R,t), p(t)
+    g:Daxes({0,1,1})    
+    g:Dcircle(0,0.5,"fill=yellow")
+    g:Dcircle(0, R, "line width=0.6pt, blue")
+    g:Ddots({E, P})
+    g:Dcircle(E,r); g:Dcircle(P,0.25,"fill=LightBlue")
+    g:Dseg({E,P})
+    g:Dpolyline(L, "line width=0.9pt, red")
+    g:Dlabel("$S$",0.5*i, {pos="NE"}, "$E$", E, {}, "$T$",P+0.25*i,{}, "$R="..R.."$", -8+8*i,{pos="SE"}, "$r="..r.."$", -8+7*i,{},  "$n="..n.."$", -8+6*i, {})
+    
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\def\nb{\directlua{tex.print(nbimages)}}
+\def\makeframe#1{\directlua{makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{6} %palindrome
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

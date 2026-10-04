@@ -1,0 +1,31 @@
+% source: https://github.com/pfradin/luadraw/discussions/148#discussioncomment-14977225 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fouriernc}
+\begin{document}
+%
+\begin{luadraw}{name=central_projection2}
+local g = graph3d:new{window3d={-5,8,-5,8,-3,5},adjust2d=true, bbox=false,viewdir={30,60},size={10,10}}
+g:Linewidth(6); Hiddenlinestyle = "dashed"; Hiddenlines = true
+local r, z0 = 2, -3
+local center = M(-1,-1,0)
+local S = {center, r} -- sphere
+local light = M(-5,-5,5)
+local I,R = (light+center)/2, pt3d.abs(center-light)/2
+
+local proj = function(A) -- central projection from light to z=z0 plane
+    return proj3dO(A,{z0*vecK,vecK},A-light)
+end
+
+local J,r1,n = interSS(S, {I,R} ) -- circle of "tangence" to the sphere resulting from light
+local shadow = ftransform3d(circle3d(J,r1,n)[1],proj)
+local beam = pyramid(shadow,light,true)
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray"})
+g:Dballdots3d(light,"Yellow",2)
+g:Dsphere(center,r,{color="Cyan",mode=mBorder})
+g:Dpolyline3d( shadow, true, "draw=none,fill=DarkGray,fill opacity=0.9") 
+g:Dpoly( beam, {color="yellow",opacity=0.3,contrast=0.5,mode=mShadedOnly} )
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/761682 (question 761676, score 11, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/761676/3d-tikz-graph-highlighting-a-specific-interp-line-and-axis-problem
+\begin{document}
+\begin{luadraw}{name= q761676}
+local sqrt = math.sqrt
+local g = graph3d:new{ window3d={-2,2,-2,2,-2,2}, viewdir=perspective("central",-30,60),
+    window={-2.5,2.5,-2.5,2.5}, size={12,12}}
+local f = function(x,y) return math.atan(y*sqrt(2-x^2))/(1+x*x) end
+local S, wall = cartesian3d(f,-sqrt(2)+1e-6, sqrt(2)-1e-6,-2,2, {25,25}, "xy")
+local I = g:Intersection3d(S, {1.5*vecJ, vecJ}) -- intersection with the t=1.5 plane
+g:Dscene3d(
+    g:addWall(wall), --partition walls (space partitioning)
+    g:addFacet(S, {usepalette={palRainbow,"z"}, edge=true, edgecolor="black!80", opacity=0.8}),
+    g:addAxes( Origin, {arrows=1, arrowscale=0.5, width=8,legend=false }),
+    g:addLabel( "$x$",2*vecI, {pos="S"}, "$t$",2*vecJ,{pos="E"}, "$z$",2*vecK, {pos="N"})
+    )
+g:Dedges(I, {hidden=true, color="Navy", width=12})
+g:Show() 
+\end{luadraw}
+\end{document}

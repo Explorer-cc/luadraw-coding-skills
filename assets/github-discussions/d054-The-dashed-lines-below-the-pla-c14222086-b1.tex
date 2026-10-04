@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222086 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/104529/tikz-intersection-of-line-and-plane?rq=1
+\begin{luadraw}{name=intersection_line_plane}
+ local g = graph3d:new{window={-5,5,-3,3.5},viewdir={30,65},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4)
+local P1 = {M(0,0,0),vecK}
+local C,P = M(-2,1,3), M(2,0,-2)
+local d = {C,P-C}
+local I = interDP(d,P1)
+Hiddenlines = false
+g:Dscene3d(
+    g:addPlane(P1, {edge=true, color="orange",scale=0.65}),
+    g:addLine(d, {color="blue",width=6,scale=0.75})
+    )
+     g:Ddots3d({C,P,I})
+     g:Dlabel3d("$P'$",I,{pos="E"},"$P$",P,{pos="E"},"$C$",C,{pos="E"})
+g:Show()
+\end{luadraw}
+\end{document} 

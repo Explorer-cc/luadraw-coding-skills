@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/324#discussioncomment-18281958 (pfradin, block 2)
+\begin{luadraw}{name=sphere_tetra}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{
+    window3d = {-5,5,-5,5,-5,5},window = {-5,5,-5,5},
+    viewdir = {35,75},size = {10,10}
+}
+local cuboid = ld.parallelep(M(-3,-3,-3),M(6,0,0),M(0,6,0),M(0,0,6))
+local T1,T2,T3,T4 = M(3,3,3),M(-3,-3,3),M(-3,3,-3),M(3,-3,-3)
+local Dsphere_cap = function(T1,T2,T3)
+    local P_norm = pt3d.prod(T2-T1,T3-T1)
+    if pt3d.dot(T1, P_norm) < 0 then P_norm= -P_norm end -- to get the right direction
+    local P = {T1,P_norm}
+    g:Dpath3d({T1,T2,T3,"l","cl"}, "fill=Gray")
+    g:Dcut_sphere(Origin, 3, P, {color="orange", mode=ld.mBorder}) --<-- change here
+    --The part of the sphere that is drawn is that in the half-space containing the vector normal to the plane P
+end
+Dsphere_cap(T1,T3,T2)
+Dsphere_cap(T4,T1,T2)
+Dsphere_cap(T1,T4,T3)
+g:Dpolyline3d({{T1,T2},{T1,T3},{T1,T4}},"blue,very thick")
+g:Dpoly(cuboid, {mode=ld.mWireframe, hiddenstyle="noline", edgecolor="blue", edgewidth=8})
+g:Show()
+\end{luadraw}

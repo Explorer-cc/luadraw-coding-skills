@@ -1,0 +1,15 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: The function \emph{ld.read\_table3d())
+\begin{luadraw}{name=read_table3d}
+local ld = luadraw
+local pt3d  = ld.pt3d
+local data3d = ld.read_csv_file( ld.cachedir.."data3d.csv", {header=false, sep=" "})
+local S = ld.read_table3d(data3d, {bbox=true, func=4})
+local color = function(f) -- f is a facet
+    local G = pt3d.isobar3d(f)
+    return S.func(G.x,G.y)
+end
+local g = ld.graph3d:new{ window3d=S.bbox, adjust2d=true, size={10,10} }
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray"})
+g:Dfacet( S.facets, {usepalette={ld.palRainbow,color}, edgecolor=ld.Gray, reverse=true})
+g:Show()
+\end{luadraw}

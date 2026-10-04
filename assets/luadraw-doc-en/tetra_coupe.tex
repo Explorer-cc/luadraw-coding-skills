@@ -1,0 +1,20 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Section of a tetrahedron by a plane)
+\begin{luadraw}{name=tetra_coupe}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{viewdir={10,60},bbox=false, size={10,10}, bg="gray!30"}
+local A,B,C,D = M(-2,-4,-2),M(4,0,-2),M(-2,4,-2),M(0,0,2)
+local T = ld.tetra(A,B-A,C-A,D-A) -- tetrahedron with vertices A, B, C, D
+local plan = {Origin, -vecK} -- sectional plane
+local T1, T2, section = ld.cutpoly(T,plan) -- we cut the tetrahedron
+-- T1 is the resulting polyhedron in the half-space containing -vecK
+-- T2 is the resulting polyhedron in the other half-space
+-- section is a facet (it's the cut)
+g:Dpoly(T1,{color="Crimson", edgecolor="white", opacity=0.8, edgewidth=8})
+g:Filloptions("bdiag","Navy"); g:Dpolyline3d(section,true,"draw=none")
+g:Dpoly(ld.shift3d(T2,2*vecK), {color="Crimson", edgecolor="white", opacity=0.8, edgewidth=8})
+g:Dballdots3d({A,B,C,D+2*vecK}) -- we drew T2 translated with the vector 2*vecK
+g:Show()
+\end{luadraw}

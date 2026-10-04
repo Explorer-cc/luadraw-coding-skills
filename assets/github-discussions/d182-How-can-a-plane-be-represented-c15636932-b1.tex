@@ -1,0 +1,31 @@
+% source: https://github.com/pfradin/luadraw/discussions/182#discussioncomment-15636932 (pfradin, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\begin{document}
+\begin{luadraw}{name=intersection_two_planes}
+local P = planeEqn(2,-3,3,-17)
+local A,B = M(3,-4,7), M(-5,-14,17)
+local H = proj3d(A,P)
+local R = 2*H - A
+local I = interDP({B, B-R},P)
+local x1,x2,y1,y2,z1,z2 = getbounds3d( {A,B,H,R} ) -- 3d bounding box
+local dl = math.max(x2-x1,y2-y1,z2-z1) + 1 -- the greatest length, plus one
+local g = graph3d:new{window3d={x1,x2+1,y1,y2+1,z1,z2+1}, adjust2d=true, viewdir={100,60},size={12,12}, bbox=false}
+Hiddenlinestyle = "dashed";Hiddenlines = true;
+local C,u,v = orthoframe(P)
+local len1, len2 = 6*u, 5*v
+C = (I+H)/2
+local F = {C+len1+len2, C-len1+len2, C-len1-len2, C+len1-len2}
+g:Dscene3d(
+    g:addFacet(F, {edge=true}),
+    g:addPolyline({{A,R,B}})
+)
+g:Labelsize("small")
+g:Dlabel3d("$A$",A,{pos="N"}, "$B$",B,{pos="N"},"$H$",H,{pos="W"},"$R$",R,{pos="S"})
+g:Dlabel3d("$P("..I.x..","..I.y..","..I.z..")$",I,{pos="E"} )
+g:Ddots3d({A,B,H,R,I})
+g:Show()
+\end{luadraw} 
+\end{document} 

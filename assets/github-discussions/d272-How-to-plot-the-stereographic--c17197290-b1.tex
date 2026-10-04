@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/272#discussioncomment-17197290 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=stereographic_curve}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, M, vecI, vecJ, vecK = pt3d.Origin, pt3d.M, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window3d={-5,5,-2,2,-2,2},window={-10,10,-10,10},size={10,10}, viewdir={10,60}} 
+g:Linewidth(4)
+require 'luadraw_spherical'
+local sM =  ld.sM
+local C, R = Origin, 2
+local a = -R
+local N = R*vecK
+local Plane = ld.planeEq(0,0,1,-a)
+
+g:Dplane(Plane,vecJ,15,15)
+g:Define_sphere( {center=C,radius=R, color="SlateGray!50",edgestyle="noline",show=true} ) 
+
+ld.Hiddenlines = true; ld.Hiddenlinestyle="dashed"
+
+local P, V, W = sM(60,65), sM(15,60), sM(40,110)
+local PP, VV, WW = table.unpack( ld.projstereo({P,V,W},{C,R}, N, a) )
+g:DSbigcircle({R*vecI,R*vecJ})
+g:DSbigcircle({R*vecI,R*vecK})
+g:DSbigcircle({R*vecJ,R*vecK})
+g:DSfacet( {V,P,W}, {fill="blue!30"})
+
+g:DSseg({N,PP},{color="blue"})
+g:DSseg({N,VV},{color="blue"})
+g:DSseg({N,WW},{color="blue"})
+
+-- local C1 = ld.projstereo( ld.arc3d(P,Origin,V,R,1), {C,R}, N, a) -- not enough points
+local C1 = ld.projstereo( ld.path3d( ld.arc3db(P,Origin,V,R,1), 30), {C,R}, N, a)
+local C2 = ld.projstereo( ld.arc3d(V,Origin,W,R,1), {C,R}, N, a)
+local C3 = ld.projstereo( ld.arc3d(W,Origin,P,R,1), {C,R}, N, a)
+
+g:Dpolyline3d( ld.merge3d( ld.concat(C1,C2,C3) ), false, "fill=blue!30")
+g:DSstars({N,P,V,W}, {fill="black"})
+g:Dspherical()
+g:Ddots3d({PP,VV,WW})
+g:Show()
+\end{luadraw}
+\end{document}

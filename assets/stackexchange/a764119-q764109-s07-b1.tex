@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/764119 (question 764109, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/764109/coloring-a-region-of-a-sphere-in-3d-using-the-tikz-package
+\begin{document}
+\begin{luadraw}{name=spherical_strip}
+local ld = luadraw
+local M, Ms = ld.pt3d.M, ld.pt3d.Ms
+local g = ld.graph3d:new{ viewdir={30,70} }
+require 'luadraw_spherical'
+ld.Hiddenlinestyle = "dashed"
+local R = 4
+g:Define_sphere({radius=R, show=false})
+
+local sphere_strip = function(p1,p2,n)
+    n = n or math.ceil((p2-p1)/5)
+    p1 = p1*ld.deg; p2 = p2*ld.deg
+    return ld.surface( function(u,v) return Ms(R,u,v) end, math.pi, -math.pi, p1, p2,{50,n})
+end
+
+local color1, color2 = "SteelBlue!30", "orange"
+local angle = 50
+local S1 = sphere_strip(0,angle)
+local S2 = sphere_strip(angle,180-angle)
+local S3 = sphere_strip(180-angle,180)
+local Sv1 = g:Classifyfacet(S1)
+local Sv2 = g:Classifyfacet(S2)
+local Sv3 = g:Classifyfacet(S3)
+local poles = ld.polyline2path3d( ld.concat(ld.border(Sv3),ld.border(Sv1)) )
+local middle = ld.polyline2path3d( ld.border(Sv2) )
+--drawing
+g:Dpolyline3d({{M(-5,0,0), M(5,0,0)}, {M(0,-5,0), M(0,5,0)}, {M(0,0,-5), M(0,0,5)}}, 
+    "line width=0.8")
+g:Dpath3d(middle, "draw=none, ball color="..color2)
+g:Dpath3d(poles, "draw=none,ball color="..color1)
+g:DScircle({ld.sM(0,angle), M(0,0,1)}, {color="ForestGreen", width=8, hidden=true})
+g:DScircle({ld.sM(0,180-angle), M(0,0,1)}, {color="ForestGreen", width=8, hidden=true})
+g:Dspherical()
+g:Dpolyline3d({{M(-5,0,0), M(5,0,0)}, {M(0,-5,0), M(0,5,0)}, {M(0,0,-5), M(0,0,5)}}, 
+    "line width=0.6, dashed")
+g:Dpolyline3d({{M(R,0,0), M(5,0,0)}, {M(0,R,0), M(0,5,0)}, {M(0,0,R), M(0,0,5)}}, 
+    "-stealth, line width=0.8")
+g:Show()
+\end{luadraw}
+\end{document}

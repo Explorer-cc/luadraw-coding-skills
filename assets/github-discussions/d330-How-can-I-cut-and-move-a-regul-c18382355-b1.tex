@@ -1,0 +1,86 @@
+% source: https://github.com/pfradin/luadraw/discussions/330#discussioncomment-18382355 (pfradin, block 1)
+\documentclass[12pt,tikz]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+
+\begin{luadraw}{name=regular_pyramid_1_10_9_2026}
+local ld = luadraw
+local pt3d = ld.pt3d
+local O,vecI,vecJ,vecK,M, Mc = pt3d.Origin,pt3d.vecI,pt3d.vecJ,pt3d.vecK,pt3d.M,pt3d.Mc
+local sqrt, sin, cos,acos = math.sqrt, math.sin, math.cos, math.acos
+local g = ld.graph3d:new{window={-3,3,-1,3},viewdir={52,70},size={12,12}}
+ld.Hiddenlines = true
+ld.Hiddenlinestyle = "dashed"
+local n,a = 4,4
+local h = a*sqrt(2)/2
+local P = ld.regular_pyramid(n,a,h)
+local A, B, C, D, S = table.unpack(P.vertices) 
+local V = 1/3*h*a^2
+local S_base = a * a                             
+local S_SAB = 0.5 * pt3d.abs(pt3d.prod(B-A, S-A)) 
+local S_tp  = S_base + 4 * S_SAB              
+local r = 3 * V / S_tp
+local I = M(0, 0, r)
+local t = h-1.2
+local J = M(0, 0, t)
+local rc = sqrt(r^2 - (r-t)^2)
+local plane = {J,-vecK}
+P1, P2 = ld.cutpoly(P,plane)
+-- drawing
+g:Dpoly(P1, {color="Crimson",mode=ld.mShadedHidden})
+g:Dplane(plane,A-D,4,4, "fill=pink, fill opacity=0.3")
+g:Dpoly(P2, {color="Crimson",mode=ld.mShadedHidden})
+g:Dsphere(I, r, {edgestyle="dashed"})
+g:Dcircle3d(J, rc, vecK, "dashed")
+
+g:Linestyle("dashed")
+g:Dplane(plane,A-D,4,4)
+g:Ddots3d(ld.concat(P.vertices,{O,I}))
+g:Dpolyline3d({{A,C}, {B,D}, {S,O}})
+g:Dlabel3d("$A$",A,{pos="E"},"$B$",B,{},"$C$",C,{pos="W"},"$D$",D,{},
+    "$S$",S,{pos="N"},"$I$",I,{pos="W"}, "$O$",O,{pos="S"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=regular_pyramid_2_10_9_2026}
+local ld = luadraw
+local pt3d = ld.pt3d
+local O,vecI,vecJ,vecK,M, Mc = pt3d.Origin,pt3d.vecI,pt3d.vecJ,pt3d.vecK,pt3d.M,pt3d.Mc
+local sqrt, sin, cos,acos = math.sqrt, math.sin, math.cos, math.acos
+local g = ld.graph3d:new{window={-3,3,-1,3},viewdir={52,70},size={12,12}}
+ld.Hiddenlines = true
+ld.Hiddenlinestyle = "dashed"
+local n,a = 4,4
+local h = a*sqrt(2)/2
+local P = ld.regular_pyramid(n,a,h)
+local A, B, C, D, S = table.unpack(P.vertices) 
+local V = 1/3*h*a^2
+local S_base = a * a                             
+local S_SAB = 0.5 * pt3d.abs(pt3d.prod(B-A, S-A)) 
+local S_tp  = S_base + 4 * S_SAB              
+local r = 3 * V / S_tp
+local I = M(0, 0, r)
+local t = h-1.2
+local J = M(0, 0, t)
+local rc = sqrt(r^2 - (r-t)^2)
+local plane = {J,-vecK}
+P = ld.cutpoly(P,plane)
+-- drawing
+local Pv, Ph = g:Classifyfacet(P)
+g:Dfacet(Ph, {color="Crimson",mode=ld.mShadedHidden})
+g:Dcut_sphere(I, r, plane, {color="orange", mode=ld.mBorder})
+g:Dcircle3d(J, rc, vecK, "left color=orange, right color=white")
+g:Dfacet(Pv, {color="Crimson",mode=ld.mShadedHidden})
+g:Dpoly(P, {mode=ld.mWireframe})
+g:Dsphere(I, r, {edgestyle="dashed"})
+
+g:Linestyle("dashed")
+g:Ddots3d(ld.concat(P.vertices,{O,I}))
+g:Dpolyline3d({{A,C}, {B,D}})
+g:Dlabel3d("$A$",A,{pos="E"},"$B$",B,{},"$C$",C,{pos="W"},"$D$",D,{},
+    "$I$",I,{pos="W"}, "$O$",O,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,23 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-8-More-Advanced-Examples.tex (demo: Volume corresponding to $\int_{x_1)
+\begin{luadraw}{name=volume_integrale}
+local ld = luadraw
+local M = ld.pt3d.M
+local pi, sin, cos = math.pi, math.sin, math.cos
+
+local g = ld.graph3d:new{window3d={-4,4,-4,4,0,6},adjust2d=true,margin={0,0,0,0},size={10,10}}
+local x1, x2, y1, y2 = -3,3,-3,3 -- bornes
+local f = function(x,y) return cos(x)+sin(y)+5 end -- function to integrate
+local p = function(u,v) return M(u,v,f(u,v)) end -- surface parameterization z=f(x,y)
+local Fx1 = ld.concat({ld.pxy(p(x1,y2)), ld.pxy(p(x1,y1))}, ld.parametric3d(function(t) return p(x1,t) end,y1,y2,25,false,0)[1])
+local Fx2 = ld.concat({ld.pxy(p(x2,y1)), ld.pxy(p(x2,y2))}, ld.parametric3d(function(t) return p(x2,t) end,y2,y1,25,false,0)[1])
+local Fy1 = ld.concat({ld.pxy(p(x1,y1)), ld.pxy(p(x2,y1))}, ld.parametric3d(function(t) return p(t,y1) end,x2,x1,25,false,0)[1])
+local Fy2 = ld.concat({ld.pxy(p(x2,y2)), ld.pxy(p(x1,y2))}, ld.parametric3d(function(t) return p(t,y2) end,x1,x2,25,false,0)[1])
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="LightGray",labels=false})
+g:Filloptions("fdiag","black"); g:Dpolyline3d( {M(x1,y1,0),M(x1,y2,0),M(x2,y2,0),M(x2,y1,0)}) -- below
+g:Dfacet( {Fx1,Fy1},{mode=ld.mShaded,opacity=0.7,color="Crimson"} )
+g:Dfacet(ld.surface(p,x1,x2,y1,y2), {mode=ld.mShadedOnly,color="cyan"})
+g:Dfacet( {Fx2,Fy2},{mode=ld.mShaded,opacity=0.7,color="Crimson"} )
+g:Dlabel3d("$x_1$", M(x1,4.75,0),{}, "$x_2$", M(x2,4.75,0),{},
+"$y_1$", M(4.75,y1,0),{}, "$y_2$", M(4.75,y2,0),{}, "$0$",M(4,-4.75,0),{})
+g:Show()
+\end{luadraw}

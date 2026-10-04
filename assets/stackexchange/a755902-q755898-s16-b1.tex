@@ -1,0 +1,44 @@
+% source: https://tex.stackexchange.com/a/755902 (question 755898, score 16, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/755898/drawing-a-sphere-and-ellipsoid-together
+\begin{document}
+\begin{luadraw}{name=sphere_ellipsoid1}
+local g = graph3d:new{viewdir={100,80},bbox=false, bg="lightgray"}
+local S = sphere(Origin, 3, 30,30)
+local a = math.sqrt(7/20)
+local P1 = {Origin, M(1,0,a)}
+local P2 = {Origin, M(1,0,-a)} -- planes to cut the sphere
+local S1, S2 = cutfacet(S,P1)
+S1 = cutfacet(S1,P2)
+S2 = cutfacet(S2,{Origin,-P2[2]})
+S1 = g:Classifyfacet(S1) -- only visible facets
+S2 = g:Classifyfacet(S2)
+local B1, B2 = border(S1), border(S2)
+local b1, b2 = g:Proj3d(B1)[1], g:Proj3d(B2)[1]
+table.insert(b2,2,"m")
+local chem = concat(b1,"l",b2,"l") -- Outline of the visible part of the sphere
+-- drawing
+g:Savematrix()
+g:Setmatrix3d( {Origin, 2*vecI, 3*vecJ, 4*vecK} )
+g:Dsphere(Origin,1,{color="Crimson", mode=mBorder}) -- ellipsoid
+g:Restorematrix()
+g:Beginclip(chem)
+g:Dsphere(Origin, 3,{color = "Orange",mode=mBorder}) --to get the correct shading
+g:Endclip()
+g:Dpath(chem)
+g:Dpolyline3d({{3*vecI,4*vecI},{3*vecJ,6*vecJ},{4*vecK,5*vecK}}, "line width=0.8pt,-stealth")
+g:Dlabel3d("$x$", 4*vecI,{pos="W"}, "$y$",6*vecJ,{pos="S"}, "$z$",5*vecK,{pos="N"})
+-- hidden part
+g:Dpolyline3d({{Origin,4*vecI},{Origin,6*vecJ},{Origin,5*vecK}}, "dashed")
+g:Linestyle("dotted")
+g:Dsphere(Origin,2.99,{mode=mBorder})
+g:Dcircle3d(Origin,3,P1[2]); g:Dcircle3d(Origin,3,P2[2]) -- intersection
+g:Savematrix(); g:Setmatrix3d( {Origin, 2*vecI, 3*vecJ, 4*vecK} )
+g:Dsphere(Origin,1,{mode=mBorder})
+g:Restorematrix()
+g:Show()
+\end{luadraw}
+\end{document}

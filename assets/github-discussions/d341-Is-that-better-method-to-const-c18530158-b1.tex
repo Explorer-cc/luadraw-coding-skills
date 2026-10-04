@@ -1,0 +1,35 @@
+% source: https://github.com/pfradin/luadraw/discussions/341#discussioncomment-18530158 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=sphere}
+    local ld = luadraw
+    local pt3d, cpx = ld.pt3d, ld.cpx
+    local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+    local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local g = ld.graph3d:new{
+        window3d = {-5,5,-5,5,-5,5},
+        window = {-5,5,-5,5},
+        -- adjust2d = true, 
+        viewdir = {0,78}
+    }
+    require 'luadraw_spherical'
+    local sM = ld.sM
+    ld.Hiddenlines = true;ld.Hiddenlinestyle = "dashed"
+    g:Define_sphere{ color = "", edgewidth=8, edgecolor="black" }
+    local phi1, phi2 = 75, 45
+    local A,B,C = sM(90,phi1), sM(-140,phi1),sM(-30,phi1)
+    local A1,B1,C1 = sM(90,phi2), sM(-140,phi2),sM(-30,phi2)
+    local P = ld.facet2poly( ld.cvx_hull3d({A,B,C,A1,B1,C1}) )
+
+    g:DScircle({Origin, vecK});
+    g:DScircle({A, vecK});
+    g:Dpoly(P,{color="violet!30!white",mode=ld.mFlatHidden, edgewidth=8})
+    g:DScircle({A1, vecK})
+    g:Dspherical()
+    g:Dballdots3d({Origin,A,A1,B,B1,C,C1},"red")
+    g:Show()
+\end{luadraw}
+\end{document}

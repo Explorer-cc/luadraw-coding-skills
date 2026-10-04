@@ -1,0 +1,4 @@
+# source: https://github.com/pfradin/luadraw/discussions/325#discussioncomment-18292587 (pfradin, block 2)
+74.572957064724
+119.36714668973
+82.695716811638

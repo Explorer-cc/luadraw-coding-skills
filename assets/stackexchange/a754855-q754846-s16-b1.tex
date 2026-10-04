@@ -1,0 +1,19 @@
+% source: https://tex.stackexchange.com/a/754855 (question 754846, score 16, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/754846/how-can-i-draw-a-filled-plane-using-tikz-closedcycle
+\begin{document}
+\begin{luadraw}{name=projections}
+local g = graph3d:new{ window3d={0,10,0,10,0,10}, window={-6.5,9,-8,9},bbox=false,bg="Beige", size={12,12}}
+require 'luadraw_polyhedrons'
+
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray"})
+local T,S,A,F1 = small_stellated_dodecahedron(M(5,5,5),M(5,5,9),true)
+g:Ddots3d( concat(pxy(S), pxz(S), pyz(S)), "darkgray!50") -- projection of the vertices
+g:Dpolyline3d( concat(pxy(F1), pxz(F1), pyz(F1)), true, "draw=none,fill=darkgray!50") -- projection of the facets
+g:Dscene3d( g:addFacet(F1,{color="Crimson"}), g:addPolyline(A, {color="Gold"}), g:addDots(S) ) -- polyhedron
+g:Show()
+\end{luadraw}
+\end{document}

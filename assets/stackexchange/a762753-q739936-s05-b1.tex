@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/762753 (question 739936, score 5, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/739936/fill-area-between-hyperbola-and-line-with-pgfplots
+\begin{document}
+\begin{luadraw}{name=fill}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{window={-1, 5, -2, 4}}  
+require 'luadraw_decorations'
+g:Daxes({0,1,1}, {grid=true, gridstyle="dashed", arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(8)
+local d = ld.lineEq(4,-1,-11) -- 4x-y-11=0
+local C = ld.parametric( function(t) return 2*Z(math.cosh(t),math.sinh(t)) end, -2,2)
+local S = ld.cutpolyline(C, d)
+g:Dpolyline(S,"draw=none,fill=green,fill opacity=0.6")
+g:Dpolyline(C, {draw_options="violet",label="$C$", anchor=Z(2,1), pos="N"})
+g:Dline(d, {draw_options="blue",label="$d$", anchor1d=0.9, pos="W"})
+g:Show()
+\end{luadraw}
+\end{document}

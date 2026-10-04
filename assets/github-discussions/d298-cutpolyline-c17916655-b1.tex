@@ -1,0 +1,72 @@
+% source: https://github.com/pfradin/luadraw/discussions/298#discussioncomment-17916655 (pfradin, block 1)
+\documentclass[]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+local function compile(expr)
+-- returns the function defined by the string expr
+    return assert(load(
+        "return function(x,y,z) return " .. expr .. " end",
+        "expression",
+        "t" -- text only
+    ))()
+end
+
+local ld = luadraw
+function ld.constraint(expr) 
+-- expr = "a*x+b*y<c" or "a*x+b*y>c"
+-- returns a line
+    local pos = string.find(expr,"<")
+    local sg = "<"
+    if pos == nil then 
+        pos = string.find(expr,">")
+        if pos == nil then return end
+        sg = ">"
+    end
+    local pre = string.sub(expr,1,pos-1)
+    local post = string.sub(expr,pos+1,#expr)
+    local f = compile(pre.."-z*("..post..")")
+    local a, b, c = f(1,0,0), f(0,1,0), f(0,0,1)
+    return ld.lineEq(a,b,c,sg)
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=linear_prog}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5}, size={10,10},margin={0,0,0,0}}
+
+function ld.graph:Dconstraints(constraints, options)
+-- constraints = list of strings as 'a*x+b*y<c' or 'a*x+b*y>c'
+    options = options or {}
+    local lines = options.lines or false -- to draw the lines or not
+    local draw_options = options.draw_options or ""  --options for the solution
+    local line_options = options.line_options or "" -- options for the lines
+    local outside = options.outside or false
+    local P, D = self:Box2d()
+    local L = {}
+    for _, expr in ipairs(constraints) do
+        D = ld.constraint(expr)
+        table.insert(L,D)
+        P = ld.cutpolyline(P,D,true)
+    end
+    if outside then
+        g:Beginclip( ld.polyline2path(P), true)
+            self:Dpolyline(g:Box2d(),true,draw_options)
+        g:Endclip()
+    else
+        self:Dpolyline(P,true,draw_options)
+    end
+    if lines then 
+        for _,D in ipairs(L) do self:Dline(D, line_options) end
+    end
+end
+
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+g:Dconstraints({'x-y>0', 'x<math.pi', '-0.25*x+y>-3'}, 
+    {lines=true, outside=true, draw_options='draw=none,fill=red!30,fill opacity=0.6'})
+g:Show()
+\end{luadraw}
+\end{document}

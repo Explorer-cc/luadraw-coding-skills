@@ -1,0 +1,222 @@
+% source: https://github.com/pfradin/luadraw/discussions/298#discussioncomment-18091172 (pfradin, block 1)
+\documentclass[12pt,a4paper]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage[utf8]{vietnam}
+%\usepackage[vietnamese]{babel}
+\usetikzlibrary {patterns,patterns.meta}
+\usepackage{fourier-otf}
+\usepackage{float}
+\usepackage[left=2cm,right=2 cm,top=2cm,bottom=2cm]{geometry} 
+\usepackage{xintfrac}
+
+\begin{luacode*}
+function luadraw.graph.interval(self, x1, x2, y, left, right, options)
+    local ld = luadraw
+    local cpx = ld.cpx
+    local Z = cpx.Z
+    local wd = 0.25
+    local inf = math.huge
+    
+    options = options or {}
+    local legend = options.legend or ""
+    local labelx1 = options.leftlabel or x1
+    local labelx2 = options.rightlabel or x2
+    local pattern = options.pattern or "pattern=north east lines,pattern color=gray"
+    local u1,u2,v1,v2 = table.unpack( self:Getview() )
+    local dx = 0.25/self.Xscale
+    
+    left = "$\\mathbf{"..left.."}$"
+    right = "$\\mathbf{"..right.."}$"
+    
+    if x1 > x2 then x1, x2 = x2, x1 end
+    if x1 == -inf then x1 = u1 end
+    if x2 == inf then x2 = u2 end
+    
+    if x1 > u1 then
+        self:Drectangle(Z(u1,y-wd/2), Z(x1,y+wd/2), "draw=none,"..pattern)
+        self:Dlabel(left, Z(x1,y), {}, "$"..labelx1.."$", Z(x1,y), {pos="S",dist=0.1})
+    end
+    if x2 < u2 then
+        self:Drectangle(Z(x2,y-wd/2), Z(u2-dx,y+wd/2), "draw=none,"..pattern)
+        self:Dlabel(right, Z(x2,y), {}, "$"..labelx2.."$", Z(x2,y), {pos="S",dist=0.1})
+    end
+    self:Dlabel(legend, Z((x1+x2)/2,y), {pos="N"})
+    self:Dline({Z(x1,y),1}, "thick,-Stealth")
+end
+\end{luacode*}
+
+
+\begin{luacode*}
+local function compile(expr)
+-- returns the function defined by the string expr
+    return assert(load(
+        "return function(x,y,z) return " .. expr .. " end",
+        "expression",
+        "t" -- text only
+    ))()
+end
+
+local ld = luadraw
+local cpx = ld.cpx
+
+function ld.constraint(expr) 
+-- expr = "a*x+b*y<c" or "a*x+b*y>c"
+-- returns a line
+    local pos = string.find(expr,"<")
+    local sg = ">"
+    if pos == nil then 
+        pos = string.find(expr,">")
+        if pos == nil then return end
+        sg = "<"
+    end
+    local pre = string.sub(expr,1,pos-1)
+    local post = string.sub(expr,pos+1,#expr)
+    local f = compile(pre.."-z*("..post..")")
+    local a, b, c = f(1,0,0), f(0,1,0), f(0,0,1)
+    return ld.lineEq(a,b,c,sg)
+end
+
+require 'luadraw_decorations'
+
+function ld.mypattern(angle, distance)
+    angle = angle or 0
+    distance = distance or 0.25 -- distance in centimeter
+    return "{Lines[angle="..angle..",distance="..distance.."cm]}"
+end
+
+function ld.graph:Dconstraints(...)
+-- g:Dconstraints(constraint1, options1, constraint2, options2, etc)
+-- constraint = string as 'a*x+b*y<c' or 'a*x+b*y>c'
+-- options = {pattern="", opacity=0.3, color=<default>, width=<default>, style=<default>,
+--      out = <solution>,
+--      label=, pos=, dir=, dist=, node_options= } ( decorations options )
+    local constaint, options = "", {}
+    local pattern, fill, label, color, width, style = "", "", "", self.param.linecolor, self.param.linewidth, self.param.linestyle 
+    local box = self:Box2d()
+    local poly = self:Box2d()
+    local n = select("#", ...)  -- number of arguments
+    local sol = (n%2 == 1) --solution needed in, last argument must be a table
+    local function aconstraint()
+        local D = ld.constraint(constraint)
+        pattern = options.pattern or pattern
+        color = options.color or color
+        width = options.width or width
+        style = options.style or style
+        opacity = options.opacity or 0.3
+        options.dir = options.dir or D[2]
+        options.pos = options.pos or "N"
+        if math.abs(cpx.arg(options.dir)) > math.pi/2 then 
+            options.dir = -options.dir
+            options.pos = "S" 
+        end
+        options.anchor1d = options.anchor1d or 0.5
+        options.node_options = options.node_options or color..",fill=white,fill opacity=0.8"
+        options.dist = options.dist or 0.05
+        local pos = string.find(constraint,"<")
+        if pos == nil then 
+            pos = string.find(constraint,">")
+        end
+        if pos ~= nil then
+            local pre = string.sub(constraint,1,pos-1)
+            local post = string.sub(constraint,pos+1,#constraint)
+            label = "$"..pre.."="..post.."$"  -- automatic label
+        else label = ""
+        end
+        options.label = options.label or label
+        local P = ld.cutpolyline(box,D,true)
+        if sol then
+            local P1, P2 = ld.cutpolyline(poly,D,true)
+            poly = P2
+        end
+        if pattern ~= "" then
+            self:Dpolyline(P,true, 'draw=none, pattern='..pattern..', pattern color='..color..'!50')
+        else
+            self:Dpolyline(P,true, 'draw=none, fill='..color..', fill opacity='..opacity)
+        end
+        options.draw_options = color..","..style..",line width=".. width/5
+        self:Dline(D,options)
+    end
+
+    for k, arg in ipairs{...} do
+        if k%2 == 1 then
+            if k == n then 
+                table.append(arg,poly)
+            else constraint = arg
+            end
+        else 
+            options = arg
+            aconstraint() 
+        end
+    end
+end
+
+-- print coord
+local function frac(val, max)  -- converts val to a fraction " sign A / B"
+    max = max or 10000 -- to stop if the process is too long
+    if val == nil then return "" end
+    local sg, den =  "", 1
+    if val < 0 then sg = "-"; val = -val end
+    local num = val
+    while (den <= max) and (math.abs(num-ld.nearest(num))>1e-8) do den = den+1; num = val*den end
+    if den > max then 
+        return sg..ld.strReal(val) -- failure
+    elseif den == 1 then
+        return sg..ld.nearest(num)
+    else
+        return sg..ld.nearest(num).."/"..den
+    end
+end
+
+function ld.graph:Dcoord2d(...)
+    local args = {}
+    local name, dot
+    for k, aux in ipairs{...} do
+        if k%3 == 1 then
+            name = aux
+        elseif k%3 == 2 then
+            dot = aux
+        else
+            table.append(args,{"$"..name.."(\\xintTeXsignedFrac {"..frac(dot.re).."},\\xintTeXsignedFrac {"..frac(dot.im).."})$", dot, aux})
+        end
+    end
+    self:Dlabel(table.unpack(args))
+end
+\end{luacode*}
+
+
+\begin{document}
+\begin{figure}[H]
+  \centering
+\begin{luadraw}{name=linear_prog7}
+local ld = luadraw
+local Z = ld.cpx.Z
+
+local g = ld.graph:new{window={-2,10,-2,8}, size={15,15},margin=0.5}
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+local function coord(A)
+    return "("..ld.strReal(A.re,2)..","..ld.strReal(A.im,2)..")"
+end
+local sol = {}
+g:Dconstraints(
+'x>0', {color="green", label="", pattern=ld.mypattern(30)},
+'y>0', {color="green", ld.mypattern(-60),label=""},
+     '12*x+2*y>23', {color="purple", label="$12x+2y=23$", pattern=ld.mypattern(30),anchor1d=0.6},
+ '6*x+20*y>59', {color="orange", ld.mypattern(-60),label="$6x+20y=59$"},
+'18*x+22*y< 139', {color="blue", pattern=ld.mypattern(30),label="$18x+22y=139$",anchor1d=0.5},
+    sol
+    )
+g:Ddots(sol) -- vertices of the polygon
+g:Dpolyline(sol,true, {draw_options='draw=none,fill=cyan,fill opacity=0.5'})
+local pts = sol[1] 
+local A, B, C = pts[1], pts[2], pts[3]
+g:Dcoord2d(
+    "A", A, {pos="W"},
+    "B", B, {pos="SW"},
+    "C", C, {pos="NE"}
+)
+g:Show()
+\end{luadraw}
+  \caption{}
+\end{figure}
+\end{document}

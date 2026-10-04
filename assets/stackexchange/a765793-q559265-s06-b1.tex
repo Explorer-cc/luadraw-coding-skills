@@ -1,0 +1,38 @@
+% source: https://tex.stackexchange.com/a/765793 (question 559265, score 6, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+%https://tex.stackexchange.com/a/765786
+\begin{luadraw}{name=klein-bottle}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local pi, cos, sin = math.pi, math.cos, math.sin
+
+local g = ld.graph3d:new{window={-12,15,-18,20}, viewdir={60,100}, size={12,12}, bg="lightgray" }
+require 'luadraw_povray'
+
+local function f(u,v)
+    local r = 4*(1-cos(u)/2)
+    local x, z
+    if u < pi then
+        x = 6*cos(u)*(1+sin(u))+r*cos(u)*cos(v)
+        z = 16*sin(u)+r*sin(u)*cos(v)
+    else
+        x = 6*cos(u)*(1+sin(u))-r*cos(v)
+        z = 16*sin(u)
+    end
+    return M(x,-r*sin(v),z)
+end
+
+g:Pov_new()
+g:Pov_surface(f,0,2*pi,0,2*pi,{grid={64,64}, opacity=0.8,
+   usepalette={ld.palRainbow,"z",{-16,21}}, shadow=false})
+g:Pov_exec()
+g:Pov_show()
+g:Show()
+\end{luadraw}
+\end{document}

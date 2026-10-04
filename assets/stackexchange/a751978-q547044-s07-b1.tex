@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/751978 (question 547044, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/547044/plotting-function-%e2%84%9d%c2%b2-%e2%86%92%e2%84%9d-with-pole-at-0-0-smoothly
+\begin{document}
+\begin{luadraw}{name=pole_at_0_0}
+local ld = luadraw
+local Mc, M = ld.pt3d.Mc, ld.pt3d.M
+local g = ld.graph3d:new{ window3d={-1,1,-1,1,-0.75,0.75}, adjust2d=true,
+    bbox=false,viewdir={"central",-30,45}, size={12,12}}
+require 'luadraw_pdfliteral'
+local cos, sin, pi = math.cos, math.sin, math.pi
+g:Labelsize("footnotesize")
+local p = function(r,t) return Mc(r,t,sin(t)*cos(t)) end
+local s = ld.surface(p,1e-3,2,-pi,pi,{20,151})
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="lightgray", drawbox=true,
+    zgradlimits={-0.5,0.5}, zstep=0.5, zlabelsep=0, zlabelstyle="W"})
+g:Dliteralfacet(s,{usepalette={ld.palRainbow,"z"},clip=true, mode=ld.mShadedOnly, opacity=0.9})
+g:Ddots3d(M(0,0,0), "white"); g:Dlabel3d("$O$",M(0,0,0),{pos="E", node_options="white"})
+g:Show() 
+\end{luadraw}
+\end{document}

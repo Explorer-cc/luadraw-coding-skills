@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/766897 (question 685483, score 2, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/685483/drawing-six-hemispheres?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=six_hemisphere, exec=true, auto=false}
+local ld = luadraw
+local cpx = ld.cpx
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-5,5,-5,5}, size={12,12}, viewdir={30,70} }
+local color = "orange"
+local O, r = Origin, 1.5 -- center, radius
+local function hemisphere(V, label, anchor, pos) -- V = vector
+    local P = {O,V} -- plane
+    local test = (g:Cosine_incidence(V,Origin) > 0)
+    local hiddenstyle = ""
+    if test then hiddenstyle = "dotted" end
+    g:Dcut_sphere(O, 1.5, P, {color=color, mode=ld.mBorder, edgestyle="solid", visibletrace="line width=0.2,solid", hiddentrace=hiddenstyle})
+    if not test then -- the section is visible
+        g:Dcircle3d(O, 1.5, V, "line width=0.2,left color="..color.."!80!black,right color="..color.."!5")
+    end
+    g:Dlabel(label, anchor, {pos=pos})
+end
+local H, V = 2.25, 3.25*cpx.I
+g:Shift(-H+V); hemisphere(vecK, "$z>0$",-2,"W"); g:Shift(2*H); hemisphere(-vecK, "$z<0$",2,"E")
+g:Shift(-H-V)
+g:Shift(-H); hemisphere(vecI,"$x>0$",-2,"W"); g:Shift(2*H); hemisphere(-vecI,"$x<0$",2,"E")
+g:Shift(-H-V)
+g:Shift(-H); hemisphere(vecJ,"$y>0$",-2,"W"); g:Shift(2*H); hemisphere(-vecJ,"$y<0$",2,"E")
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,28 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-7-Adding-Your-Own-Methods.tex (demo: Using the new methods)
+\begin{luadraw}{name=fields}
+require "luadraw_fields" -- import of new methods
+local ld = luadraw
+local g = ld.graph:new{window={0,21,0,10},size={16,10}}
+local i = ld.cpx.I
+g:Labelsize("footnotesize")
+local f = function(x,y) return {x-x*y,-y+x*y} end -- Volterra
+local F = function(x,y) return x^2+y^2+x*y-6 end
+local H = function(t,Y) return f(Y[1],Y[2]) end
+-- top
+g:Saveattr();g:Viewport(0,10,0,10);g:Coordsystem(-5,5,-5,5)
+g:Dgradbox({-4.5-4.5*i,4.5+4.5*i,1,1}, {originloc=0,originnum={0,0},grid=true,
+    title="gradient field, $f(x,y)=x^2+y^2+xy-6$"})
+g:Arrows("->"); g:Lineoptions(nil,"blue",6)
+g:Dgradientfield(F,{view={-4,4,-4,4},grid={15,15},long=0.5})
+g:Arrows("-"); g:Lineoptions(nil,"Crimson",12); g:Dimplicit(F, {view={-4,4,-4,4}})
+g:Restoreattr()
+-- bottom
+g:Saveattr();g:Viewport(11,21,0,10);g:Coordsystem(-5,5,-5,5)
+g:Dgradbox({-4.5-4.5*i,4.5+4.5*i,1,1}, {originloc=0,originnum={0,0},grid=true,
+    title="vector field, $f(x,y)=(x-xy,-y+xy)$"})
+g:Arrows("->"); g:Lineoptions(nil,"blue",6); g:Dvectorfield(f,{view={-4,4,-4,4}})
+g:Arrows("-");g:Lineoptions(nil,"Crimson",12)
+g:Dodesolve(H,0,{2,3},{t={0,50},out={2,3},nbdots=250})
+g:Restoreattr()
+g:Show()
+\end{luadraw}

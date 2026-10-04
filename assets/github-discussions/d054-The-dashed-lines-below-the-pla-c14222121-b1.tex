@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222121 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=truncated-pyramid}
+local g = graph3d:new{window={-5,5,-2,5}, viewdir={-15,75}, size={10,10}};
+
+local truncated_pyrmamid = function(R,r,h,n)
+    local b1 = polyreg(0,R,n)
+    local b2 = polyreg(0,r,n)
+    local base1 = map(toPoint3d,b1)
+    local base2 = shift3d( map(toPoint3d,b2), h*vecK )
+    local rep = {}
+    rep.vertices = concat(base1,base2)
+    rep.facets = { range(n,1,-1), range(n+1,2*n)}
+        for k = 1, n-1 do
+        table.insert(rep.facets,{k,k+1,n+k+1,n+k})
+    end
+    table.insert(rep.facets,{n,1,n+1,2*n})
+    return rep
+end
+
+local T = truncated_pyrmamid(3,2,4,6)
+g:Dpoly(T, {mode=0})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Interpolation curve with imposed tangent vectors)
+\begin{luadraw}{name=tcurve}
+local ld = luadraw
+local g = ld.graph:new{window={-0.5,10.5,-0.5,6.5},size={10,10,0}}
+local i = ld.cpx.I
+local L = {
+1+4*i,{2,-20},
+2+3*i,{2,-70},
+4+i/2,{3,0},
+6+3*i,{4,15},
+8+6*i,{4,0,4,-90}, -- angular point
+10+i,{3,-15}}
+g:Dgrid({0,10+6*i},{gridstyle="dashed"})
+g:Daxes(nil,{limits={{0,10},{0,6}},originpos={"center","center"}, arrows="->"})
+g:Dtcurve(L,{showdots=true,draw_options="line width=0.8pt,red"})
+g:Show()
+\end{luadraw}

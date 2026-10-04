@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/72#discussioncomment-14330989 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/171169/how-to-draw-a-simple-cone-with-height-and-radius-with-tikz?noredirect=1&lq=1
+\begin{luadraw}{name=special_cone2}
+local g = graph3d:new{window={-2,4,-4,2},viewdir={120,70},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local a = 3
+local O,A,B,C=M(0,0,0), M(a,0,0),M(0,a,0),M(0,0,a)
+local I = (A+B+C)/3
+local R = pt3d.abs(I-A)
+local C1 = cone(O,-2*I,2*R,100)
+local I1 = g:Intersection3d(C1,{-I,-I})
+g:Dcone(O,-I,R,{color="orange",hiddenstyle="noline"}) 
+g:Dedges(I1,{hidden=true,color="red",width=6})
+g:Show()
+\end{luadraw}
+\end{document}

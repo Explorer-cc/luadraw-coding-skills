@@ -1,0 +1,53 @@
+% source: https://tex.stackexchange.com/a/766885 (question 212356, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/212356/draw-closed-section-of-sphere-using-pgfplots?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=eighth_sphere}
+local ld = luadraw
+local cpx = ld.cpx
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local Ms, pi = pt3d.Ms, math.pi
+local g = ld.graph3d:new{ window={-4,6,-2,4}, size={12,12} }
+local R = 3
+local O, A, B, C = Origin, R*vecK, R*vecI, R*vecJ
+local S = ld.surface( function(u,v) return Ms(R,u,v) end, pi/2,0,0,pi/2,{25,25})
+local function facet_color(F)
+    return "fill="..g:Adjust_color(F, "blue!50!white",1,true)..",fill opacity=0.7"
+end
+local function draw(theta,phi)
+    g:Setviewdir(theta,phhi)
+    local Sv, Sh = g:Classifyfacet(S)
+    local path = { {A,O,C,R,1,"ca",O,"l","cl"}, {C,O,B,R,1,"ca",O,"l","cl"}, {B,O,A,R,1,"ca",O,"l","cl"} }
+    local sides = g:Sortfacet( {{A,C,O,1}, {O,C,B,2}, {A,O,B,3}, {A,B,C,4}} )
+    for _,F in ipairs(sides) do
+        local k = table.remove(F)
+        if k == 4 then
+            g:Dpolyline3d( ld.border(Sh), facet_color(F))
+            g:Beginclip( ld.polyline2path3d( ld.border(Sv)) )
+                g:Dsphere(O, R, {color="blue", opacity=0.7, mode=ld.mBorder})
+            g:Endclip()
+        else
+            g:Dpath3d(path[k], facet_color(F))
+            if k == 1 then 
+                g:Dpolyline3d( {{O,4*vecJ}, {O,4*vecK}}, "thick, -stealth")
+                g:Dlabel3d("$y$",4.25*vecJ,{}, "$z$", 4.5*vecK,{}, "$1$",M(0,R,-0.25),{},
+                    "$1$",M(-0.25,0,R),{},"$O$",M(0,0,-0.25),{})
+                g:Dballdots3d({O,R*vecJ, R*vecK},nil,0.75)
+            elseif k == 2 then 
+                g:Dpolyline3d({O,4*vecI}, "thick, -stealth")
+                g:Dlabel3d("$x$",4.25*vecI,{}, "$1$",M(R,0,-0.25),{})
+                g:Dballdots3d(R*vecI,nil,0.75)
+            end
+        end
+    end
+end
+--drawing
+draw(120,60); g:Shift(2); draw(-30,60)
+g:Show()
+\end{luadraw}
+\end{document}

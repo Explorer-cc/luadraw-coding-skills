@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/764407 (question 332171, score 7, block 1)
+\documentclass[tikz]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/332171/draw-a-colored-sphere-in-tikz
+\begin{document}
+\begin{luadraw}{name=colored_spheres}
+local ld = luadraw
+local Z, M, Ms = ld.cpx.Z, ld.pt3d.M, ld.pt3d.Ms
+local g = ld.graph3d:new{ size={10,10}, bg="gray" }
+require 'luadraw_spherical'
+
+local function dpshere(pos2d,r,theta,phi,colors) -- theta in [0,360], phi in [0,180]
+    colors = colors or {'Crimson','blue','Gold'}
+    local function options(fill)
+        return {fill=fill, style="noline", fillopacity=0.5}
+    end
+    g:Define_sphere({radius=r, color='white'})
+    local A, B, C = ld.sM(0,0), ld.sM(0,90), ld.sM(0,180)
+    local D, E = ld.sM(120,90), ld.sM(240,90)
+    g:Composematrix3d(ld.matrix3dof( function(A) return ld.rotateaxe3d(A,M(0,0,1), ld.sM(theta,phi)) end ))
+    g:DSfacet({A,B,C,D}, options(colors[1]))
+    g:DSfacet({A,D,C,E}, options(colors[2]))
+    g:DSfacet({A,E,C,B}, options(colors[3]))
+    g:Shift(pos2d)
+    g:Dspherical()
+    g:IDmatrix3d()
+    g:Shift(-pos2d)
+end
+
+dpshere(Z(-3,3),2,0,0); dpshere(Z(3,3),1.5,0,100, {'ForestGreen','SteelBlue','Pink'})
+dpshere(Z(-3,-3),1,90,70,{'Navy','Brown','orange'}); 
+dpshere(Z(3,-3),1.75,210,90,ld.getpalette(ld.palRainbow,3))
+g:Show()
+\end{luadraw}
+\end{document}

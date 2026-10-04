@@ -1,0 +1,91 @@
+% source: https://github.com/pfradin/luadraw/discussions/337#discussioncomment-18501273 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+function ld.cutfacet2(L,f,sg)
+-- L is a list of facets
+-- f = (x,y,z) -> f(x,y,z) in R
+-- sg = ">" or "<"
+-- the part satisfying f>0 or f<0 is kept
+-- returns two lists of facets, the first one satisfying f>0 if sg=">" or f<0 if sg="<"
+    if pt3d.isPoint3d(L[1]) then L = {L} end
+    if L.vertices ~= nil then -- polyèdre
+        L = ld.poly2facet(L)
+    end
+    local function test(A)
+        local r = f(A.x,A.y,A.z)
+        if sg== ">" then return r
+        else return -r
+        end
+    end
+    local function solve(A,fa,B,fb)
+        local a, b, c, fc = A, B
+        k = 0
+        while (pt3d.abs2(b-a)>1e-12) or (k<=50) do
+            c = (a+b)/2; fc = test(c)
+            if fa*fc < 0 then b = c
+            else a = c; fa = fc
+            end
+            k = k + 1 
+        end
+        return c
+    end
+    local res, res2 = {}, {}
+    for _,F in ipairs(L) do
+        local nb, aux, aux2 = #F, {}, {}
+        local A1, B1 = nil, F[1]
+        local p1, p2, I = nil, test(B1)
+        if math.abs(p2)<1e-8 then p2 = 0 end
+        for k = 2, nb+1 do
+            if k == nb+1 then k = 1 end -- on ferme la facette
+            A1 = B1; p1 = p2; B1 = F[k]; p2 = test(B1)
+            if math.abs(p2) < 1e-8 then p2 = 0 end
+            if (p1*p2 < 0) or (p2 == 0) then
+                if p2 == 0 then I = B1 else I = solve(A1,p1,B1,p2) end
+                if I ~= nil then 
+                    table.insert(aux,I) ; table.insert(aux2,I)
+                end
+            end
+            if (p2 > 0) and (p1 ~= nil) then table.insert(aux,B1) end
+            if (p2 < 0) and (p1 ~= nil) then table.insert(aux2,B1) end
+        end
+        if #aux>2 then table.insert(res,aux) end
+        if #aux2>2 then table.insert(res2,aux2) end
+    end
+    return res, res2 -- returns two list of facets
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=sphere_cut_by_tube}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local cos, sin, pi = math.cos, math.sin, math.pi
+local g = ld.graph3d:new{ window={-4,5,-6,4}, viewdir={-30,65}, size={12,12}}
+require 'luadraw_spherical'
+local r, R = 3, 4
+local r2 = r^2
+local f = function(x,y,z) return pt3d.abs2(M(x,y,z))-r2 end
+local L = ld.parametric3d( function(t) return R*vecI+R*cos(t)*vecI+3*sin(t)*vecK end, -pi,pi,35,false,0)[1]
+local T = ld.line2tube(L, 1, {nbfacet=20, close=true})
+local T1, T2 = ld.cutfacet2(T,f,">")
+local B = ld.border(T2)
+local I, r1, n = table.unpack( g:Sphere_outline(Origin,r).data )
+T1,T3 = ld.cutfacet(T1, {I,n})
+
+g:Dfacet(T2, {color="gray", opacity=0.6, mode=ld.mShadedOnly}) --inside sphere
+g:Dfacet(T3, {color="gray", opacity=0.6, mode=ld.mShadedOnly}) --outside sphere but hidden
+g:Define_sphere({radius=r, opacity=0.7})
+g:DSregion(B[1], {fill="DarkGreen", fillopacity=0.7, color="red", width=8}) -- intersection1
+g:DSregion(B[2], {fill="DarkGreen", fillopacity=0.7, color="red", width=8}) -- intersection2
+g:Dspherical()
+g:Dfacet(T1, {color="gray", opacity=0.7, mode=ld.mShadedOnly}) -- outside
+g:Show()
+\end{luadraw}
+\end{document}

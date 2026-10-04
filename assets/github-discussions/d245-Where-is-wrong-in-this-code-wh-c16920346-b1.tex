@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16920346 (pfradin, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/699986/draw-shaded-region-using-tikz-and-pgfplots
+\begin{document}
+\begin{luadraw}{name=parametric}
+local ld = luadraw
+local cpx = ld.cpx
+local sqrt = math.sqrt
+local Z, i = cpx.Z, cpx.I
+local xmin, xmax, ymin, ymax = -6, 6, -4, 4
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax}}  
+g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(8)
+local d = ld.lineEq(0,1,0)
+local C = ld.parametric( function(t) return Z(5*math.sin(t), 25/8*math.sin(2*t)) end, 0, 2*math.pi)
+local S1, S2 = ld.cutpolyline(C, d)
+g:Dpolyline(S1,"draw=none,fill=green,fill opacity=0.6")
+g:Dpolyline(S2,"draw=none,fill=yellow,fill opacity=0.6")
+g:Dpolyline(C, "violet"); g:Dline(d, "blue")
+g:Dlabel("$\\mathcal{(C)}$", Z(3.5,3.5),{pos="W"})
+g:Show()
+\end{luadraw}
+\end{document} 

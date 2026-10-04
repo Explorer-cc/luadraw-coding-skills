@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/752224 (question 752218, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%hhttps://tex.stackexchange.com/questions/752218/tessellating-a-surface-using-maxima-minima-aware-orthogonal-trajectories-query
+\begin{document}
+\begin{luadraw}{name=tessellating-a-surface}
+local g = graph3d:new{ window3d={-5,5,-10,10,-1.5,1.5}, window={-11,11,-5,5}, size={10,10}}
+local sin, sqrt = math.sin, math.sqrt
+
+local f = function(u,v)
+     return  M(u,v, sin(5*sqrt((u)^2+(v-5)^2))/sqrt(u^2+(v-5)^2)+
+                       sin(5*sqrt(u^2+(v+5)^2))/sqrt(u^2+(v+5)^2) )
+end
+
+local s = surface(f,-5,0,-10,0,{25,50})
+s = concat(s, sym3d(reverse_face_orientation(s),{Origin,vecI})) --symmetry u <-> -u
+s = concat(s, sym3d(reverse_face_orientation(s),{Origin,vecJ})) --symmetry v <-> -v
+g:Dfacet(s)
+
+g:Show()
+\end{luadraw}
+\end{document}

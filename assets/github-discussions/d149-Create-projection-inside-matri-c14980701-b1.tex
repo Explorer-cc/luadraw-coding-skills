@@ -1,0 +1,41 @@
+% source: https://github.com/pfradin/luadraw/discussions/149#discussioncomment-14980701 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fouriernc}
+\begin{document}
+%
+\begin{luadraw}{name=matrix}
+local g = graph3d:new{window={-2,5,-2.5,4}, bbox=false,viewdir={40,60},size={10,10}}
+local mat1 = {{2,0,2,1},{3,1,9,6},{0,3,0,1},{6,5,2,4}}
+local mat2 = {{2,-9,-4},{-1,1,8},{-5,1,-4}}
+local A, B, u, v = M(3,0,0), M(-3,0,0), vecJ, vecK
+--grid B
+g:Dlabel3d("Result",B+1.5*u+3.5*v, {dir={u,v}})
+g:Dpolyline3d( {B+2*u+v,B+3*u+v,B+3*u+2*v,B+2*u+2*v}, true, "fill=yellow, draw=none")
+g:Dpolyline3d({B,B+3*u,B+3*u+3*v,B+3*v},true,"blue,line width=0.8pt")
+for k = 1,2 do
+    g:Dpolyline3d({{B+k*u,B+k*u+3*v},{B+k*v,B+k*v+3*u}}, "blue,line width=0.4pt")
+end
+for k = 1, 3 do
+    for i = 1, 3 do
+        g:Dlabel3d( "$"..mat2[4-k][i].."$",B+(k-0.5)*v+(i-0.5)*u,{dir={u,v}})
+    end
+end
+g:Dpolyline3d({{B+2*u+v,A+2*u+v},{B+3*u+v,A+4*u+v}, {B+3*u+2*v,A+4*u+3*v}, {B+2*u+2*v,A+2*u+3*v}},"red, line width=0.4pt")
+--grid A
+g:Dlabel3d("Original",A+2*u+4.5*v, {dir={u,v}})
+g:Dpolyline3d( {A+2*u+v,A+4*u+v,A+4*u+3*v,A+2*u+3*v}, true, "fill=yellow, draw=none")
+g:Dpolyline3d({A,A+4*u,A+4*u+4*v,A+4*v},true,"blue,line width=0.8pt")
+for k = 1,3 do
+    g:Dpolyline3d({{A+k*u,A+k*u+4*v},{A+k*v,A+k*v+4*u}}, "blue,line width=0.4pt")
+end
+for k = 1, 4 do
+    for i = 1, 4 do
+        g:Dlabel3d( "$"..mat1[5-k][i].."$",A+(k-0.5)*v+(i-0.5)*u,{dir={u,v}})
+    end
+end
+g:Dpolyline3d({{B+2*u+v,A+2*u+v},{B+3*u+v,A+4*u+v}, {B+3*u+2*v,A+4*u+3*v}, {B+2*u+2*v,A+2*u+3*v}},"red,dotted, line width=0.4pt")
+g:Show()
+\end{luadraw}
+\end{document} 

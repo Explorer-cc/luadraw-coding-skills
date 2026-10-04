@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/752263 (question 301052, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/301052/drawing-a-tangent-from-a-point-outside-of-a-circle-to-it
+\begin{document}
+\begin{luadraw}{name=tangent_to_sphere }
+local g = graph3d:new{window={-4,5.5,-4,4},viewdir={30,60}, size={10,10}}
+require 'luadraw_spherical'
+Hiddenlinestyle = "dashed"
+local O, I = Origin, M(0,6,0)
+local S,S1 = {O, 3}, {(I+O)/2,pt3d.abs(I-O)/2}
+-- the circle of tangency is the intersection between spheres S and S1
+local C,r,n = interSS(S,S1) 
+local L = circle3d(C,r,n)[1] -- list of 3d points on the circle
+local dots, lines = {}, {}
+-- draw
+g:Define_sphere()
+g:DScircle({C,n},{color="red",hidden=true})
+for k = 1, math.floor(#L/4) do
+    local A = L[4*(k-1)+1]
+    if pt3d.dot(A-O,g.Normal) >0 then table.insert(dots,A) end -- visible points only
+    table.insert(lines,{I, 2*A-I})
+end
+g:DSpolyline(lines ,{color="gray"})
+g:Dspherical()
+g:Dseg3d({O,dots[1]},"darkgray,dashed"); g:Dangle3d(O,dots[1],I,0.2,"darkgray,dashed")
+g:Dballdots3d(dots,"gray",0.5)
+g:Ddots3d({O,I}); g:Dlabel3d("$I$",I,{pos="S"},"$O$",O,{})
+g:Show() 
+\end{luadraw}
+\end{document}

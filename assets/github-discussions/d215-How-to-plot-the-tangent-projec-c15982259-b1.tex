@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/215#discussioncomment-15982259 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=simple_projection}
+    local g = graph3d:new{
+        window3d={-10,10,-10,10,-10,10}, 
+        size={10,10}, adjust2d=true,
+        viewdir = perspective("xz",0.75,30)
+    }
+    local dist, ratio = 20, 0.65
+    local RC, RS = 5, 6
+    local Rc, Rs = RC * ratio, RS * ratio
+    local apex = (dist / (1-ratio) - 10)*vecJ
+    -- mathematical calculation of tangents to the truncated cone (not very simple)
+    -- We need to find the points of the cone for which the tangent plane contains the vector `g.Normal`
+    -- which is directed towards the observer.
+    local alpha = math.atan((RC-Rc)/dist)
+    local u = M(0,math.sin(alpha),math.cos(alpha)) -- vector orthogonal to the surface of the cone
+    local f = function(t) return pt3d.dot(rotate3d(u,t,{Origin,vecJ}), g.Normal) end
+    local I = solve(f,-180,180)
+    local t1, t2 = table.unpack(I)
+    local A1, A2 = rotate3d( M(0,-10,RC), t1, {Origin,vecJ}), rotate3d( M(0,-10,RC), t2, {Origin,vecJ})
+    local B1, B2 = table.unpack( scale3d({A1,A2},ratio,apex) )
+    
+    -- construction of the truncated pyramid
+    local Base = {M(RS,-10,RS),M(RS,-10,-RS),M(-RS,-10,-RS),M(-RS,-10,RS)}
+    local base = scale3d(Base,ratio,apex)
+    local pyramid = truncated_pyramid(Base, apex, 20, true)
+    
+    -- drawing
+    g:Dpolyline3d( {{A1,B1}, {A2,B2}}, "line width=.8pt,dotted") -- tangent lines
+    g:Dcircle3d(M(0,-10,0), RC, vecJ, "blue, line width=1.2pt, fill=blue!20")
+    g:Dcircle3d(M(0,10,0), Rc, vecJ, "Crimson, line width=1.5pt, fill=Crimson!20")
+    
+    g:Dpoly(pyramid, {mode=mWireframe, edgestyle="solid", edgewidth=6})
+    g:Dpolyline3d(Base, true, "blue, line width=1.2pt")
+    g:Dpolyline3d(base, true, "Crimson, line width=1.5pt")
+    g:Show()
+\end{luadraw}
+\end{document}

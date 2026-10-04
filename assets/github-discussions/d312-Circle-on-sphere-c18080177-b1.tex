@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/312#discussioncomment-18080177 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=3dobjects}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local a = 5 --angle in degrees
+local Origin,vecI,vecJ,vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window = {-1.5,1.5,-0.5,2.5}, size={12,12}, viewdir = {-a,90}}
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+g:Dsphere(vecK,1,{color="violet!50", mode=ld.mBorder})  --no equator
+local N = vecJ
+local A, B = table.unpack( g:Sphere_tangency(vecK,1,{vecK, N}) )
+g:Dpath3d({A,vecK,B,1,-1,N,"ca"})
+g:Dpath3d({A,vecK,B,1,1,N,"ca"},"dashed")
+local N = Ms(1,-a*ld.deg,a*ld.deg)
+local A, B = table.unpack( g:Sphere_tangency(vecK,1,{vecK, N}) )
+g:Dpath3d({A,vecK,B,1,-1,N,"ca"})
+g:Dpath3d({A,vecK,B,1,1,N,"ca"},"dashed")
+g:Dline3d({vecK,vecK}, 'red')
+g:Dline3d({vecK,vecJ}, 'red')
+g:Show()
+\end{luadraw}
+\end{document}

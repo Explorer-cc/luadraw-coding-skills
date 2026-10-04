@@ -1,0 +1,91 @@
+% source: https://github.com/pfradin/luadraw/discussions/254#discussioncomment-16942000 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage{kpfonts}
+\usepackage{animate}
+\begin{document}
+\begin{luacode*}
+local ld = luadraw
+local Z, Zp, pi, sin, cos = ld.cpx.Z, ld.cpx.Zp, math.pi, math.sin, math.cos
+local pal = ld.rainbow
+
+ld.nbimages = 73
+ld.defaultlegendsep = 0.05
+
+local g = ld.graph:new{window={-1.5, 6.8, -1.5, 1.5}, size={12, 4}} -- a single object g
+
+local function draw_frame(angle_deg)
+    local x0 = angle_deg * pi / 180
+    local y0 = sin(x0)
+
+    g:Daxes(
+        {0, pi/2, 1},
+        {
+            arrows = "-Stealth",
+            tickpos = {0, 0},
+            xyticks = {0.1, 0.1},
+            labelpos = {"bottom", "none"},
+            labelden = {2, 1},
+            labeltext = {"\\pi", ""},
+            legend = {"$x$", "$y$"},
+            legendpos = {0.98, 0.98}
+        }
+    )
+
+    local A = Z(1, 0)
+    local B = Z(cos(x0), sin(x0))
+    local T = Z(x0, y0)
+    local option1 = "draw=none,fill=pink,fill opacity=0.6"
+    local option2 = "draw=none,fill=cyan,fill opacity=0.6"
+    
+    local function Tpos(x)
+        if x <= pi/2 then return "NW"
+        elseif x <= pi then return "NE"
+        elseif x <= 3*pi/2 then return "SW"
+        else return "SE"
+        end
+    end
+
+    if x0>0 then 
+        g:Dwedge(A,0,B,1,1, option1) 
+        g:Darc(A,0,B,0.5,1,"-stealth")
+        g:Dlabel( "$x_0$", Zp(0.65, x0/2), {node_options="font=\\tiny"})
+    end
+    g:Ddomain1(sin,{x={0,x0}, draw_options=option2})
+    g:Dcircle({Z(0, 0), 1})
+    g:Dcartesian(sin, {x = {0, 2 * pi}, nbdots = 50, draw_options = "magenta,smooth"})
+    g:Dpolyline({Z(0, 0), B}, false, "thick,black")
+    g:Dpolyline({B, T, Z(x0, 0)}, false, "thick,densely dashed,black")
+    g:Ddots({T}, "draw=red,fill=red")
+    g:Dlabel(
+        "$A$", A, {pos = "SW"},
+        "$B$", 1.15*B, {pos = "center"},
+        -- method 1
+        --"$T(x_0,\\sin(x_0))$", T, {pos = (x0 < pi) and "NE" or "SW"},
+        -- method 2
+        "$T(x_0,\\sin(x_0))$", T, {pos = Tpos(x0), node_options="inner sep=1pt"},
+        -- method 3
+        --"$T(x_0,\\sin(x_0))$", Z(x0,1.25*y0), {},
+        "$x_0$", Z(x0, 0), {pos = ((x0<pi) and "S") or "N"}
+    )
+
+    g:Sendtotex()
+    g:Cleargraph()
+end
+
+function ld.makeframe(k)
+    local angle_deg = (k - 1) * 5
+    draw_frame(angle_deg)
+end
+\end{luacode*}
+
+\newcommand*\nb{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*\makeframe[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{animateinline}[poster=first,controls,loop]{8}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}
+\end{animateinline}
+
+\end{document}

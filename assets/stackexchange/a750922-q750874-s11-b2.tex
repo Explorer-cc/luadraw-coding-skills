@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/750922 (question 750874, score 11, block 2)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/750874/how-can-i-draw-a-simple-three-dimensional-coil/750897#750897
+\begin{document}
+\begin{luadraw}{name=2d_coil}
+local g = graph:new{size={10,10},bbox=false}
+local i = cpx.I
+g:Linewidth(8)
+
+function graph:Dcoil(A,B,r,n,draw_options)
+    local a, u = A, (B-A)/(2*n+4)
+    local v = -r*cpx.I*u/cpx.abs(u)
+    local front = {a,a,a+v,a+2*u+v,"b"}
+    local back = {} -- back
+    a = a+2*u
+    for k = 1, n do
+        insert(back, {a+v,"m",a+v+3*u,a-v+3*u,a+u-v,"b"})
+        insert(front,{a+u-v,"m",a-v-u,a-u+v,a+v+2*u,"b"})
+        a = a+2*u
+    end
+    insert(front,{a+v+2*u,a+2*u,a+2*u,"b"})
+    self:Dpath(back,draw_options)
+    self:Dpath(front,draw_options)
+    local w = (r+cpx.abs(B-A)/2)*v/r
+    self:Dpath({A,A-w,B-w,B,"b"},draw_options)
+end
+-- examples
+local a,b = i, 5*i
+g:Dcoil(a,b,1,8,"draw=white,double=black,double distance=0.8pt")
+a,b = -2-2*i, 4-4*i
+g:Dcoil(a,b,0.75,15,"draw=white,double=red,double distance=0.8pt")
+g:Show()            
+\end{luadraw}
+\end{document}

@@ -1,0 +1,59 @@
+% source: https://tex.stackexchange.com/a/764335 (question 386030, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/386030/how-to-draw-orbital-elements
+\begin{document}
+\begin{luadraw}{name=orbital_elements}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Z, Zp, M, Ms, pi = cpx.Z, cpx.Zp, pt3d.M, pt3d.Ms, math.pi
+local O, I, J, K = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+require 'luadraw_decorations'
+local g = ld.graph3d:new{ window3d={-6,6,-6,6,-5,5}, viewdir={40,60}, 
+    window={-9,9,-6,6}, size={12,12} }
+ld.Hiddenlinestyle = "dashed"
+local N = Ms(1, -30*ld.deg, 30*ld.deg)
+local V = pt3d.normalize(pt3d.prod(K,N))
+local U = pt3d.prod(V,N)
+local U1, V1 = table.unpack( ld.rotate3d({U,V}, 15, {O,N}) ) -- to rotate ellipse
+local P = g:Plane2facet({O,K}) -- equatorial plane
+local P2 = ld.rotateaxe3d(P,K,N) -- orbital plane
+local a, c = 4.5, 1
+local R = function(t) return (a^2-c^2)/(a-c*math.cos(t)) end
+local ellipse = function(t) 
+    local r = R(t)
+    return r*math.cos(t)*U1+r*math.sin(t)*V1
+end
+local E = ld.parametric3d( ellipse, 0,2*math.pi)
+local A, B, C = ellipse(pi), ellipse(5*pi/4), ellipse(0)
+local A1 = 6*pt3d.normalize( pt3d.prod(K,V) )
+local A2 = ld.proj3dO(A1,{O,N},K)
+-- drawing
+g:Dscene3d(
+    g:addFacet(P, {color="Pink!30!white", edge=true, contrast=0}),
+    g:addFacet(P2, {edge=true, contrast=0, opacity=0.8}),
+    g:addPolyline(E, {width=8, color="blue", hidden=true}),
+    g:addPolyline({A,C}, {color="blue", arrows=2, arrowscale=0.5, hidden=true}),
+    g:addAxes(O, {color="gray", arrows=1}), g:addDots(B), g:addDots(O,{scale=2})
+)
+g:Dline3d({O,V}, {draw_options="line width=0.6,dashed", clip=true, 
+    label="Line of nodes", anchor1d=1, pos='W', scale=0.75})
+g:Dpolyline3d({A1,O,A2}, 'gray,dashed')
+g:Dangle3d(V,O,A1,0.7,'gray,dashed'); g:Dangle3d(V,O,A2,0.65,'gray,dashed')
+g:Dpolyline3d({O,A}, "blue")
+g:Dpolyline3d({O,B}, {draw_options="blue", node_options="blue",label="$m$", anchor1d=1, pos="N"})
+g:Darc3d(I,O,V,2,1,{arc_options="orange,-stealth", node_options="orange",label="$\\Omega$"})
+g:Darc3d(V,O,A,2,1,{arc_options="blue,-stealth", label="$\\omega$", node_options="blue"})
+g:Darc3d(A,O,B,2,1,{arc_options="blue,-stealth", label="$\\nu$", node_options="blue"})
+g:Darc3d(A1,O,A2,5.25,1,{arc_options="gray,-stealth", label="$i$", node_options="gray"})
+g:Dseg3d({A,A+3*K}, {scale=0.9, draw_options="gray", node_options="blue", 
+    label="Periapsis", anchor1d=1, pos='N'})
+g:Dseg3d({C,C-2*K}, {scale=0.9, draw_options="gray", node_options="blue", 
+    label="Apoapsis", anchor1d=1, pos='W'})
+g:Dlabel3d("Orbital plane", P2[3], {dir={P2[3]-P2[2], P2[1]-P2[2]}, pos="NW"})
+g:Dlabel3d("Equatorial plane", P[3], {dir={P[3]-P[2], P[1]-P[2]}, pos="NW"})
+g:Show()
+\end{luadraw}
+\end{document}

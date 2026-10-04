@@ -1,0 +1,43 @@
+% source: https://tex.stackexchange.com/a/765971 (question 718884, score 5, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/718884/how-can-i-draw-this-in-latex
+\begin{document}
+\begin{luadraw}{name=toroidal_solenoid}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc = pt3d.M, pt3d.Mc
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sin, cos, sqrt, pi = math.sin, math.cos, math.sqrt, math.pi
+local g = ld.graph3d:new{ window3d={-6,5,-6,6,-3,3},window={-5,5,-4,4}, adjust2d=true, 
+    viewdir={"central",30,60,30}, size={12,12} }
+local a, b, d = 4.05, 4, 1
+local c = sqrt(a*a - b*b)
+local f = function(u, v)
+    local D = a - c*cos(u)*cos(v)
+    return M(
+        (d*(c - a*cos(u)*cos(v)) + b*b*cos(u)),
+        (b*sin(u)*(a - d*cos(v))),
+        (b*sin(v)*(c*cos(u) - d)) ) / D
+end
+local S =  ld.surface(f,0,2*pi,0,2*pi,{41,31})
+local sections = {}
+for k = 0, 2 do
+    local n = Mc(1, (k+0.1)*pi/3 + pi/2, 0)
+    local I = g:Intersection3d(S, {Origin,n})
+    table.insert(sections, I)
+end
+local H = g:Intersection3d(S, {Origin, vecK})
+g:Dboxaxes3d({grid = true,gridcolor = "gray",fillcolor = "LightGray",drawbox = true,
+    xstep=2, ystep=2})
+g:Dfacet(S,{usepalette={ld.palRainbow,"z"},mode=ld.mShadedOnly,opacity=0.8})
+for _, I in ipairs(sections) do
+    g:Dedges(I, {color="Crimson", width=6})
+end
+g:Dedges(H, {color="Navy", width=6})
+g:Dparametric3d( function(t) return f(t,3*pi/2) end, {t={0,2*pi}, draw_options="Navy, line width=0.6"})
+g:Show()
+\end{luadraw}
+\end{document}

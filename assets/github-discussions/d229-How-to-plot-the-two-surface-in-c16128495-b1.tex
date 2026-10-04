@@ -1,0 +1,46 @@
+% source: https://github.com/pfradin/luadraw/discussions/229#discussioncomment-16128495 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=earth_tilted_system}
+local g = graph3d:new{
+    window3d={-8,8,-8,8,-6,6}, 
+    window = {-8,8,-6,6},
+    size={10,10}, 
+    viewdir={0,70},
+}
+-- first half plane
+g:Dpath3d({M(0,-7,0),M(-8,-6,0), M(-8,8,0), M(0,7,0),"l", 4*vecJ, "m", Origin, -4*vecJ, 4, 1, vecK, "ca"},
+    "fill=yellow, fill opacity=1, draw=orange, line width=0.5pt")
+g:Darc3d(4*vecJ, Origin, -4*vecJ, 4, 1, vecK, "teal, line width=0.5pt") -- inner edge
+-- disque and sphere
+g:Saveattr()
+g:Rotate3d(-23.26, {Origin, vecI})
+g:Dcircle3d(Origin, 4, vecK, "fill=yellow, draw=orange, line width=0.5pt")
+g:Dsphere(Origin, 4, {mode=mBorder, edgecolor="cyan", edgewidth=10})
+--g:Dline3d({-1.5 * vecK, 1.5 * vecK}, "black, dashed, line width=0.8pt")
+--g:Dseg3d({Origin, 8 * vecJ}, "teal, dashed, line width=0.8pt")
+g:Restoreattr()
+-- second half plane
+g:Dpath3d({M(0,-7,0),M(8,-8,0), M(8,6,0), M(0,7,0),"l", 4*vecJ, "m", Origin, -4*vecJ, 4, -1, vecK, "ca"},
+    "fill=yellow, fill opacity=1, draw=orange, line width=0.5pt")
+g:Darc3d(4*vecJ, Origin, -4*vecJ, 4, -1, vecK, "teal, line width=0.5pt")
+-- hidden lines
+g:Dcircle3d(Origin, 4, g.Normal, "dashed,cyan")
+g:Dcircle3d(Origin, 4, vecK, "dashed,teal")
+g:Saveattr()
+g:Rotate3d(-23.26, {Origin, vecI})
+g:Dcircle3d(Origin, 4, vecK, "orange,dashed")
+g:Dline3d({-1.5 * vecK, 1.5 * vecK}, "black, dashed, line width=0.8pt")
+g:Dseg3d({Origin, 8 * vecJ}, "teal, dashed, line width=0.8pt")
+g:Restoreattr()
+-- magenta segments and arc3d
+g:Dseg3d({Origin, 4 * vecJ}, "magenta, dashed, line width=0.8pt")
+g:Dseg3d({8*vecJ, 4 * vecJ}, "magenta, line width=0.8pt")
+g:Darc3d(5 * vecJ, Origin, Ms(4,90*deg,23.26*deg),5,1, "red,latex-latex") -- 90*deg = pi/2 (radians)
+g:Darc3d(8*vecJ, Origin, Ms(4,90*deg,(90+23.26)*deg),8,1, "red,latex-latex")
+g:Show()
+\end{luadraw}
+\end{document}

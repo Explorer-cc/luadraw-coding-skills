@@ -1,0 +1,19 @@
+% source: https://tex.stackexchange.com/a/752719 (question 752634, score 9, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/752634/a-logistical-way-to-recursively-subdivide-triangles-into-6-sub-triangles-such
+\begin{document}
+\begin{luadraw}{name=surface}
+local g = graph3d:new{window3d={-5,5,-5,5,-1,6},adjust2d=true,bbox=false,size={10,10}, viewdir={-30,50}}
+g:Labelsize("footnotesize")
+local curve = parametric3d(function(t) return M(t,0,3/(t^2+0.5)) end, 0,7, 15)[1] -- The points on this curve are not regularly spaced.
+local S = rotline(curve,{Origin,vecK},-180,180) -- We rotate the curve around the axis (O,k) to obtain the surface.
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray",xyzstep=2})
+g:Dfacet(S, {usepalette={palAutumn,"z"},clip=true})
+g:Dpolyline3d(curve,false,"DarkGreen,line width=0.8pt",true)
+g:Ddots3d(curve,"scale=0.75,DarkGreen",true)
+g:Dlabel3d("curve $M(t,0,\\frac3{t^2+0.5})$", M(5.5,0,0),{dir={vecJ,vecK},node_options="DarkGreen"})
+g:Show()
+\end{luadraw}
+\end{document}

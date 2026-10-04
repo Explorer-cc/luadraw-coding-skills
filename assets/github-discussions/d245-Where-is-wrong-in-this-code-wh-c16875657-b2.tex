@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16875657 (pfradin, block 2)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=fill2}
+local ld = luadraw
+local cpx = ld.cpx
+local sqrt = math.sqrt
+local Z, i = cpx.Z, cpx.I
+local xmin, xmax, ymin, ymax = -1, 5, -2, 4
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax}}  
+g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(8)
+local fs = function(x) return (x+11)/4  end -- exchange between x and y
+local hs = function(x) return sqrt(x^2+4) end -- exchange between x and y
+g:Setmatrix({0,i,1}) -- symmetry with respect to the line y=x
+g:Ddomain3(fs,hs,{x={-3,3}, draw_options="draw=none,fill=green,fill opacity=0.6"})
+g:Dcartesian(hs, {x={-2,4}, draw_options="violet"});
+g:DlineEq(1,-4,11, "blue");
+g:IDmatrix()
+g:Show()
+\end{luadraw}
+\end{document} 

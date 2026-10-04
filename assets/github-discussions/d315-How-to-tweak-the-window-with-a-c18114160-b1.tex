@@ -1,0 +1,32 @@
+% source: https://github.com/pfradin/luadraw/discussions/315#discussioncomment-18114160 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=campo}
+    local ld = luadraw
+    local pt3d, cpx = ld.pt3d, ld.cpx
+    local Z = cpx.Z
+    local M, vecK = pt3d.M, pt3d.vecK
+    local g = ld.graph3d:new{
+        window3d = {-12,12,-12,12,-5,5,1,1,2},
+        window = {-20, 18, -17, 16}, --<- default size = 38cm x 33cm (plus margins) !!
+        size = {12,12}, --<- choose a better size
+        viewdir = {-60,75}
+    }
+    -- function: z=x/y, the same as (x,y) -> (x,y,z(x,y))=(x,y,x/y) 
+    -- rewrute as: x=y*z, we could use parameters (u,v) -> (x(u,v),y(u,v),z(u,v))=(u*v,u,v) to avoid singularity at y=0,
+    local S = ld.surface(function(u,v) return M(u*v,u,v) end, -12, 12, -5, 5, {50,50})
+    g:Labelsize("scriptsize")
+    g:Dboxaxes3d{
+        grid = true, gridcolor = "gray",
+        xstep = 3, ystep = 3, zstep = 5,
+        xlegend = "$\\vec{F}$", ylegend = "$q$",
+        zlegend = "$E$", zlegendsep = 0.25
+    }
+    g:Dfacet(S, {mode = ld.mShadedOnly, usepalette = {ld.palRainbow, "z", {-5,5}}, opacity = 0.8, clip = true})
+    g:Dlabel("Campo in funzione della forza e della carica", Z((g:Xinf()+g:Xsup())/2, g:Ysup()), {pos="N"})
+    g:Show()
+    \end{luadraw}
+\end{document}

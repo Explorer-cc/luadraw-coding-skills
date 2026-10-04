@@ -1,0 +1,30 @@
+% source: https://tex.stackexchange.com/a/765229 (question 537573, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/537573/how-can-i-draw-great-circles-on-a-diagram-using-specific-coordinates-with-arbitr?rq=1
+\begin{document}
+
+\begin{luadraw}{name=great_circle_arc}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{ viewdir={30,60}, bg="Bisque", margin=0 }
+require 'luadraw_spherical'
+local sM = ld.sM --> sM(theta,phi) is a point on the sphere (theta and phi in degrees)
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+g:Define_sphere({radius=4, color="SlateGray", edgestyle="noline"})
+-- a first simple example
+g:DSarc( {sM(-20,90), sM(45,45)}, 1, {color="red"}) --> 1 = counter-clockwise arc
+g:DSarc( {sM(45,45), sM(45,-60)}, 1, {color="blue"})
+-- a troncated cube on sphere
+local poly = require 'luadraw_polyhedrons'
+local cube, vertices, edges = poly.truncatedcube(Origin, sM(50,30), true)
+for _, A in ipairs(edges) do -- A is a list of two vertices of the cube
+    g:DSarc(A, 1, {color="white"}) -- DSarc projects A onto the sphere before plotting.
+end
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

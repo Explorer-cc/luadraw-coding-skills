@@ -1,0 +1,62 @@
+% source: https://tex.stackexchange.com/a/763720 (question 762233, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/762233/improved-visualization-of-the-domains-of-integration-in-%e2%84%9d%c2%b3
+\begin{document}
+\begin{luadraw}{name=integral_paraboloid}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc = pt3d.M, pt3d.Mc
+local g = ld.graph3d:new{viewdir={30,75}, window={-4.5,4.5,-2,6}, size={12,12}}
+local S = ld.surface( function(r,t) return Mc(r,t,r^2/2) end, 3,0, -math.pi, math.pi,{20,50})
+local z0 = 3.75
+local R = math.sqrt(2*z0)
+local P = {M(0,0,z0), -M(0,0,1)}
+local S1, S2 = ld.cutfacet(S, P)
+local S1v, S1h = g:Classifyfacet(S1)
+local S2v, S2h = g:Classifyfacet(S2)
+
+local function vol_elt(color)
+    local z, dz, t, dt = 2, 0.5, 65*ld.deg, 20*ld.deg
+    local r, dr = math.sqrt(2*z), 0.5
+    local A1,A2,A3,A4,A5,A6,A7,A8 = Mc(r-dr,t,z), Mc(r,t,z), Mc(r,t+dt,z), Mc(r-dr,t+dt,z), Mc(r-dr,t,z+dz), Mc(r,t,z+dz), Mc(r,t+dt,z+dz), Mc(r-dr,t+dt,z+dz)
+    local C1,C2 = M(0,0,z), M(0,0,z+dz)
+    local options = "fill="..color
+    g:Labelsize("scriptsize")
+    g:Dpolyline3d({{A4,C1,A1},{A8,C2,A5}}, "dashed")
+    g:Dpath3d({A5,A6,"l",C2,A7,r,1,"ca",A8,"l",C2,A5,r-dr,1,"ca"},options) -- top
+    g:Dpath3d({A1,A2,A6,A5,"l","cl"}, options) -- front
+    g:Dpath3d({A2,C1,A3,r,1,"ca",A7,"l",C2,A6,r,1,"ca"}, options) -- right
+    g:Dpolyline3d({{A1,A4,A3},{A8,A4}},"dashed")
+    g:Dcircle3d(C1,r,M(0,0,1),"dashed,gray")
+    g:Dlabel3d("$dz$",(C1+C2)/2,{pos="W"},"$dr$",(A7+A8)/2,{pos="N"}, 
+        "$r$", (C1+A2)/2,{pos="S"}, "$d\\theta$",(C2+(A5+A8)/2)/2,{pos="E"})
+    local a1, a2, a3, a4 = table.unpack( ld.pxy({A1,A2,A3,A4}) ) 
+    g:Dpath3d({a1,a2,"l",M(0,0,0),a3,r,1,"ca",a4,"l",M(0,0,0),a1,r-dr,1,"ca"}, 
+        "gray, pattern=north west lines")
+    g:Dpolyline3d({a1,M(0,0,0),a3}, "gray")
+    return {A1, A2, A3, A4}
+end
+
+g:Dcircle3d(M(0,0,0), R, M(0,0,1), "fill=Gold, fill opacity=0.3")
+g:Dpolyline3d( {{M(0,0,0), M(4,0,0)},{M(0,0,0),M(0,4,0)}}, "-stealth") -- xy axis
+g:Dpolyline3d( ld.border(S1h), "left color=blue!25, right color=blue!80,fill opacity=0.6") -- back S1
+g:Dpolyline3d( {M(0,0,0), M(0,0,5)}, "-stealth") -- z axis
+local S = vol_elt("red") -- volume element
+g:Dpolyline3d( ld.border(S1v), "left color=blue!50, right color=blue, middle color=blue!10, fill opacity=0.6") -- front S1
+for _, A in ipairs(S)  do
+    g:Dpolyline3d({A,ld.pxy(A)}, "dashed,gray") 
+end
+g:Dplane(P,M(0,1,0),6,6,"fill=lightgray, fill opacity=0.3")
+g:Dcircle3d(M(0,0,z0), R, M(0,0,1), "fill=Gold, fill opacity=0.3")
+g:Dpolyline3d( ld.border(S2h), "left color=blue!25, right color=blue!80,fill opacity=0.6") -- back S2
+g:Dpolyline3d( {M(0,0,z0), M(0,0,5)}, "-stealth") -- z axis
+g:Dpolyline3d( ld.border(S2v), "left color=blue!50, right color=blue, middle color=blue!10, fill opacity=0.6") -- front S2
+g:Labelsize("normalsize")
+g:Dlabel3d("$x$",M(4,0,0),{pos="S"}, "$y$",M(0,4,0),{pos="E"},"$z$",M(0,0,5), {pos="N"},
+    "$z=z_0$", M(-3,3,z0),{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,33 @@
+% source: https://tex.stackexchange.com/a/766502 (question 727237, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/727237/draw-tubular-surfaces
+\begin{document}
+\begin{luadraw}{name=tubular_surface}
+    local ld = luadraw
+    local pt3d, cpx = ld.pt3d, ld.cpx
+    local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+    local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local cos, sin, pi = math.cos, math.sin, math.pi
+    local g = ld.graph3d:new{
+        window3d = {-4,4,-4,4,-1,14}, window = {-5,5,-2,12},
+        size = {10,12}, viewdir = {30,65}
+    }
+    local helix = function(t)
+        return M(2 * cos(t), 2 * sin(t), t)
+    end
+    local r = function(u,v) return 2+cos(u) end
+    local z = function(u,v) return v+sin(u) end
+    local L = ld.parametric3d(helix, 0, 4*pi, 51)
+    local S, wall = ld.cylindrical_surface(r,z,-1.5*pi, 0, 0, 4*pi, {20, 61},"v")
+    g:Dscene3d(
+        g:addWall(wall),
+        g:addFacet(S, {color = "orange", contrast=0.5}),
+        g:addPolyline(L, {color = "red", width = 8})
+    )
+    g:Show()
+\end{luadraw}
+\end{document}

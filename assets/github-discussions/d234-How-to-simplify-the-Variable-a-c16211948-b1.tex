@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/234#discussioncomment-16211948 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier}
+\begin{document}
+    \begin{luadraw}{name=atoms}
+        local g = graph3d:new{
+            window3d={-2,2,-2,2,-2,2},
+            window={-2.25, 2.25, -2.25, 3.75}, 
+            viewdir={10,75}, size={12,12}
+        }
+        require "luadraw_povray"
+        g:Pov_new()
+        local data = {
+            {val = -0.9, col_var = RoyalBlue},
+            {val = 0.0,  col_var = ForestGreen},
+            {val = 0.75, col_var = IndianRed}
+        }
+        for _, item in ipairs(data) do
+            local f = function(x,y,z) return 4*x*y*z - (x^4 + y^4 + z^4) - item.val end
+            local pov_str = "4*x*y*z - (pow(x,4) + pow(y,4) + pow(z,4)) - (" .. item.val .. ")"
+            g:Pov_implicit(pov_str, f, {color=item.col_var, opacity=0.3})
+        end
+        g:Pov_axes(Origin,{color=Gold,arrows=1})
+        g:Pov_exec()
+        g:Pov_show()
+        local lx = -0.25
+        local ly = 3.5
+        for i, item in ipairs(data) do
+            local cur_y = ly - (i-1) * 0.33
+            g:Fillopacity(1)
+            g:Dlabel("$4xyz - (x^4 + y^4 + z^4) = " .. tostring(item.val) .. "$", Z(lx+1, cur_y), {pos="W"})  -- <-- change here
+            g:Filloptions("full", rgb(item.col_var), 0.5) -- col_var is a {r,g,b} table 
+            g:Dcircle(Z(lx+1.25, cur_y), 0.1)
+        end
+        g:Dlabel3d("$x$",2*vecI,{pos="S"}, "$y$",2*vecJ,{pos="E"}, "$z$", 2*vecK, {pos="N"})
+        g:Show()
+    \end{luadraw}
+\end{document}

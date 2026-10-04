@@ -1,0 +1,31 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-6-Matrix-Calculus.tex (demo: Classification of the points of a parametric curve)
+\begin{luadraw}{name=viewport_changewin}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5},size={10,10}}
+local i, Z = ld.cpx.I, ld.cpx.Z
+g:Labelsize("tiny")
+local styleA = "\\tikzset{->-/.style={decoration={markings, mark="
+local styleB = "at position #1 with {\\arrow{>}}}, postaction={decorate}}}"
+g:Writeln(styleA..styleB)
+g:Dline({0,1},"dashed,gray"); g:Dline({0,i},"dashed,gray")
+local legende = {"Ordinary point", "Inflection point", "Cusp of the first kind", "cusp of the second kind"}
+local A, B, C =(1+i)*0.75, 0.75, 0
+local A2, B2 ={-1.25+i*0.5,-0.75-i*0.5,1.25-0.5*i, 0.5+i}, {-0.75,-0.75,0.75,0.75}
+local u = {Z(-5,0),Z(0,0),-5-5*i,-5*i}
+for k = 1, 4 do
+    g:Saveattr(); g:Viewport(u[k].re,u[k].re+5,u[k].im,u[k].im+5)
+    g:Coordsystem(-1.4,2.25,-1,1.25)
+    g:Composematrix({0,1,1+i}) -- to tilt the Oy axis
+    g:Dpolyline({{-1,1},{-i*0.5,i}}) -- axes
+    g:Lineoptions(nil,"blue",8)
+    g:Dpath({A2[k],(B2[k]+2*A2[k])/3,(C+5*B2[k])/6, C,"b"},"->-=0.5")
+    g:Dpath({C,(C+5*B)/6,(B+2*A)/3,A,"b"},"->-=0.75")
+    g:Dpolyline({{0,0.75},{0,0.75*i}},false,"->,red")
+    g:Dlabel(
+    legende[k],0.75-0.5*i, {pos="S"},
+        "$f^{(p)}(t_0)$",1,{pos="E",node_options="red"},
+        "$f^{(q)}(t_0)$",0.75*i,{pos="W",dist=0.05})
+    g:Restoreattr()
+end
+g:Show()
+\end{luadraw}

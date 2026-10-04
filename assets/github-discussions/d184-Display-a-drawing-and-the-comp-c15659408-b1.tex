@@ -1,0 +1,250 @@
+% source: https://github.com/pfradin/luadraw/discussions/184#discussioncomment-15659408 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\usepackage{array}
+
+%%%%%%%%%%%%%
+% uses luacas and xintfrac
+\usepackage{luacas}
+\usepackage{xintfrac}
+%% TeX  macros for distance calculs, 
+%% The parameters must be of the form M(x,y,z) only, luacas must parse and convert the numbers x, y and z.
+%% The formulas are explained so that the calculations can be performed by luacas.
+\def\distpointpoint#1#2{%
+\begin{CAS}
+vars('y')
+local A, B = #1, #2
+local d = (B.x-A.x)^2+(B.y-A.y)^2+(B.z-A.z)^2
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+\def\distpointplane#1#2#3{%
+\begin{CAS}
+vars('y')
+local A, B, n = #1, #2, #3
+local d = ( (B.x-A.x)*n.x + (B.y-A.y)*n.y + (B.z-A.z)*n.z)^2 / (n.x^2+n.y^2+n.z^2)
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+\def\distpointline#1#2#3{%
+\begin{CAS}
+vars('y')
+local A, B, v = #1, #2, #3
+local u = M(A.x-B.x,A.y-B.y,A.z-B.z)
+local n = M(u.y*v.z-v.y*u.z, u.z*v.x-v.z*u.x, u.x*v.y-v.x*u.y)
+local d = (n.x^2+n.y^2+n.z^2) / (v.x^2+v.y^2+v.z^2)
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+\def\distlineline#1#2#3#4{%
+\begin{CAS}
+vars('y')
+local A, u, B, v = #1, #2, #3, #4
+local n = M( u.y*v.z-v.y*u.z, u.z*v.x-v.z*u.x, u.x*v.y-v.x*u.y)
+local d =  ((B.x-A.x)*n.x+(B.y-A.y)*n.y+(B.z-A.z)*n.z)^2 / (n.x^2+n.y^2+n.z^2)
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+\def\anglevectorvector#1#2{%
+\begin{CAS}
+vars('y')
+local u, v = #1, #2
+local d = (u.x*v.x + u.y*v.y + u.z*v.z)^2/ ((u.x^2 + u.y^2 + u.z^2)*(v.x^2 + v.y^2 + v.z^2))
+local a = simplify( arccos( SqrtExpression(d,2) ) )
+tex.print(a:evaluate():tolatex())
+\end{CAS}
+}%
+% end of TeX macros
+%%%%%%%%%%%
+
+%% results formatting function
+\begin{luacode*}
+function frac(val, max)  -- converts val to a fraction " sign A / B"
+    max = max or 10000 -- to stop if the process is too long
+    if val == nil then return "" end
+    local sg, den =  "", 1
+    if val < 0 then sg = "-"; val = -val end
+    local num = val
+    while (den <= max) and (math.abs(num-nearest(num))>1e-8) do den = den+1; num = val*den end
+    if den > max then 
+        return sg..strReal(val) -- failure
+    elseif den == 1 then
+        return sg..nearest(num)
+    else
+        return sg..nearest(num).."/"..den
+    end
+end
+
+function trigfrac(val, max)  -- converts val (radians) to a fraction of pi " sign AxPi / B"
+    max = max or 10000 -- to stop if the process is too long
+    if val == nil then return "" end
+    local sg, den =  "", 1
+    val =val*rad
+    if val < 0 then sg = "-"; val = -val end
+    local num = val
+    while (den <= max) and (math.abs(num-nearest(num))>1e-8) do den = den+1; num = val*den end
+    if den > max then 
+        return false -- failure
+    else
+        den = den*180
+        num, den = simplifyFrac(nearest(num),den)
+        if num == 0 then return 0
+        else
+            if num == 1 then num = "" end
+            return sg.."\\frac{"..num.."\\pi}{"..den.."}"
+        end
+    end
+end
+
+function tofrac(A) -- converts the coordinates of A
+    return "M("..frac(A.x)..","..frac(A.y)..","..frac(A.z)..")"
+end
+
+function distpointpoint3d(A, B)
+    return "\\distpointpoint{"..tofrac(A).."}{"..tofrac(B).."}"
+end
+
+function distpointplane(point, plane)
+    local A, n = table.unpack(plane)
+    return "\\distpointplane{"..tofrac(point).."}{"..tofrac(A).."}{"..tofrac(n).."}"
+end
+
+function distpointline3d(point, line)
+    local A, u = table.unpack(line)
+    return "\\distpointline{"..tofrac(point).."}{"..tofrac(A).."}{"..tofrac(u).."}"
+end
+
+function distlineline3d(line1, line2)
+    local A, u = table.unpack(line1)
+    local B, v = table.unpack(line2)
+    return "\\distlineline{"..tofrac(A).."}{"..tofrac(u).."}{"..tofrac(B).."}{"..tofrac(v).."}"
+end
+
+function anglevectorvector3d(u,v, degree)
+    if degree == nil then degree = true end
+    local alpha = pt3d.angle(u,v)
+    if degree then
+        return strReal(alpha*rad).."^\\circ"
+    end
+    local alpha = trigfrac( alpha )
+    if alpha == false then 
+        return "\\anglevectorvector{"..tofrac(u).."}{"..tofrac(v).."}"
+    else
+        return alpha
+    end
+end
+
+function anglelineline3d(line1, line2, degree)
+    local A, u = table.unpack(line1)
+    local B, v = table.unpack(line2)
+    return anglevectorvector3d(u,v, degree)
+end
+
+function anglelineplane3d(line, plane, degree)
+    if degree == nil then degree = true end
+    local A, u = table.unpack(line)
+    local B, v = table.unpack(plane)
+    local alpha = pt3d.angle(u,v)
+    if degree then
+        return strReal(90-alpha*rad).."^\\circ"
+    end
+    local alpha = math.pi/2-alpha
+    local alpha = trigfrac( alpha )
+    if alpha == false then 
+        return "\\frac{\\pi}2-\\anglevectorvector{"..tofrac(u).."}{"..tofrac(v).."}"
+    else
+        return alpha
+    end
+end
+
+function angleplaneplane3d(plane1, plane2, degree)
+    local A, u = table.unpack(plane1)
+    local B, v = table.unpack(plane2)
+    return anglevectorvector3d(u,v,degree)
+end
+
+function graph3d:Dcoord3d(...)
+    local args = {}
+    local name, dot
+    for k, aux in ipairs{...} do
+        if k%3 == 1 then
+            name = aux
+        elseif k%3 == 2 then
+            dot = aux
+        else
+            insert(args,{"$"..name.."(\\xintTeXsignedFrac {"..frac(dot.x).."},\\xintTeXsignedFrac {"..frac(dot.y).."},\\xintTeXsignedFrac {"..frac(dot.z).."})$", dot, aux})
+        end
+    end
+    self:Dlabel3d(table.unpack(args))
+end
+
+function defmac(name,body)
+    token.set_macro(name,body,"global")
+end
+\end{luacode*}
+
+
+\begin{document}
+
+\begin{tabular}{m{10cm}m{7cm}}
+\begin{luadraw}{name=test}
+local a = 1
+local A,B,C,D,S = M(0,0,0),M(a,0,0),M(a,a,0),M(0,2*a,0),M(0,0,2*a)
+local G = (A+B+S)/3
+local P = pyramid( {A,B,C,D}, S)
+local K = dproj3d(A,{S,S-D})
+local lineSD = {S, D-S} 
+local Q = {S, pt3d.prod(S-C,S-D)}
+local H = proj3d(G,Q)
+local x1,x2,y1,y2,z1,z2 = getbounds3d( {A,B,C,D,S} ) -- 3d bounding box
+local dl = math.max(x2-x1,y2-y1,z2-z1) + 1 -- the greatest length, plus one
+
+local g = graph3d:new{window3d={x1,x2+1,y1,y2+1,z1,z2+1}, adjust2d=true, viewdir={20,70},size={10,10}}
+Hiddenlinestyle = "dashed";Hiddenlines = true;
+
+g:Dpolyline3d({{x1*vecI,(x1+dl)*vecI},{y1*vecJ,(y1+dl)*vecJ},{z1*vecK,(z1+dl)*vecK}}, "arrows={-Stealth[scale=1.5]}") -- axes
+g:Dpoly(P, {color="orange", mode=mShadedHidden})
+ g:Dlabel3d("$A$",A,{pos="S"}, "$H$",H,{pos="S"}, "$G$",G,{},"$x$",(x1+dl)*vecI,{pos="S"},"$y$",(y1+dl)*vecJ,{pos="S"},"$z$",(z1+dl)*vecK,{pos="E"})
+g:Ddots3d({A,B,C,D,S,G,H})
+g:Dcoord3d("S",S,{pos="E"}, "C",C,{pos="S"}, "B",B,{pos="W"}, "D",D,{pos="S"})
+digits = 3
+defmac("SA", distpointpoint3d(A,S) )
+defmac("dGSCD", distpointplane(G,Q) )
+defmac("dASD", distpointline3d(A,lineSD) )
+defmac("angleSCBD", anglelineline3d( {S,C-S}, {B,D-B}) )
+defmac("angleSCDSBC", angleplaneplane3d(plane(S,C,D), plane(S,B,C)) )
+defmac("angleSCSAB", anglelineplane3d({S,S-C},plane(S,A,B)) )
+defmac("angleACSD", anglevectorvector3d(C-A,D-S) )
+defmac("angleACAB", anglevectorvector3d(C-A,B-A) )
+defmac("angleSCSD", anglevectorvector3d(B-S,C-S) )
+digits = 4 -- default value
+g:Show()
+\end{luadraw}
+&
+We have the distances:
+\begin{itemize}
+    \item $\mathrm d(S,A) = \SA$.
+    \item $\mathrm d(A, SD) = \dASD$.
+    \item $\mathrm d(G,(SCD)) = \dGSCD$.
+\end{itemize}
+We have then angles:   
+\begin{itemize} 
+    \item $(SC),(BD)) = \angleSCBD$.
+    \item $((SCD),(SBC)) = \angleSCDSBC$.
+    \item $((SC),(SAB)) = \angleSCSAB$.
+    \item $(\vec{AC},\vec{SD}) = \angleACSD$.
+    \item $(\vec{AC},\vec{AB}) = \angleACAB$.
+    \item $(\vec{SC},\vec{SD}) = \angleSCSD$.
+\end{itemize}
+\end{tabular}
+\end{document} 

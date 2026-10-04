@@ -1,0 +1,33 @@
+% source: https://tex.stackexchange.com/a/765584 (question 701093, score 4, block 2)
+\documentclass{standalone} %compile with lualatex only
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+%https://tex.stackexchange.com/questions/701093/pgf-cone-drawing
+\begin{luadraw}{name=plane-cone}
+local ld = luadraw
+local pt3d = ld.pt3d
+local cpx, M, vecJ = ld.cpx, ld.pt3d.M, pt3d.vecJ
+local g = ld.graph3d:new{window3d={-1,1,-1,1,0,2}, size={12,12}, 
+    viewdir={"central",-65,60}, window={-2,2,-1,2.5} }
+local cone = g:Cone_outline(M(0,0,0), 1, M(0,0,2))
+local C = ld.cone(M(0,0,0), 1, M(0,0,2),100)
+local P = {M(0,0,1), -M(1, 0, math.sqrt(3))}
+local I = g:Intersection3d(C,P)
+local C1, C2 = ld.cutfacet(C,P)
+C1 = g:Classifyfacet(C1) -- visible facets below the plane
+C2 = g:Classifyfacet(C2) -- visible facets  above the plane
+local angle = cpx.arg(g:Proj3d(vecJ))*ld.rad
+if angle < 0 then angle = angle+180
+    elseif angle > 180 then angle = angle-180 
+end 
+g:Dboxaxes3d{grid=true,gridcolor="gray",fillcolor="LightGray", xyzstep=0.5, drawbox=true}
+g:Dpolyline3d( ld.border(C1), "bottom color=blue, top color=blue!45!red")
+g:Dpolyline3d( g:Plane2facet(P), "draw=none, left color=red, right color=white, shading angle="..angle..", fill opacity=0.7")
+g:Dpolyline3d( ld.border(C2), "bottom color=blue!80!red, top color=red")
+g:Dedges(I, {hidden=true, color="Gold", width=8, hiddenstyle="dashed"})
+g:Dpath3d(cone.hidden, "dashed")
+g:Show()
+\end{luadraw}
+\end{document}

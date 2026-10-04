@@ -1,0 +1,35 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-povray.tex (demo: Holes in a hemisphere)
+\begin{luadraw}{name=holes_in_hemisphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-5,5,-4,5}, size={10,10}, bg="lightgray"}
+require "luadraw_povray"
+local O, R = Origin, 4
+local A, r = 2*R/3*vecJ, R/3
+local P = {Origin, vecK}
+local base = ld.circle3d(A,r,vecK)[1] --circular base of the cylinder (list of 3D points)
+local Cylborder = {}
+for _, C in ipairs(base) do -- we project each point C of the base onto the half-sphere
+    table.insert(Cylborder,C + math.sqrt(R^2-pt3d.abs2(C))*vecK)
+end -- Cylborder is now the intersection between the half-sphere and the cylinder
+-- using povray 
+g:Pov_new()
+g:Pov_sphere(Origin, R, {name="sph", clipplane=P, render=false}) -- only declaration
+g:Pov_cylinder(A-vecK, r, A+R*vecK, {name="cyl1", render=false })
+g:Pov_union({"cyl1", "cyl1 rotate 90*z"}, {name="cylext", render=false})
+g:Pov_cylinder(A-vecK, r-0.001, A+R*vecK, {name="cyl2", render=false }) 
+-- renderings
+g:Pov_difference({"sph","cylext"}, {color=ld.Blue, opacity=0.7})
+g:Pov_union( {"cyl2", "cyl2 rotate 90*z"}, {color=ld.LightBlue,opacity=0.8,clipbox="sph"})
+g:Pov_axes(Origin,{color=ld.Gold,arrows=1})
+g:Pov_exec()
+-- drawing
+g:Dcircle3d(O,R,vecK,"line width=1.2pt"); g:Dcircle3d(A,r,vecK,"line width=1.2pt")
+g:Dcircle3d(ld.rotate3d(A,-90,{Origin,vecK}), r,vecK,"line width=1.2pt")
+g:Pov_show()
+g:Dpolyline3d( {Cylborder, ld.rotate3d(Cylborder,-90,{Origin,vecK})}, "red, line width=1.2pt")
+g:Dlabel3d("$x$",5*vecI,{pos="S"}, "$y$", 5*vecJ, {pos="SE"}, "$z$", 5*vecK, {pos="N"})
+g:Show()
+\end{luadraw}

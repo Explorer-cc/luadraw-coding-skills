@@ -1,0 +1,41 @@
+% source: https://github.com/pfradin/luadraw/discussions/293#discussioncomment-17679729 (pfradin, block 1)
+\documentclass[tikz]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{document}
+\begin{luadraw}{auto=false, exec=true}
+local nbimages = 36
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, O, I, J, K = pt3d.M, pt3d.Origin,  pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-2.25,2.25,-2.25,2.25}, viewdir={40,55},size={10,10}, bg="white"}
+local poly = require 'luadraw_polyhedrons'
+local P = poly.octahedron(O,3*K)
+local colors = {"blue", "red"}
+local S = ld.getfacet(P)
+local I, r = ld.incircle3d( table.unpack(S[1]) )
+local angle = ld.linspace(0,360,nbimages+1)
+
+-- create the images
+for k = 1, nbimages do 
+    local  S1 = ld.rotate3d(S,angle[k], {O,K}) 
+    for k,F in ipairs(S1) do
+        table.insert(F, colors[1+k%2])
+    end
+    local S1 = g:Sortfacet( S1 )
+    for _,F in ipairs(S1) do
+        local col = F[4]
+        I = pt3d.isobar3d({F[1],F[2],F[3]})
+        g:Dcone(I,r,O,{color=col,opacity=0.7})
+    end
+    g:Dsphere(O,math.sqrt(3+r^2),{color="orange",mode=ld.mBorder, opacity=0.2})
+
+    -- draw image number k here
+    -- save image number k
+    g:Sendtotex()
+    g:Cleargraph()
+end
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,43 @@
+% source: https://tex.stackexchange.com/a/751587 (question 751568, score 12, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/751568/illustrating-the-complex-gamma-function-in-3d
+\begin{document}
+\begin{luadraw}{name=gamma_3d}
+local ld = luadraw -- version >= 3
+local cpx, pt3d = ld.cpx, ld.pt3d
+local M, Z = pt3d.M, cpx.Z
+
+local g = ld.graph3d:new{window3d={-4,5,-5,5,0,6}, adjust2d=true, size={10,10},
+    viewdir={-120,60}}
+
+local gamma = function(x,y) -- approximation of gamma
+-- gamma(z) = $\sum_{k=0}^{+\infty} \frac{(-1)^k}{k!(z+k)} + \int_1^{+\infty} t^{z-1}e^{-t}dt$
+    local den, sg, z = 1, 1, Z(x,y)
+    local S = 1/z
+    for k = 1,10 do
+        sg = -sg; den = den*k
+        S = S + sg/den/(z+k)
+    end
+    return S + ld.int( function(t) return cpx.exp((z-1)*math.log(t)-t) end, 1,10)
+end
+
+local  p = function(x,y) -- surface parameterization
+    local gz = gamma(x,y)
+    if gz ~= nil then return M(x,y,cpx.abs(gz)) end
+end
+
+local colorpos = function(f)  -- position in the color palette based on the argument of gamma(x,y)
+    local G = pt3d.isobar3d(f)
+    local gz = gamma(G.x,G.y)
+    if gz ~= nil then 
+        return (cpx.arg(gz)+math.pi)/(2*math.pi) -- position in [0,1]
+    end
+end
+local s = ld.surface(p, -4,5,-5,5,{50,50})
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="LightGray"})
+g:Dfacet(s, {clip=true, width=1, usepalette={ld.rainbow,colorpos}})
+g:Show()
+\end{luadraw}
+\end{document}

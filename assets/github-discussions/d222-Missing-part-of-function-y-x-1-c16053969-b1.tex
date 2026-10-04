@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/222#discussioncomment-16053969 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage{fourier}
+
+\begin{luacode*}
+function nth_root(n,x)
+-- n is a positive integer with n>1
+-- x is a real
+    if x>=0 then return x^(1/n)
+    elseif n%2 == 1 then
+        return -(-x)^(1/n)
+    end
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=func}
+    local g = graph:new{window={-2.5,2.5,-1.8,1.8}, size={10,10}}
+    g:Daxes({0,1,1},{arrows="-Stealth"})
+    g:Dcartesian(function(x) return nth_root(3,x) end, {x={-3,3},  draw_options="magenta, thick"}) -- not work/ elegant
+    g:Show()
+\end{luadraw}
+\end{document}

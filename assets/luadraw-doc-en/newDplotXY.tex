@@ -1,0 +1,16 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-7-Adding-Your-Own-Methods.tex (demo: Modifying an existing method)
+\begin{luadraw}{name=newDplotXY}
+require "luadraw_fields" -- import of the modified method
+local ld = luadraw
+local g = ld.graph:new{window={-0.5,11,-1,20}, margin={0.5,0.5,0.5,1}, size={10,10,0}}
+g:Labelsize("scriptsize")
+local X, Y = {}, {} -- we define two lists X and Y, we could also read them in a file
+for k = 1, 10 do
+    table.insert(X,"nom"..k)
+    table.insert(Y,math.random(1,20))
+end
+g:Daxes({0,1,2},{limits={{0,10},{0,20}}, labelpos={"none","left"},
+    labelshift={0,0}, originpos={"none","center"}, arrows="->", grid=true})
+g:DplotXY(X,Y,"line width=0.8pt, blue")
+g:Show()
+\end{luadraw}

@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222116 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=cone-pyramid}
+local g = graph3d:new{window={-5.5,5.5,-2,6}, viewdir={-15,75}, size={10,10}};
+g:Linejoin("round"); g:Linewidth(4)
+Hiddenlinestyle = "dashed"
+local h, r = 5, 5
+local pi = math.pi
+local O, S, A, B = Origin, M(0,0,h), Mc(r,0,0), Mc(r,2*pi/3,0)
+local K = (A+B)/2
+local H = dproj3d(O,{S, S-K})
+local P = pyramid( {A,B,O}, S)
+g:Dmixfacet( {S,O,A}, {color="green",edgestyle="noline",opacity=0.6},{S,A,B},{color="cyan"})
+g:Dpoly(P,{mode=0,edgewidth=6,edgestyle=Hiddenlinestyle})
+g:Dangle3d(O,H,K,0.25)
+g:Dangle3d(A,K,O,0.25)
+g:Dangle3d(S,O,K,0.25)
+g:Dcone(S,O-S,r,{color="gray", opacity=0.3})
+g:Dpolyline3d({{O,K,S},{O,H}},"dashed")
+g:Dpolyline3d({{A,S}})
+g:Dballdots3d({O,S,A,B,K,H})
+g:Dlabel3d( "$O$",O,{pos="W"}, "$S$",S,{pos="N"}, "$A$",A,{pos="S"}, "$B$",B,{pos="S"}, "$K$",K,{pos="SE"}, "$H$",H,{pos="E"})
+g:Show()
+\end{luadraw}
+\end{document} 

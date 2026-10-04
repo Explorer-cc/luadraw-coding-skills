@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/750309 (question 321156, score 9, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/321156/how-to-draw-a-polygon-with-different-line-color-and-rounded-corners/750277#750277
+\begin{document}
+\begin{luadraw}{name=polygon_with_different_line_color_and_rounded_corners}
+local g = graph:new{window={-5,5,-5,5},size={10,10}}
+g:Linejoin("round")
+local i = cpx.I
+local Dcolored_polyreg = function(c,a,nb,r,wd,colors) 
+-- c=center, a=vertice, nb=number of sides, r=radius, wd=width in point, colors=list of colors
+    local L = polyreg(c,a,nb)
+    insert(L,{r,"cla"}) --polygon width rounded corners (radius=r)
+    local angle = 360/nb
+    local b = a
+    for k = 1, nb do
+        g:Saveattr()
+        a = b; b = rotate(a,angle,c)
+        g:Writeln("\\clip "..g:Coord(2*a-c).." -- "..g:Coord (c).." -- "..g:Coord(2*b-c)..";")
+        g:Dpath(L,"line width="..wd.."pt,color="..colors[k])
+        g:Restoreattr()
+    end
+end
+Dcolored_polyreg(3+2*i,5+2*i,5,0.8,12,{"red","blue","orange","green","yellow"}) -- pentagon
+
+local palette = {Indigo,Blue,Green,Yellow,Orange}
+Dcolored_polyreg(-2.5-2*i,-5-2*i,7,1,24,getpalette(palette,7))  -- heptagon
+g:Show()
+\end{luadraw}
+\end{document}

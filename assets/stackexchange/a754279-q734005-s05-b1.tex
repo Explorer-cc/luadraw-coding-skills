@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/754279 (question 734005, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/734005/tikz-3d-graphic-background-foreground-intersections
+\begin{document}
+ \begin{luadraw}{name=answer}
+local g = graph3d:new{window={-2,8,-3,7},viewdir={20,70},size={10,10}}
+Hiddenlinestyle = "dashed"; Hiddenlines = true;g:Linewidth(6);
+local a, b, h,k = 4,8,5,8
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local S = P.vertices
+local A,B,C,D,E,F,G,H = table.unpack(S)
+local L = M(a/2,3*b/4,k)
+local S = concat(S, {M(a/2,b/4,k),L} )
+P = facet2poly( cvx_hull3d(S) )
+local A = g:Edges(P)
+g:Dpolyline3d(A.hidden, "dotted")
+g:Dpolyline3d({{F,G},{C,G,L}},"line width=3pt,draw=white,double=black,double distance=0.6pt") -- these points depend on the angle of view.
+g:Dpolyline3d(A.visible)
+
+g:Show()
+\end{luadraw}
+\end{document}

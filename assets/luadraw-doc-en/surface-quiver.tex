@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-fields.tex (demo: The \emph{g:Dsurfacefield())
+\begin{luadraw}{name=surface-quiver}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Z = pt3d.M, cpx.Z
+require 'luadraw_fields'
+local surface = function(x, y) return M(x, y, 0.15*x^2 - 0.15*y^2) end
+local field = function(x, y) return {math.sin(y), math.sin(x)} end
+local g = ld.graph3d:new{ window={-5.5, 6, -6, 4}, viewdir={65, 60}, margin=0, size={10, 10} }
+g:Dsurfacefield(surface, field, {
+    domain = {-4, 4, -4, 4},
+    color = "Navy",
+    width = 6,
+    surface_options = {mode=ld.mShadedOnly, usepalette={ld.palRainbow,"z"}, opacity=0.8}
+    })
+g:Dlabel("$z=0.15x^2-0.15y^2$,\\quad $f(x,y)=(\\sin y,\\sin x)$", Z(0,-4.5), {pos="S"})
+g:Show()
+\end{luadraw}

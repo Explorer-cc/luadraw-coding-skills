@@ -1,0 +1,30 @@
+% source: https://tex.stackexchange.com/a/758274 (question 758255, score 8, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/758255/making-geometric-frieze-pattern-with-tikz
+\begin{document}
+\begin{luadraw}{name=frieze}
+local g = graph:new{window={-7,7.5,-1.1,1.1},bbox=false,bg="lightgray"}
+local i = cpx.I
+g:Lineoptions(nil,"Navy",8); g:Filloptions("full","Pink",0.8)
+local pattern = function() -- pattern in [-1;1]x[-1;1]
+    g:Dpath({-0.75,i,0.5+0.65*i,-0.55-0.2*i,0.125,"cla"})
+end
+local x0, vector, nb = -6 , 2, 7
+g:Shift(x0) -- starting point
+for k = 1, nb do
+     pattern(); 
+     g:Savematrix(); 
+     g:Composematrix({vector/2,1,-i}); pattern(); -- glide reflection
+     g:Restorematrix()
+     g:Shift(vector) -- translation for next loop
+end
+g:IDmatrix()
+g:Lineoptions("dashed","black",1); g:Filloptions("none")
+g:Dline({0,1}); g:Dline({i,1}); g:Dline({-i,1}); g:Dsquare(-1-i,1-i,1)
+g:Dseg({0.5*i,vector+0.5*i},"solid,ForestGreen,-stealth,line width=1.2pt")
+g:Show()
+\end{luadraw}
+\end{document}

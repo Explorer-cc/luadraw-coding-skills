@@ -1,0 +1,40 @@
+% source: https://tex.stackexchange.com/a/766810 (question 499733, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/499733/draw-3d-cubes-around-centre?rq=1
+\begin{document}
+\begin{luadraw}{name=cubes_around_center}
+local ld = luadraw
+local cpx = ld.cpx
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-5,5,-3,3}, size={12,12}, viewdir={"central",30,60} }
+local r, ep, h, r1 = 4,0.125, 0.5, 0.75
+local F = {}
+local function cube(angle)
+    local u, v = table.unpack( ld.rotate3d({vecI,vecJ}, angle, {Origin, vecK}) )
+    local ep = math.pi*r1/6-0.05
+    local A = r1*u-ep*v/2
+    local C = ld.parallelep(A, (r-r1)*u, ep*v, h*vecK)
+    return ld.poly2facet(C)
+end
+local S = ld.rotline({M(0,r,h), M(0,r,0)} , {Origin, vecK}, 0,360, {nbdots=101})
+local _,Sh = g:Classifyfacet(S)
+for angle = 0, 330, 30 do
+    table.append(F, cube(angle))
+end
+local Cyl = g:Cylinder_outline(Origin,r+ep,h*vecK)
+g:Dcircle3d(Origin,r, vecK, "fill=LightGray")
+g:Dpolyline3d( ld.border(Sh), "left color=gray!50, right color=gray, middle color=gray!10")
+g:Dfacet( F, {color="SlateGray", backcull=true} )
+g:Dcylinder(Origin,r+ep,h*vecK,{hiddenstyle="noline"})
+g:Dpath3d( Cyl.side, "left color=gray!50, right color=gray, middle color=gray!10")
+g:Dpath3d( {M(r+ep,0,h), M(0,0,h), vecK, "c", M(r,0,h),"m",M(0,0,h),vecK, "c"}, "even odd rule,fill=gray!30")
+g:Dpath3d( {M(3*r/4,0,h), M(0,0,h), vecK, "c", M(r/2.5,0,h),"m",M(0,0,h),vecK, "c"}, "even odd rule,fill=brown")
+g:Dpolyline3d({{M(3*r/4,0,h),M(r/2.5,0,h)},{M(-3*r/4,0,h),M(-r/2.5,0,h)}})
+g:Show()
+\end{luadraw}
+\end{document}

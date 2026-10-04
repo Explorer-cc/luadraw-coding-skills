@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222093 (pfradin, block 2)
+\documentclass[12pt]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=cube_one_color}
+local g = graph3d:new{window={-6,5,-3,10},viewdir={20,65},size={10,10}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"; Hiddenlines = false
+local a, b, h = 4,4,4
+local N,T = M(a/2,b/2,h), M(a/2,b/2,2*h)
+local R = a/2
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+g:Dpoly(P,{mode=3,color="LightBlue",opacity=0.7})
+g:Dcylinder(N,T-N,R,{color="orange",opacity=0.6,hiddenstyle="solid",hiddencolor="gray"}) -- cylinder is above the cube
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",F,{}, "$G$",G,{}, "$H$",H,{})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,37 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-5-Dscene3d-Method.tex (demo: Section of a sphere without Dscene3d())
+\begin{luadraw}{name=section_sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{ window3d={-4,4,-4,4,-4,4}, window={-5.5,5.5,-4,5}, viewdir={30,75}, size={10,10}}
+local O, R = Origin, 2.5 -- center and radius
+local S, P = ld.sphere(O,R), {M(0,0,1.5),vecK+vecJ/2} -- the sphere and the section plane
+local w, n = pt3d.normalize(P[2]), g.Normal -- unit vectors normal to P for w and to the screen for n
+local I, r = ld.interPS(P,{O,R}) -- center and radius of the small circle (intersection between the plane and the sphere)
+local C = g:Intersection3d(S,P) -- It is a list of edges
+local N = I-O
+local J = I+r*pt3d.normalize(vecJ-vecK/2) -- a point on the small circle
+local a = R/pt3d.abs(N)
+local A, B = O+a*N, O-a*N -- points of intersection of the axis (O,I) with the sphere
+local c1, alpha = ld.Orange, 0.4
+local coul = {c1[1]*alpha, c1[2]*alpha,c1[3]*alpha} --to simulate transparency
+g:Dhline( g:Proj3d({B,-N})) -- half-line (point B is not visible)
+g:Dsphere(O,R,{mode=ld.mBorder,color="orange"})
+g:Dline3d(A,B,"dotted") -- dotted line (A,B)
+g:Dedges(C, {hidden=true,hiddenstyle="dashed"}) -- drawing of the intersection
+g:Dpolyline3d({I,J,O},"dashed")
+g:Dangle3d(O,I,J) -- right angle
+g:Dcrossdots3d({{B,N},{I,N},{O,N}},ld.rgb(coul),0.75) -- points in the sphere
+g:Dlabel3d("$O$", O, {pos="NW"})
+local L = C.visible[1] -- visible part of the intersection (arc of a circle)
+A1 = L[1]; A2 = L[#L] -- ends of L
+local F = g:Plane2facet(P) -- plane converted to facet
+-- hole plane as 3D path, the hole is the outline of the part of the sphere above the plane
+ld.insert(F,{"l","cl",A1,"m",I,A2,r,-1,w,"ca",Origin,A1,R,-1,n,"ca"})
+g:Dpath3d( F,"fill=Beige,fill opacity=0.6") -- drawing of the perforated plan
+g:Dhline( g:Proj3d({A,N})) -- half-line, upper part of the axis (AB)
+g:Dcrossdots3d({A,N},"black",0.75); g:Dballdots3d(J,"black",0.75)
+g:Dlabel3d("$A$", A, {pos="NW"}, "$I$", I, {}, "$B$", B, {pos="E"}, "$J$", J, {pos="S"})
+g:Show()
+\end{luadraw}

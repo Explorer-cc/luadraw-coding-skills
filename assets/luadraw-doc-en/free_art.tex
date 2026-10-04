@@ -1,0 +1,22 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-6-Matrix-Calculus.tex (demo: Using Shift, Rotate and Scale)
+\begin{luadraw}{name=free_art}
+local ld = luadraw
+local du = math.sqrt(2)/2
+local g = ld.graph:new{window={1-du,4+du,1-du,4+du},
+    margin={0,0,0,0},size={7,7}}
+local i = ld.cpx.I
+g:Linestyle("noline")
+g:Filloptions("full","Navy",0.1)
+for X = 1, 4 do
+    for Y = 1, 4 do
+        g:Savematrix()
+        g:Shift(X+i*Y); g:Rotate(45)
+        for k = 1, 25 do
+            g:Dsquare((1-i)/2,(1+i)/2,1)
+            g:Rotate(7); g:Scale(0.9)
+        end
+        g:Restorematrix()
+    end
+end
+g:Show()
+\end{luadraw}

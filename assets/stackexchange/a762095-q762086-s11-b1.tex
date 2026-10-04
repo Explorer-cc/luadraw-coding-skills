@@ -1,0 +1,20 @@
+% source: https://tex.stackexchange.com/a/762095 (question 762086, score 11, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/762086/plot-a-domain-in-3d-with-tikz-for-a-triple-integral
+\begin{document}
+\begin{luadraw}{name= integral_domain}
+local g = graph3d:new{window3d={-1,1,-1,1,-1,1}, adjust2d=true, 
+    viewdir=perspective("central",30,60), size={10,10}}
+local L = {Origin, M(0,1,-1), M(0,1,1)} -- the triangle
+local S = rotline(L, {Origin,vecK}, 0, 90, {close=true, nbdots=10})
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray"})
+g:Dmixfacet(S, {color="blue!40!white", opacity=0.6, edgewidth=1, edgecolor="blue"}, L,{}, rotate3d(L,90,{Origin,vecK}), {})
+g:Lineoptions("dotted",nil,6)
+g:Dcylinder(-vecK,1,vecK, {mode=mWireframe})
+g:Dpolyline3d({{vecK,-vecK}, {M(-1,0,1),M(1,0,1)}, {M(0,-1,1),M(0,1,1)}})
+g:Show() 
+\end{luadraw}
+\end{document}

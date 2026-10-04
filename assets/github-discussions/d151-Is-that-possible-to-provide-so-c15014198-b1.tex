@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/151#discussioncomment-15014198 (pfradin, block 1)
+\begin{luadraw}{name=tangent_from}
+local i, cos, sin, pi = cpx.I, math.cos, math.sin, math.pi
+local g = graph:new{window={-5,5,-5,5}, size={10,10}}
+local p1 = function(t) return t+i*(t^2/4-1) end -- parabola
+local p2 = function(t) return 1/2+i+rotate(2*cos(t)+i*sin(t),15) end -- ellipse
+local p3 = function(t) return math.sinh(t)+i*math.cosh(t)-i*2 end -- branch of a hyperbola
+local p4 = function(t) return 2*cos(3*t)*cpx.exp(i*t) end -- other
+local P = 0.5-1.25*i
+local draw = function(p,t1,t2)
+    local axis_style = { arrows='-Stealth', legend={'$x$','$y$'} }
+    local S = {}
+    g:Daxes({0, 1, 1}, axis_style)
+    g:Dparametric(p,{t={t1,t2}, draw_options="line width=0.8pt, Crimson"})
+    g:Dtangent_from(P,p,t1,t2,"blue",S)
+    g:Ddots(S,"Crimson"); g:Ddots(P); g:Dlabel("$A$",P,{pos="S"})
+end
+g:Saveattr(); g:Viewport(-5,-0.25,0.25,5); g:Coordsystem(-3,4,-3,4); draw(p1,-4,4); g:Restoreattr()
+g:Saveattr(); g:Viewport(0.25,5,0.25,5); g:Coordsystem(-3,3,-3,3); draw(p2,-pi,pi); g:Restoreattr()
+g:Saveattr(); g:Viewport(-5,-0.25,-5,-0.25); g:Coordsystem(-3,4,-3,3); draw(p3,-4,4); g:Restoreattr()
+g:Saveattr(); g:Viewport(0.25,5,-5,-0.25); g:Coordsystem(-3,3,-3,3); draw(p4,-pi,pi); g:Restoreattr()
+g:Show()
+\end{luadraw}

@@ -1,0 +1,62 @@
+% source: https://github.com/pfradin/luadraw/discussions/164#discussioncomment-15309854 (pfradin, block 1)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+\begin{luacode*}
+nbimages = 39
+\end{luacode*}
+
+% images creation
+\begin{luacode*}
+local cos, sin, pi, sqrt = math.cos, math.sin, math.pi, math.sqrt
+local g = graph3d:new{ window={-10,3,-4,9}, viewdir={90,80}, size={12,12} }
+
+-- declarations
+local i = cpx.I
+local Rc, Rs, x0 =  2, 1, 4
+local Cs = x0*vecI
+local p = linspace((x0-Rs-Rc)/2+0.5,4,4)
+local T = linspace(-25,25,5)
+
+-- create the image number k, this function must be global
+function makeframe(k) -- do not modify this line
+    local r, t = p[k//10+1], T[5.5-math.abs(5.5-k%10-1)]*deg
+    local xrt, yrt = (Rc+r)*cos(t), (Rc+r)*sin(t)
+    local zrt2 = x0*(2*xrt-x0)+(Rs-Rc)*(Rs+Rc+2*r)
+    local C = M(xrt, yrt, sqrt(zrt2))
+    if C ~= nil then
+        local Cc = dproj3d(C,{Origin,vecK})
+        local A, B = C+r*pt3d.normalize(Cs-C), C+r*pt3d.normalize(Cc-C)
+        if yrt <= 0 then
+            g:Dcylinder( -2*vecK, Rc, 8*vecK, {color="cyan"})
+            g:Dsphere(Cs,Rs,{color="orange", mode=mBorder})
+            g:Dpolyline3d( {A,C,B} )
+            g:Dsphere(C,r,{color="Pink", opacity=0.6, mode=mBorder})
+            g:Dpolyline3d({{Cs,A}, {B,Cc},{-5*vecK,9*vecK}}, "dashed")
+        else
+            g:Dpolyline3d( {A,C,B} )
+            g:Dsphere(C,r,{color="Pink", opacity=0.6, mode=mBorder})
+            g:Dcylinder( -2*vecK, Rc, 8*vecK, {color="cyan"})
+            g:Dsphere(Cs,Rs,{color="orange", mode=mBorder})
+            g:Dpolyline3d({{Cs,A}, {B,Cc},{-5*vecK,9*vecK}}, "dashed")
+        end
+    end
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\def\nb{\directlua{tex.print(nbimages)}}
+\def\makeframe#1{\directlua{makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop,palindrome]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

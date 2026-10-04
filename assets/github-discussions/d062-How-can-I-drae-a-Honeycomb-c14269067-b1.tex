@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/62#discussioncomment-14269067 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=honeycomb}
+local g = graph3d:new{window={-5,5,-6,6},viewdir={25,65},size={10,10}}
+g:Linejoin("round"); g:Labelsize("footnotesize"); g:Linewidth(8)
+local i = cpx.I
+local s = 4
+local h = 7*vecK
+local theta = 40
+local P = shift3d( map(toPoint3d,polyreg(0,s,6)), -3*vecK)
+local A,B,C,D,E,F = table.unpack(P)
+local P1 = {A+h,rotate3d(vecK,90-theta,{Origin,C-A})} -- plane to calculate the vertex S
+local S = interDP({Origin,vecK},P1)
+local d = (A+h+C+h)-S-B
+local A1,B1,C1,D1,E1,F1 = A+h,B+d,C+h,D+d,E+h,F+d
+local facet = {{A,B,B1,A1}, {B,C,C1,B1},{C,D,D1,C1}, {D,E,E1,D1},{E,F,F1,E1}, {F,A,A1,F1}, {A1,B1,C1,S}, {C1,D1,E1,S}, {E1,F1,A1,S}}
+g:Dfacet(facet, {opacity=0.5})
+g:Dpolyline3d({B1,S,-3*vecK},"red,dashed")
+g:Darc3d(Origin,S,B1,2,1,nil,"red,dashed")
+g:Dlabel3d("$h$", (E+E1)/2,{pos="W"}, "$s$",(E+F)/2,{pos="S"}, "$S$",S,{pos="N"},
+    "$\\theta$",S-2*vecK,{pos="W",node_options="red"} )
+g:Show()
+\end{luadraw}
+\end{document} 

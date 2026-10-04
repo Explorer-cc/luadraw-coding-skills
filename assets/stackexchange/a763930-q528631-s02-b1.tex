@@ -1,0 +1,46 @@
+% source: https://tex.stackexchange.com/a/763930 (question 528631, score 2, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/528631/draw-the-polyhedra-tessellation-in-the-3-dimensional-space?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=truncated_octahedron}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+
+local g = ld.graph3d:new{viewdir={30,60}, size={10,10}}
+local poly = require 'luadraw_polyhedrons'
+local abs = math.abs
+local a = 1
+local P, V, E, F1, F2 = poly.truncatedoctahedron(M(0,0,0), M(0,0,a), true)
+-- P = polyhedron, V = vertices, E = edges, F1 = facets type 1, F2 = facets type 2
+local dirs = {} -- vectors going from the origin to the center of the pentagonal visible faces (times 2).
+for _, f in ipairs(F1) do
+    if g:Isvisible(f) then table.insert(dirs, 2*pt3d.isobar3d(f) ) end
+end
+local U, V, W = dirs[4], dirs[2], dirs[1] -- a base of the lattice
+local color = {"Crimson", "SteelBlue"}
+g:Linewidth(1); g:Linecolor("lightgray")
+
+local function drawpoly(T,index) -- translation vector, index of color
+    g:Dpoly( ld.shift3d(P, T), {color=color[index+1], opacity=0.8})
+end
+
+local centers = {} -- lattice points
+for a = -2, 2 do
+    for b = -2, 2 do
+        for c = -1, 1 do
+            table.insert(centers,{a*U+b*V+c*W, (abs(a)+abs(b)+abs(c))%2}) --insert {point, color index}
+        end
+    end
+end
+table.sort(centers, function(A,B) return g:Observer_distance(A[1]) < g:Observer_distance(B[1]) end) --from furthest away to closest
+g:Rotate(-30)
+for _, T in ipairs(centers) do
+    drawpoly( table.unpack(T) )
+end
+g:Show() 
+\end{luadraw}
+\end{document}

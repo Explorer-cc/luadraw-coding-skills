@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/307#discussioncomment-18047899 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+%%https://tex.stackexchange.com/questions/739936/fill-area-between-hyperbola-and-line-with-pgfplots
+\begin{luadraw}{name=rotline}
+local ld = luadraw
+local pt3d = ld.pt3d
+local cpx = ld.cpx
+local sqrt = math.sqrt
+local O, I, J, K = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{ window3d={-10,10,-10,10,-10,10}, window={-11,11,-11,11},
+    viewdir={15,70}, size={12,12}}  
+local f = function(x) return sqrt(3)/4*sqrt(256-x^2)  end
+local h = function(x) return sqrt(100-x^2) end
+local L = ld.domain3(f,h,-10,10) -- see documentation
+L = ld.map(pt3d.toPoint3d,L) -- conversion 2D -> 3D
+local S = ld.rotline(L,{O,I},-270,0, {close=true, nbdots=35})
+
+g:Dfacet(S, {color="Tomato"})
+-- close the two ends
+g:Dfacet({L, ld.rotate3d(L,-270,{O,I})} , {color="Tomato", twoside=false})
+g:Show()
+\end{luadraw}
+\end{document} 

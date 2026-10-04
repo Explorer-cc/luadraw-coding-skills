@@ -1,0 +1,24 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-decorations.tex (demo: 2D Decorations)
+\begin{luadraw}{name=decorations2d}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{size={10,10}}
+require 'luadraw_decorations'
+local A, B = Z(1,4), Z(-3,1)
+local C = ld.rotate(B,50,A)
+local A1 = (B+C)/2
+g:Dpolyline({A,B,C}, {close=true, draw_options="draw=none,fill=pink,fill opacity=0.3", 
+    label="$(T)$", anchor=(A+B+C)/3, pos="E",node_options="DarkRed"})
+g:Lineoptions(nil,"ForestGreen",8)
+g:Dseg({A,B}, {scale=1.25,ticks=2,label="$D_1$",anchor1d=0,pos="E"})
+g:Dseg({A,C}, {scale=1.25,ticks=2,label="$D_2$",anchor1d=1,pos="S"})
+g:Dseg({C,B}, {scale=1.25,label="$D_3$",anchor1d=1,pos="W"})
+g:Dmarkseg(B,A1,3); g:Dmarkseg(A1,C,3); g:Dangle(B,A1,A,0.25,"black,thin")
+g:Dcircle({A,B,C}, {label='$(C)$', anchor1d=0, pos="E", draw_options="blue"})
+g:Dmed(B,C,{label="$M_{bc}=H_a$",anchor1d=0.15,pos="N",dir=cpx.I*(C-B), draw_options="dashed,black,thin"})
+g:Dcartesian( function(x) return (x/2)^2-4 end,{x={-5,5},
+    draw_options={label="$C_f$", anchor2d=Z(0.5,0), pos="S", draw_options="red,line width=1.2pt"} })
+g:Show()
+\end{luadraw}

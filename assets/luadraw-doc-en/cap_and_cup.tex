@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Set Operations)
+\begin{luadraw}{name=cap_and_cup}
+local ld = luadraw
+local g = ld.graph:new{window={-5.5,5.5,-5,5},size={10,10}}
+local i = ld.cpx.I
+local A, B, C = ld.set(i,0), ld.set(-2-i,25), ld.set(2-i,-25)
+g:Fillopacity(0.3)
+g:Dpath(A,"fill=orange"); g:Dpath(B,"fill=blue"); g:Dpath(C,"fill=green")
+g:Fillopacity(1)
+local C1, C2, C3 = ld.path(A), ld.path(B), ld.path(C) -- conversion: path -> list of complex numbers
+local I = ld.cap(ld.cup(C1,C2),C3)
+g:Linecolor("red"); g:Filloptions("full","white")
+g:Dpolyline(I,true,"line width=0.8pt,fill opacity=0.8")
+g:Dlabel("$A$",5*i,{pos="N"},"$B$",-4+3*i,{pos="W"},"$C$",4+3*i,{pos="E"},
+"$(A\\cup B) \\cap C$",-i,{pos="NE",node_options="red,draw"})
+g:Show()
+\end{luadraw}

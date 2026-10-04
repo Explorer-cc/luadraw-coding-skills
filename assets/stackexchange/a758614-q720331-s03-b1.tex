@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/758614 (question 720331, score 3, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/720331/how-derive-the-projection-of-the-curve-intersection-with-specific-x-axis-notatio
+\begin{document}
+\begin{luadraw}{name=intersections}
+local g = graph:new{window={-1.1,4.5,-1.1,3.5}, size={12,12}}
+g:Linewidth(6)
+-- calculations
+local f = function(x) return (x-1)*math.log(x)-x+1 end
+local y0, e = 0.6, math.exp(1)
+local T1, T2, H, C = tangentC(f,1), tangentC(f,e), {Z(0,y0),1}, cartesian(f,0,4.5)
+local A, B = interD(T1,H), interD(T2,H) -- intersection between two lines
+local E, F = table.unpack( interDL(H,C) ) -- intersection between a straight line and a polygonal line
+local dy = Z(0,0.125)
+-- drawing
+g:Daxes({0,1,1}, {arrows="-stealth", legend={"$x$","$y$"}})
+g:Dpolyline(C,"thick, magenta") -- curve
+g:Dline(T1,"thick,teal"); g:Dline(T2,"thick,teal") -- the tangents
+g:Ddots({A,1,e,B},"teal"); g:Dline({Z(0,y0),1},"thick,orange")
+g:Ddots({E,F},"orange")
+g:Dpolyline({{A,A.re},{B,B.re}},"teal,dashed"); g:Dpolyline({{E,E.re},{F,F.re}},"orange,dashed")
+g:Dlabel("${x'}_1$",A.re-dy,{node_options="teal"}, "${x'}_2$",B.re-dy,{}, 
+    "$x_1$",E.re-dy,{node_options="orange"}, "$x_2$", F.re-dy, {})
+g:Show()
+\end{luadraw}
+\end{document}

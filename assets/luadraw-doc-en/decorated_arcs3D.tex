@@ -1,0 +1,44 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-decorations.tex (demo: Method \emph{g:Darc3d())
+\begin{luadraw}{name=decorated_arcs3D}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{ window={-3,8,-5,8}, viewdir={"xy",0.8,60}, size={10,10} }
+require 'luadraw_decorations'
+local O, P = Origin, M(6.5, 6, 4)
+local Px,Pz,Py,Pxz = ld.px(P), ld.pz(P), ld.py(P), ld.pxz(P)
+
+g:Dpolyline3d({{O, 7*vecI}, {O, 7*vecJ}, {O, 6*vecK}}, "-Stealth,solid,black, line width=1pt")
+g:Dlabel3d("$x$", 7*vecI, {pos="E"}, "$y$", 7*vecJ, {pos="N"}, "$z$", 6*vecK, {pos="S"})
+g:Dpolyline3d({{P,Py}, {P,Pxz}, {Pxz,Px}, {O,Pxz}, {Pxz,Pz}}, "dashed,blue,thick")
+g:Dseg3d({O, P}, "-latex,RosyBrown,line width=4pt")
+g:Dpolyline3d({{O, 2.5*vecI}, {O, 2.5*vecJ}, {O, 2.5*vecK}}, "-latex,cyan,line width=3pt")
+
+g:Darc3d(Px, O, P, 4, 1, {
+    arc_options = "-Stealth,blue,ultra thick",
+    sector_options = "fill=blue,opacity=0.2",
+    label = "$\\alpha$", node_options="blue,scale=1.25",
+    rotate = "ortho", pos="N" })
+     
+g:Darc3d(Py, O, P, 4, 1, {
+    arc_options = "-Stealth,green,ultra thick",
+    sector_options = "fill=green,opacity=0.2",
+    label = "$\\beta$", node_options="green,scale=1.25",
+    pos = "S", rotate3d = "ortho"  }) 
+     
+g:Darc3d(Px, O, Pz, 4, 1, {
+    arc_options = "-Stealth,Crimson,ultra thick",
+    sector_options = "fill=Crimson,opacity=0.2",
+    label = "$\\delta$", node_options="Crimson,scale=1.25",
+    rotate3d = "auto", angle=-5,
+    showanchor=true  })  
+
+g:Darc3d(Pz, O, P, 4, 1, {
+    arc_options = "-Stealth,violet,ultra thick",
+    sector_options = "fill=violet,opacity=0.2",
+    label = "$\\gamma$", node_options="violet,scale=1.25",
+    pos="E"  }) 
+g:Ddots3d({P,Pxz,Px,Py,Pz})     
+g:Show()
+\end{luadraw}

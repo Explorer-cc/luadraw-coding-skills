@@ -1,0 +1,22 @@
+% source: https://tex.stackexchange.com/a/764432 (question 140278, score 2, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/140278/plot-3d-graphs-of-functions-defined-implicitly?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=implicit_surf, exec=true, auto=false}
+local ld = luadraw
+local Z, M, Ms = ld.cpx.Z, ld.pt3d.M, ld.pt3d.Ms
+local g = ld.graph3d:new{ size={10,10}, adjust2d=true }
+require 'luadraw_povray'
+g:Pov_new()
+local f = function(x,y,z) return 2*x*y + 2*x*z-1 end
+g:Pov_implicit("2*x*y + 2*x*z-1",f,{ containedby={M(-5,-5,-5),M(5,5,5)}, 
+    color=ld.SteelBlue })
+g:Pov_exec()
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", drawbox=true})
+g:Pov_show()
+g:Show()
+\end{luadraw}
+\end{document}

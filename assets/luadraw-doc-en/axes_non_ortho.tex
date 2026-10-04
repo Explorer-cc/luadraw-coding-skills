@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Example of a non-orthogonal coordinate system)
+\begin{luadraw}{name=axes_non_ortho}
+local ld = luadraw
+local g = ld.graph:new{window={-5.25,5.25,-4,4},size={10,10}}
+local i, pi, Z = ld.cpx.I, math.pi, ld.cpx.Z
+local f = function(x) return 2*math.sin(x) end
+g:Setmatrix({0,1,1+i}); g:Labelsize("small")
+g:Dgrid({-5-4*i,5+4*i},{gridstyle="dashed"})
+g:Daxes({0,1,1}, {arrows="-Stealth"})
+g:Lineoptions("solid","ForestGreen",12); g:Dcartesian(f,{x={-5,5}})
+g:Dcircle(0,3,"Crimson")
+g:DlineEq(1,0,3,"Navy") -- line with equation x=-3
+g:Lineoptions("solid","black",8); g:DtangentC(f,pi/2,1.5,"<->")
+g:Dpolyline({pi/2,pi/2+2*i,2*i},"dotted")
+g:Ddots(Z(pi/2,2))
+g:Dlabeldot("$\\frac{\\pi}2$",pi/2,{pos="SW"})
+g:Show()
+\end{luadraw}

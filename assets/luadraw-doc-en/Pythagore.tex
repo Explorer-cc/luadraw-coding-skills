@@ -1,0 +1,25 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-6-Matrix-Calculus.tex (demo: Using the Graph Matrix)
+\begin{luadraw}{name=Pythagore}
+local ld = luadraw
+local g = ld.graph:new{window={-15,15,0,22},size={10,10}}
+local a, b, c = 3, 4, 5 -- un triplet de Pythagore
+local i, arccos, exp = ld.cpx.I, math.acos, ld.cpx.exp
+local f1 = function(z)
+    return (z-c)*a/c*exp(-i*arccos(a/c))+c+i*c end
+local M1 = ld.matrixof(f1)
+local f2 = function(z)
+    return z*b/c*exp(i*arccos(b/c))+i*c end
+local M2 = ld.matrixof(f2)
+local arbre
+arbre = function(n)
+    local color = ld.mixcolor(ld.ForestGreen,1,ld.Brown,n)
+    g:Linecolor(color); g:Dsquare(0,c,1,"fill="..color)
+    if n > 0 then
+        g:Savematrix(); g:Composematrix(M1); arbre(n-1)
+        g:Restorematrix(); g:Savematrix(); g:Composematrix(M2)
+        arbre(n-1); g:Restorematrix()
+    end
+end
+arbre(8)
+g:Show()
+\end{luadraw}

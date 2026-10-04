@@ -1,0 +1,26 @@
+% source: https://tex.stackexchange.com/a/757376 (question 757355, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/757355/curves-filled-in-in-3d-plot
+\begin{document}
+\begin{luadraw}{name=saddle_point}
+local g = graph3d:new{window3d={-2,2,-2,2,-4,4}, window={-4,3.5,-5.5,5}, size={8,9,0}, viewdir={120,60}}
+local S = cartesian3d(function(u,v) return u^2-v^2 end, -2,2,-2,2,{20,20})
+local P = facet2poly(S) -- conversion en polyèdre
+local Tx = g:Intersection3d(P, {Origin,vecI}) --intersection with yz-plane
+local Ty = g:Intersection3d(P, {Origin,vecJ}) --intersection with xz-plane
+local P = {Origin, vecK} -- tangent plane z=0
+local S1, S2 = cutfacet(S,P)
+-- drawing
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray",drawbox=true})
+g:Dfacet(S2,{mode=mShadedOnly,color="ForestGreen"}) -- first part of the surface
+g:Dedges(Tx, {color="Crimson", hidden=false, width=12}) 
+g:Dfacet(g:Plane2facet(P), {color="Pink", opacity=0.6})
+g:Dfacet(S1,{mode=mShadedOnly,color="ForestGreen"}) -- second part of the surface
+g:Dedges(Ty, {color="Navy",hidden=true, width=12}) 
+g:Dedges(Tx, {color="Crimson", visible=false,hidden=true, width=12}) 
+g:Show()
+\end{luadraw}
+\end{document}

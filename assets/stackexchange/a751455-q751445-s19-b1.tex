@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/751455 (question 751445, score 19, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/751445/how-can-i-draw-this-box-in-3d-i-am-unhappy-with-that-i-have
+\begin{document}
+\begin{luadraw}{name=3d_box}
+local g = graph3d:new{size={10,10}, viewdir={10,70}}
+local C = cylinder(-3*vecK,2,3*vecK,100)
+local C1, C2 = cutpoly(C,{Origin,-vecJ},true)
+C1 = poly2facet(shift3d(C1,-3*vecJ))
+C2 = poly2facet(shift3d(C2,3*vecJ))
+local P = parallelep(M(-2,-3,1),4*vecI,6*vecJ,2*vecK)
+P = getfacet(P,{1,2,5,6})
+local cube = parallelep(M(-2,-3+4/3,-1),4*vecI,vecJ,2*vecK)
+cube = getfacet(cube,{3,4,5,6})
+local boite = concat(C1,C2,P,shift3d(P,-4*vecK),cube,shift3d(cube,7/3*vecJ))
+g:Dfacet(boite, {color="orange",mode=mShadedOnly,backcull=true})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,30 @@
+% source: https://tex.stackexchange.com/a/747756 (question 747751, score 11, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/747751/draw-3d-triad-in-tikz/747756#747756
+\begin{document}
+\begin{luadraw}{name=3d_triad}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window={-3,3,-3,3}, size={10,10}}
+-- cube
+g:Dpoly(ld.parallelep(M(-1,-1,-1), 2*vecI,2*vecJ,2*vecK), {color="LightBlue"})
+-- top
+g:Dcut_sphere(M(0,0,0.85),0.5, {vecK,vecK}, {color="ForestGreen", mode=ld.mBorder})
+g:Dpolyline3d({1.5*vecK,3*vecK},"line width=0.8pt, ForestGreen, -stealth")
+g:Dlabel3d("$y$",3*vecK,{pos="N",node_options="ForestGreen"})
+-- front
+g:Dcut_sphere(M(0.85,0,0),0.5, {vecI,vecI}, {color="blue", mode=ld.mBorder})
+g:Dpolyline3d({1.5*vecI,3*vecI},"line width=0.8pt, blue, -stealth")
+g:Dlabel3d("$z$",3*vecI,{pos="SW",node_options="blue"})
+-- right
+g:Dcut_sphere(M(0,0.85,0),0.5, {vecJ,vecJ}, {color="red", mode=ld.mBorder})
+g:Dpolyline3d({1.5*vecJ,3*vecJ},"line width=0.8pt, red, -stealth") 
+g:Dlabel3d("$x$",3*vecJ,{pos="E",node_options="red"})
+g:Show()
+\end{luadraw}
+\end{document} 

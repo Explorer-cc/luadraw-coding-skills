@@ -1,0 +1,29 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Vector field, integral curve of $y'= 1-xy^2$)
+\begin{luadraw}{name=champ}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{window={-5,5,-5,5},bg="Cyan!30",size={10,10}}
+local f = function(x,y) -- ode y'= 1-x*y^2=f(x,y)
+    return 1-x*y^2
+end
+local A = Z(-1,1) -- A = -1+i
+local deltaX, deltaY, long = 0.5, 0.5, 0.4
+local champ = function(f)
+    local vecteurs, v = {}
+    for y = g:Yinf(), g:Ysup(), deltaY do
+        for x = g:Xinf(), g:Xsup(), deltaX do
+            v = Z(1,f(x,y)) -- coordinates 1 and f(x,y)
+            v = v/cpx.abs(v)*long -- normalization of v
+            table.insert(vecteurs, {Z(x,y), Z(x,y)+v} )
+        end
+    end
+    return vecteurs -- vecteurs is a polygonal line
+end
+
+g:Daxes( {0,1,1}, {labelpos={"none","none"}, arrows="->"} )
+g:Dpolyline( champ(f), "->,blue")
+g:Dodesolve(f, A.re, A.im, {t={-2.75,5},draw_options="red,line width=0.8pt"})
+g:Dlabeldot("$A$", A, {pos="S"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,38 @@
+% source: https://github.com/pfradin/luadraw/discussions/249#discussioncomment-16927920 (pfradin, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+local ld= luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+function ld.parabola(A,B,C)
+    A = cpx.toComplex(A); B = cpx.toComplex(B); C = cpx.toComplex(C)
+    local x1, x2, x3 = A.re, B.re, C.re -- the x-coordinates must be different
+    local y1,y2,y3 = A.im, B.im, C.im
+    local f = function(t)
+        return (t-x2)*(t-x3)/(x1-x2)/(x1-x3)*y1 + (t-x1)*(t-x3)/(x2-x1)/(x2-x3)*y2 + (t-x2)*(t-x1)/(x3-x2)/(x3-x1)*y3
+    end
+    return f
+end
+\end{luacode*}
+
+\begin{document}
+
+\begin{luadraw}{name=parabola}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{size={10,10}}
+local A, B, C = Z(-3,2), Z(0,1), Z(2,-2)
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = ld.parabola(A,B,C)
+g:Ddots({A,B,C})
+g:Dcartesian(f, {draw_options="red, line width=0.8pt"}); 
+g:Show()
+\end{luadraw}
+\end{document} 

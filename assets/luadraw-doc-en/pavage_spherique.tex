@@ -1,0 +1,21 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: A spherical tiling)
+\begin{luadraw}{name=pavage_spherique}
+local ld = luadraw
+local Origin = ld.pt3d.Origin
+
+local g = ld.graph3d:new{window={-3,3,-3,3},viewdir={30,60},size={10,10}}
+require 'luadraw_spherical'
+local poly = require "luadraw_polyhedrons"
+g:Linewidth(6); ld.Hiddenlines = true; ld.Hiddenlinestyle = "dotted"
+local P = ld.poly2facet( poly.octahedron(Origin, ld.sM(30,10)) )
+local colors = {"Crimson","ForestGreen","Gold","SteelBlue","SlateGray","Brown","Orange","Navy"}
+g:Define_sphere()
+for k,F in ipairs(P) do
+    g:DSfacet(F,{fill=colors[k],style="noline",fillopacity=0.7})  --facets without edges
+end
+for _, A in ipairs(ld.facetedges(P)) do
+    g:DSarc(A,1,{width=8}) -- each edge is an arc of a great circle
+end
+g:Dspherical()
+g:Show()
+\end{luadraw}

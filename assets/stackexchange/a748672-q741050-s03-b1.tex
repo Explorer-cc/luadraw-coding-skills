@@ -1,0 +1,17 @@
+% source: https://tex.stackexchange.com/a/748672 (question 741050, score 3, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\begin{document}
+\begin{luadraw}{name=racine_cubic}
+local g = graph:new{window={-3,3,-3,3},size={10,10}}
+local i = cpx.I
+g:Daxes({0,1,1},{grid=true})
+g:Linejoin("round"); g:Linewidth(12)
+g:Dparametric( function(x) return x+i*x^3 end, {draw_options="red"})
+g:Dparametric( function(x) return x^3+i*x end, {draw_options="blue"})
+g:Dlabel("$x\\mapsto x^3$",1.5+2.5*i,{pos="E",node_options="red,fill=white"},
+    "$x\\mapsto \\sqrt[3]x$",-2.7-1.65*i,{pos="E",node_options="blue,fill=white"} )
+g:Show()
+\end{luadraw}
+\end{document}

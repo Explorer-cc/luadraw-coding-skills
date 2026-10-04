@@ -1,0 +1,20 @@
+% source: https://github.com/pfradin/luadraw/discussions/91#discussioncomment-14462887 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{siunitx}
+\begin{document}
+\begin{luadraw}{name=cubic_cylinder}
+local g = graph3d:new{window={-2,5,-2,4},viewdir={10,70},size={10,10}}
+g:Linewidth(4); 
+Hiddenlinestyle = "dashed"
+local a, b, c = 4,4,4
+local R = math.sqrt(a^2+b^2)*0.5
+local P = parallelep(Origin,b*vecI,a*vecJ,c*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+g:Dscene3d( g:addPoly( cylinder(M(a/2,b/2,0),c*vecK,R,100),{contrast=0.5,color="Orange"}),
+            g:addPolyline( facetedges(P),{hidden=true}) )
+g:Dcylinder(M(a/2,b/2,0),c*vecK,R,{mode=mWireframe})            
+g:Show()
+\end{luadraw}
+\end{document} 

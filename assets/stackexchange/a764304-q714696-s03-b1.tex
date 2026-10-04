@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/764304 (question 714696, score 3, block 1)
+% Source - https://tex.stackexchange.com/a/764301
+% Posted by Explorer
+% Retrieved 2026-06-30, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=paraboloid}
+local ld = luadraw
+local pt3d = ld.pt3d
+local cos, sin, pi = math.cos, math.sin, math.pi
+local M, O, I, J, K = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{
+    window3d={-2,2,-2,2,-0.5,1.5},window={-2,2,-0.5,2},
+    viewdir={-60,70},size={10,10}
+}
+local p = function(t,r) return M(r*cos(t), r*sin(t), r^2) end
+local s1 = ld.surface(p,3*pi/2,3*pi,0,1,{60,15})
+local s2 = ld.surface(p,pi,3*pi/2,0,1,{20,15})
+local s1v, s1h = g:Classifyfacet(s1)
+local s2v, s2h = g:Classifyfacet(s2)
+
+g:Dpolyline3d({{-2*I,2*I},{-2*J,2*J}}, "-stealth") -- xy axes
+g:Dpolyline3d( ld.border(s1h), "draw=none, left color=gray!40, right color=gray!80, middle color=gray!20") -- s1 back
+g:Dpolyline3d( ld.border(s2h), "draw=none, left color=green!40, right color=green!80, middle color=green!20") -- s2 back
+g:Dpolyline3d({-0.25*K,1.5*K}, "-stealth") -- z axis
+g:Dpolyline3d( ld.border(s1v), "draw=none, left color=gray!60, right color=gray") -- s1 front
+g:Dpolyline3d( ld.border(s2v), "draw=none, left color=green!60, right color=green") -- s2 front
+g:Darc3d(M(-1,0,1), O+K, M(0,-1,1), 1, 1, K, "red,line width=1pt")
+g:Dpolyline3d({{-2*I,2*I},{-2*J,2*J},{-0.25*K,1.5*K}}, "dashed")
+g:Dlabel3d("$l_1$", 2.1*I, {}, "$l_2$", 2.2*J, {}, "$u$", 1.6*K, {})
+g:Show()
+\end{luadraw}
+\end{document}

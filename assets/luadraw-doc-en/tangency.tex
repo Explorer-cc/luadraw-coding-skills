@@ -1,0 +1,28 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: Points of tangency)
+\begin{luadraw}{name=tangency}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Z = pt3d.M, cpx.Z
+local O, I, J, K = M(0,0,0), M(1,0,0), M(0,1,0), M(0,0,1)
+local g = ld.graph3d:new{ size={10,10}, window={-5,5,-5,6} }
+g:Shift( Z(-2.5,3.5) ) -- cylinder
+local A, B, C, D = table.unpack( g:Cylinder_tangency(-3*K, 1.5, 2*K) )
+g:Dcylinder(-3*K, 1.5, 2*K, {color="blue"})
+g:Ddots3d({A,B,C,D})
+g:Shift( Z(5,0) ) -- cone
+local A, B = table.unpack( g:Cone_tangency(-3*K, 1.5, 2*K) )
+g:Dcone(-3*K, 1.5, 2*K, {color="red"})
+g:Ddots3d({A,B})
+g:Shift( Z(0,-5) ) -- frustum
+local A, B, C, D = table.unpack( g:Frustum_tangency(-3*K, 1.5,0.5, K) )
+g:Dfrustum(-3*K, 1.5, 0.5, K, {color="green"})
+g:Ddots3d({A,B,C,D})
+g:Shift(Z(-5,-1.5)) -- sphere
+local R, P = 2, {K, K}
+local I, r, n = ld.interPS(P, {O,R})
+local A, B = table.unpack( g:Sphere_tangency(O, R, P) )
+g:Dsphere(O, R, {color="orange", mode=ld.mBorder})
+g:Ddots3d({A,B})
+g:Darc3d(A,I,B,r,1,n); g:Darc3d(A,I,B,r,-1,n,"dotted")
+g:Show()
+\end{luadraw}

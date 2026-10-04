@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/764634 (question 764630, score 8, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/764630/controlling-what-appears-in-front-in-a-3d-pgfplot
+\begin{document}
+\begin{luadraw}{name= surf3d}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local vecJ, vecK = pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{window3d={0,3,0,3,0,5,1,1,1/2}, adjust2d=true, viewdir={25,65}, size={12,12}}
+local f = function(x,y) return -(x-2)^3 - (y-1.5)^2 + 2 end
+local S = ld.cartesian3d(f, 0,3,0,3)
+S = ld.cutfacet(S, {M(0,0,0), vecK})
+local P = {M(2,0,0), M(1,0,0)}
+local Sv, Sh = ld.cutfacet(S, P)
+local I = g:Intersection3d(S,P)
+local A = M(2, 1, f(2,1))
+local h = 1e-6
+local V =  vecJ+(f(2, 1+h)-f(2,1-h))/(2*h)*vecK
+g:Dboxaxes3d( {grid=true, gridcolor="gray", fillcolor="lightgray", labels=false, 
+    xyzstep=5, drawbox=true})
+g:Dfacet(Sh, {clip=true, usepalette={ld.palAutumn,"z"}, edgecolor="gray",opacity=0.9})
+g:Dfacet( g:Plane2facet(P), {color="blue", opacity=0.6})
+g:Dfacet(Sv, {clip=true, usepalette={ld.palAutumn,"z"}, edgecolor="gray", opacity=0.9})
+g:Dedges(I,{color="red", hidden=true, width=12})
+g:Ddots3d(A)
+g:Dline3d({A,V},"line width=0.8",true)
+g:Dpolyline3d( { {A, ld.pxy(A), M(3,1,0) }, { ld.pxy(A), M(2,3,0)}}, "dashed")
+g:Dlabel3d( "$b$", M(3,1,0), {pos="SW"}, "$a$", M(2,3,0), {pos="SE"})
+g:Show() 
+\end{luadraw}
+\end{document}

@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/760364 (question 760362, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/760362/improving-the-visibility-of-a-curve-in-a-3d-pgfplots-surface
+\begin{document}
+\begin{luadraw}{name=paraboloid}
+local g = graph3d:new{window3d = {-2,2,-2,2,0,8},window={-4.5,4,-3,9.5},size={10,10,0},
+viewdir=perspective("central",30,50,20)}
+local S = cartesian3d( function(x,y) return x^2+y^2 end, 2,-2,-2,2)
+local c = Origin
+local u = M(1,0,0)
+local N = pt3d.prod(u, vecK)
+local Curve = g:Intersection3d(S, {c,N})
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray"})
+g:Dfacet( S, {usepalette={palGasFlame,"z"}, edgecolor="gray", clip=true})
+g:Dedges(Curve, {hidden=true, color="Navy", width=12})
+g:Show()
+\end{luadraw}
+\end{document}

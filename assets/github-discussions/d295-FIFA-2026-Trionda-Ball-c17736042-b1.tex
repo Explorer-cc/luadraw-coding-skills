@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/295#discussioncomment-17736042 (pfradin, block 1)
+\documentclass[border=2pt]{standalone}
+ \usepackage[svgnames]{xcolor}
+ \usepackage[3d]{luadraw}
+ \usepackage{fourier-otf}
+  \begin{document}
+\begin{luadraw}{name=tetra_len}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecJ, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecJ, pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+
+local g = ld.graph3d:new{window={-4,4,-4,4},margin={0,0,0,0},viewdir={70,65},size={10,10}}
+ld.Hiddenlines = true
+ld.Hiddenlinestyle = "dashed"
+g:Linewidth(8)
+require 'luadraw_spherical'
+local poly = require 'luadraw_polyhedrons'
+local R = 4
+local T = poly.tetrahedron(O, 4*vecK)
+local A, B, C, D = table.unpack(T.vertices)
+local function transform_edge(A,B)
+    local m = (A+B)/2
+    local  P = {A,m}
+    local u = pt3d.normalize(B-A)
+    local v = ld.rotate3d(u,90,{O,m})
+    local L = ld.path3d( {A,"m",A+v+u/2, m+1.5*v-u/2,m,"b",m-1.5*v+u/2,B-v-u/2,B,"b"} )
+    return ld.map(ld.toSphere, L[1])
+end
+g:Define_sphere({radius=R, color="SlateGray"})
+g:DScurve(transform_edge(A,B),{color="red"})
+g:DScurve(transform_edge(A,D),{color="green"})
+g:DScurve(transform_edge(A,C),{color="black"})
+g:DScurve(transform_edge(B,C),{color="blue"})
+g:DScurve(transform_edge(D,B),{color="magenta"})
+g:DScurve(transform_edge(D,C),{color="yellow"})
+g:DSdots({A,B,C,D})
+g:Dspherical()
+g:Dlabel3d("$A$",A,{pos="S"},"$B$",B,{pos="SW"},"$C$",C,{},"$D$",D,{pos="N"} )
+g:Show()
+\end{luadraw}
+\end{document}

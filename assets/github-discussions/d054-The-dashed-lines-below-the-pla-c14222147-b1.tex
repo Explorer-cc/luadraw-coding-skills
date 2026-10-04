@@ -1,0 +1,57 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222147 (pfradin, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/729038/drawing-latitudinal-line-on-a-sphere-associated-with-a-given-angle-of-elevation
+\begin{document}
+
+\begin{luadraw}{name=dom}
+local g = graph3d:new{window={-5,5,-2,5},viewdir={30,70},size={10,10}}
+local i = cpx.I
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a, b, h, n = 3, 5, 3, 20 -- n = nbdots on ellipticEdges
+local nbvertices = 5 -- numbers of vertices for the base
+local base = map(toPoint3d,polyreg(0,a,nbvertices))
+local S = b*vecK
+
+local ellipticEdge = function(M,a,b,n)
+    local u = pt3d.normalize(M)
+    local p = function(t)
+        return a*math.cos(t)*u+b*math.sin(t)*vecK
+    end
+    return parametric3d(p,0,90*deg,n,false,0)[1]
+end
+
+local dome = function(list,a,b,n) -- build the dome as a list of facets
+    local rep = {list}  --base
+    local edges = {}
+    local m = #list
+    for k = 1, m do
+        table.insert(edges,ellipticEdge(list[k],a,b,n))
+    end
+    table.insert(edges,list); table.insert(edges[m+1],list[1]) -- to close the last list
+    local B, A = list[1]
+    local Lb, La = edges[1]
+    for k = 2, m+1 do
+        if k == m+1 then k = 1 end -- to close the list
+        A = B; B = list[k]; La = Lb; Lb = edges[k]
+        for j = 1, n-2 do
+            local facet = {La[j],Lb[j],Lb[j+1],La[j+1]}
+            table.insert(rep,facet)
+        end
+        table.insert(rep,{La[n-1],Lb[n-1],Lb[n]})
+    end
+    return rep, edges
+end
+
+local D, edges = dome(base,a,b,n)
+local I = g:Intersection3d(D,{h*vecK,vecK})
+g:Dscene3d(
+    g:addFacet(D, {color="LightBlue", backcull=true}),
+    g:addPolyline(edges, {width=8})
+)
+g:Dedges(I,{hidden=true})
+g:Show()
+\end{luadraw}
+\end{document}

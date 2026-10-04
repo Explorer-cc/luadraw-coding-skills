@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/763902 (question 52953, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/52953/intersection-of-two-surfaces?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=surface_plane}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local M, Mc = pt3d.M, pt3d.Mc
+
+local g = ld.graph3d:new{ window3d={-10,10,-10,10,-10,5}, 
+    viewdir={"central",30,60,50}, window={-18,15,-19,11}, size={12,12} }
+g:Labelsize("footnotesize")
+local p = function(r,t) return Mc(r,t,5-r) end
+local S = ld.surface(p, 0,10*math.sqrt(2),-math.pi, math.pi,{20,37})
+local P = {Origin, -vecK}
+local I = g:Intersection3d(S, P)
+local S1, S2 = ld.cutfacet(S, P)
+local pal1, pal2 = {ld.Blue, ld.Green, ld.Yellow, ld.Orange}, {ld.Orange, ld.Red}
+-- drawing
+g:Dboxaxes3d({ grid=true, gridcolor="gray", fillcolor="lightgray", xyzstep=2,
+    zlabelstyle="W", zlabelsep=0})
+g:Dfacet( S1, {usepalette={pal1,"z"}, clip=true, edgecolor="gray"}) -- bottom part
+g:Dfacet(g:Plane2facet(P), {color="Pink", opacity=0.7, constrast=0}) -- plane
+g:Dfacet( S2, {usepalette={pal2,"z"}, edgecolor="gray"})    -- top part
+g:Dedges(I, {color="Navy", width=12, hidden=true}) -- intersection
+g:Show()
+\end{luadraw}
+\end{document}

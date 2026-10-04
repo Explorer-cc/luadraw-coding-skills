@@ -1,0 +1,63 @@
+% source: https://tex.stackexchange.com/a/766815 (question 766814, score 5, block 1)
+% Source - https://tex.stackexchange.com/q/766814
+% Posted by minthao_2011
+% Retrieved 2026-09-30, License - CC BY-SA 4.0
+%https://tex.stackexchange.com/questions/766814/how-to-use-conditional-if-then-statements-in-luacas-lualatex-to-filter-algebra
+\documentclass{article}
+\usepackage{luacas}
+\begin{document}
+\begin{CAS}
+vars("x")
+left = x+5
+right = x+5
+f = topoly(right^2)
+g = topoly(left)
+eq = f-g
+r = ZTable( roots(eq) )
+sol1 = substitute({[x]=r[1]}, right):simplify()
+sol2 = substitute({[x]=r[2]}, right):simplify()
+sol1v = tostring(sol1) %expression of sol1 as a string
+sol2v = tostring(sol2) %expression of sol1 as a string
+\end{CAS}
+
+Solve the equation:
+\[\sqrt{\print{left}} = \print{right}.\]
+
+Squaring both sides of the equation, we get:
+\[\print{left} = \print{f}.\]
+
+Simplifying the equation above yields:
+\[ \print{eq} = 0. \] 
+
+This equation has two roots:
+\[r_1 = \print{r[1]}, \quad r_2 = \print{r[2]}.\]
+
+\directlua{%
+local sol, nb = {}, 0
+if string.find(sol1v, "i") then
+    tex.print("\\par These solution are not real.")
+else
+    tex.print("We have:")
+    sol1v = load("return "..sol1v)() %numerical evaluation of sol1
+    sol2v = load("return "..sol2v)() %numerical evaluation of sol2
+    if sol1v >= 0 then 
+        tex.print("\\[-r_1 + 5 = \\print{sol1} \\geq 0,\\] hence $r_1$ is a valid solution.")
+        table.insert(sol,1); nb = nb+1
+    else
+        tex.print("\\[-r_1 + 5 = \\print{sol1} < 0,\\] hence $r_1$ is not a valid solution.")
+    end
+    if sol2v >= 0 then 
+        tex.print("\\[-r_2 + 5 = \\print{sol2} \\geq 0,\\] hence $r_2$ is a valid solution.")
+        table.insert(sol,2); nb = nb+1
+    else
+        tex.print("\\[-r_2 + 5 = \\print{sol2} < 0,\\] hence $r_2$ is not a valid solution.")
+    end
+    if nb == 0 then tex.print("\\par Therefore, there is no solution.")
+    elseif nb == 1 then tex.print("\\par Therefore, there is one solution:") 
+        if sol[1] == 1 then tex.print("$\\print{r[1]}$.") else tex.print("$\\print{r[1]}$.") end
+    else 
+        tex.print("\\par Therefore, there are two solution: $\\print{r[1]}$ and $\\print{r[2]}$.")
+    end
+end
+}%
+\end{document}

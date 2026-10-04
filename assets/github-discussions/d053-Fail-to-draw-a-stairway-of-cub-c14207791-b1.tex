@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/53#discussioncomment-14207791 (pfradin, block 1)
+\begin{luadraw}{name = stairway}
+    local graphview = graph3d:new{
+        window3d = {-5, 5, -5, 5, -5, 5},
+        adjust2d = true,
+        viewdir  = {-35, 45}
+    }
+    graphview:Linejoin("round")
+    local nb_slices = 10
+    local num_col, colors = 0, {"Crimson", "ForestGreen"}
+    local cube = parallelep(M(-5, -5, -5), vecI, vecJ, vecK)
+    local F = graphview:Classifyfacet(cube)  --visible facets only
+    local list = {} --list = {facets, options, facets, options, ...}
+    nb_slices = nb_slices - 1
+    for i = 0, nb_slices do
+        num_col = num_col%2 + 1
+        for j = nb_slices, 0, -1 do
+            for k = 0, nb_slices - i do
+                if j == 0 or k == nb_slices - i then
+                    table.insert(list, shift3d(F, i*vecI + j*vecJ + k*vecK) ) -- facets insertion
+                    table.insert(list, {color = colors[num_col]}) -- options insertion
+                end
+            end
+        end
+    end
+    graphview:Dmixfacet( table.unpack(list) )
+    graphview:Show()
+\end{luadraw}

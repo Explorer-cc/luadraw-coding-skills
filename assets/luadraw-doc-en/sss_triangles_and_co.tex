@@ -1,0 +1,27 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-3-Geometric-Constructions.tex (demo: sss\_triangle, sas\_triangle and asa\_triangle)
+\begin{luadraw}{name=sss_triangles_and_co}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-3,5},size={10,10}}
+g:Labelsize("footnotesize"); g:Linewidth(8)
+local Zp, i, deg = ld.cpx.Zp, ld.cpx.I, ld.deg
+local T1 = ld.shift( ld.sss_triangle(4,5,3), 2*i-2)
+local T2 = ld.shift( ld.sas_triangle(4,60,2), -4-2*i)
+local T3 = ld.shift( ld.asa_triangle(30,4,50), 0.5-i)
+g:Dpolyline({T1,T2,T3}, true)
+g:Linewidth(4)
+g:Darc(T2[2],T2[1],T2[3],0.5,1,"->")
+g:Darc(T3[2],T3[1],T3[3],0.75,1,"->")
+g:Darc(T3[1],T3[2],T3[3],0.75,-1,"->")
+g:Dlabel(
+  "$4$",(T1[1]+T1[2])/2,{pos="N"}, "$5$",(T1[2]+T1[3])/2,{pos="NE"},"$3$",(T1[1]+T1[3])/2,{pos="W"},
+  "$4$",(T2[1]+T2[2])/2,{pos="N"},"$60^\\circ$", T2[1]+Zp(0.9,30*deg),{pos="center"}, 
+  "$2$",(T2[1]+T2[3])/2,{pos="W"},
+  "$4$",(T3[1]+T3[2])/2,{pos="N"}, "$30^\\circ$",T3[1]+Zp(1.15,15*deg),{pos="center"},
+  "$50^\\circ$",T3[2]+Zp(1.15,155*deg),{pos="center"},
+  "sss\\_triangle(4,5,3)",(T1[1]+T1[2])/2,{pos="S"}, "sas\\_triangle(4,60,2)",(T2[1]+T2[2])/2,{},
+  "asa\\_triangle(30,4,50)",(T3[1]+T3[2])/2,{})
+for _,T in ipairs({T1,T2,T3}) do
+    g:Dlabel("$A$",T[1],{pos="SW"}, "$B$",T[2],{pos="SE"},"$C$",T[3],{pos="N"})
+end
+g:Show()
+\end{luadraw}

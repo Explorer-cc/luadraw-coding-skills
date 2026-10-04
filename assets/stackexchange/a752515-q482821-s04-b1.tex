@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/752515 (question 482821, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/482821/tikz-how-to-add-fill-in-style-of-multiple-arcs
+\begin{document}
+\begin{luadraw}{name=fill_pattern}
+local g = graph:new{window={-5,5,-5,5},bg="gray!30",bbox=false,size={10,10}}
+local i = cpx.I
+g:Linewidth(8)
+local pattern = function(v) -- pattern in [0;1]x[0;1] shifted with v
+    g:Shift(v) -- we modify the graph matrix
+    g:Dbezier({0.2+i,0.2+0.5*i,0.8+0.5*i,0.8},"Crimson")
+    g:Dbezier({0.4+0.4*i,0.4*i,-0.2,0.2},"Crimson")
+    g:Dbezier({0.5+i,0.6+0.7*i,0.9+0.7*i,1+i},"ForestGreen")
+    g:Dbezier({0.6+0.6*i,0.7+0.7*i,0.9+0.7*i,1+0.5*i},"ForestGreen")
+    g:Dbezier({0.5*i,0.25+0.5*i,0.2+0.7*i,i},"ForestGreen")
+    g:Ddots({0.15+0.2*i, 0.8*i}, "scale=0.5")
+    g:IDmatrix() -- we restore the identity matrix
+end
+for x = -5, 4 do
+    for y = -5, 4 do
+        pattern(x+i*y)
+    end
+end
+g:Show() 
+\end{luadraw}
+\end{document}

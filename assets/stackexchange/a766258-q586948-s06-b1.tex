@@ -1,0 +1,48 @@
+% source: https://tex.stackexchange.com/a/766258 (question 586948, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/586948/draw-spherical-coordinates-definition-in-tikz
+\begin{document}
+\begin{luadraw}{name=spherical_coordinates, exec=true, auto=false}
+local ld = luadraw --V3.5
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Ms, Mc = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, pt3d.Ms, pt3d.Mc
+local g = ld.graph3d:new{ window3d={-5,5,-5,5,-5,6}, viewdir={40,70}, window={-5,5,-5.5,6.5}, size={12,12} }
+require 'luadraw_povray'
+require 'luadraw_decorations'
+local t0, H, r, R = 70*ld.deg, 4, 3, 3
+local U = Mc(1,t0,0)
+local P = {M(0,0,H), Mc(5,t0,H), Mc(5,t0,-4), M(0,0,-4)}
+local h = H*R/math.sqrt(H^2+r^2)
+local cube = ld.parallelep(Origin, 3*vecI, 3*U, h*vecK)
+local A, B = 2*Mc(r,t0,H), Mc(5,t0,0)
+-- Using POV-Ray
+g:Pov_new({imagescale=2, shadow=false})
+g:Pov_sphere(Origin, R, {name="extS", render=false}) 
+g:Pov_sphere(Origin, R-0.1, {name="intS", render=false}) 
+g:Pov_facet(cube, {name="C", render=false, csg=true})
+g:Pov_difference({"extS","intS","C"}, {color=ld.Orange})
+g:Pov_cone(M(0,0,H),r,Origin, {color=ld.LightGray, hollow=true})
+g:Pov_facet(P, {color=ld.LightBlue, opacity=1})
+g:Pov_axes(Origin, {arrows=1, width=8})
+g:Pov_exec()
+g:Pov_show()
+-- Using TikZ
+g:Dpolyline3d({A,Origin,B}, {label="$P(a,\\phi_0,\\theta_0)$", anchor1d=0, pos="N",
+    draw_options="line width=0.8, magenta"})
+g:Dpolyline3d({{-5*vecI,5*vecI}, {-5*vecJ,5*vecJ}, {-5*vecK,5*vecK}}, "dashed")
+g:Darc3d(vecK,Origin,A,5.5,1, 
+    {arc_options="magenta, line width=0.8, -stealth",
+    label="$\\phi_0$", pos="N", dist=5.75 })
+g:Darc3d(vecI,Origin,B,1.5,1, 
+    {arc_options="magenta, line width=0.8, -stealth", label="$\\theta_0$"})    
+g:Dlabel3d( "$x$",5*vecI,{pos="W"}, "$y$",5*vecJ,{pos="E"}, "$z$",6*vecK,{pos="N"},
+    "$\\theta=\\theta_0$", P[3],{pos="S"}, "$\\phi=\\phi_0$", M(0,-r,H),{pos="NW"},
+    "$\\rho=a$", Ms(R,0,3*math.pi/4),{pos="SW"}
+)    
+g:Show()
+\end{luadraw}
+\end{document}

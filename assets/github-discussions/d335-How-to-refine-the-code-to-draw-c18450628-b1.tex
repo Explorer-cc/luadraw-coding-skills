@@ -1,0 +1,53 @@
+% source: https://github.com/pfradin/luadraw/discussions/335#discussioncomment-18450628 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=tetrahedron}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local poly = require 'luadraw_polyhedrons'
+require 'luadraw_spherical'
+local g = ld.graph3d:new{ window = {-4,4,-4,4}, viewdir = {60,80}, size={12,12} }
+ld.Hiddenlines = false;ld.Hiddenlinestyle = "dashed"
+local P = poly.tetrahedron(M(0,0,0), M(0,0,3))
+local D, B, C, A = table.unpack(P.vertices)
+local T1,T2,T3,T4 = (A+B)/2, (B+C)/2, (C+D)/2, (D+A)/2
+local T5,T6 = (B+D)/2, (A+C)/2
+local R = pt3d.abs(T1)
+local o1,r1,n1 = ld.incircle3d(A,B,C) -- incircle of triangle ABC
+local o2,r2,n2 = ld.circumcircle3d(T3,T4,T5) -- circumcircle of triangle T3T4T5
+
+g:Define_sphere({radius=R, color="violet!30", edgecolor="violet!75", edgewidth=8, 
+    mode=ld.mBorder, hiddencolor="violet!75", opacity=0.65})
+
+g:DScircle({Origin,vecK}, {color="violet!75", width=8})
+g:DSpolyline( ld.facetedges(P),{width=8})
+g:DScircle({A,pt3d.prod(C-A,B-A)},{color="violet"})
+g:DSaddinside( ld.circle3db(o1,r1,n1), "draw=violet,fill=magenta!75, fill opacity=0.6")
+g:DScircle({T5,pt3d.prod(T3-T5,T4-T5)},{color="violet"})
+g:DSaddinside( ld.circle3db(o2,r2,n2), "draw=violet,fill=magenta!75, fill opacity=0.6")
+g:DSlabel(
+    "$A$",A,{pos="W"},
+    "$B$",B,{pos="S"},
+    "$C$",C,{pos="E"},
+    "$O$",Origin,{},
+    "$O_1$",o1,{},
+    "$O_2$",o2,{},
+    "$D$",D,{pos="N"},
+    "$a$",(A+B)/2,{pos="SW",node_options="text=red"},
+    "$R$",(T2+T4)/2,{pos="W",dist=0.1}
+)
+g:DSdots({Origin,T3,T4,T5,T6,o1,o2},{mark_options="red, scale=0.75"})
+g:Dspherical()
+g:Dpolyline3d({{Origin,T3},{T2,T4}},"red!50!gray,dashed,thick")
+g:Dpolyline3d({D,o1,A},"teal!50!gray,dashed,semithick")
+g:Dballdots3d({A,B,C,D,T1, T2},"red",0.75)
+g:Linecolor("black!80!violet!75")
+g:Dangle3d(D,T4,T2,0.15,"thick"); g:Dangle3d(D,T3,Origin,0.15,"thick"); g:Dangle3d(T4,T2,B,0.15,"thick");
+g:Show()
+\end{luadraw}
+\end{document}

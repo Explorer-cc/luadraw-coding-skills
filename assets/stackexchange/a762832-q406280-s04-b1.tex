@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/762832 (question 406280, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/406280/truncated-cylinder-in-pgfplots?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=truncated_cylinder}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{window3d={-5,5,-5,6,-5,5}, window={-4,7,-5,6}, 
+    viewdir={"central",30,60,20}, bbox=true}
+local Cyl = ld.cylinder( M(0,0,0), 2, M(0,5,0), 100, true)
+local P1, P2 = {M(0,0,0), M(-1,1,0)}, {M(0,0,0),M(1,1,0)} -- planes containing the two arcs
+Cyl = ld.cutfacet(Cyl, P1)
+Cyl = ld.cutfacet(Cyl, P2)
+g:Dscene3d( 
+    g:addFacet(Cyl, {usepalette={ld.palRainbow,"z"}, opacity=0.9}),
+    g:addPolyline( ld.border(Cyl) ),
+    g:addAxes( M(0,0,0), {arrows=1})  )
+g:Show()
+\end{luadraw}
+\end{document}

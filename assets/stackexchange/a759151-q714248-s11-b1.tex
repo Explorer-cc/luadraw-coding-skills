@@ -1,0 +1,33 @@
+% source: https://tex.stackexchange.com/a/759151 (question 714248, score 11, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/714248/asymptote-draw-a-torus-with-6-holes-drilled-in-it/759129
+\begin{document}
+\begin{luadraw}{name=Dimage}
+local g = graph3d:new{window={-5,5,-5,5}, window={-4,4,-2,2}, viewdir = perspective("central",5,80) }
+local cos, sin, pi = math.cos, math.sin, math.pi
+local R, r, rc = 2.75, 1, 0.6
+local f = function(t) return M(0,R+r*cos(t),r*sin(t)) end
+local C  = rotcurve(f,-pi,pi,{Origin,vecK}, 360,0, {grid={30,45}}) --torus
+local Cyl = cylinder(Origin, (R+r)*vecI, rc, 30, true) -- cylinder with axis is the x-axis
+
+local sortfacet= function(C,v) -- we sort out the facets that do not need to be cut by the cylinder.
+    local out, tobecut = {},{}
+    for _,F in ipairs(C) do
+        local ok = true
+        for _, A in ipairs(F) do
+            if (math.abs(A.x-R) <= 1.5*r) and (math.abs(A.y) <= v) and (math.abs(A.z) <= v) then ok = false; break end
+        end
+        if ok then table.insert(out,F) else table.insert(tobecut,F) end
+    end
+    return out, tobecut
+end
+
+local C1, C2 = sortfacet(C,rc)
+C2 = clip3d(C2, Cyl,true) -- the facets are clipped onto the cylinder, but the outer part is kept.
+g:Dfacet( concat(C1,C2), {usepalette={palAutumn,"z"}, mode=mShadedOnly})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,32 @@
+% source: https://github.com/pfradin/luadraw/discussions/239#discussioncomment-16624956 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=rot_curve}
+local sqrt =math.sqrt 
+local g = graph3d:new{
+    window={-2,2,1.25,6},
+    viewdir={40,70},
+    size={10,10}--, bbox=false
+}
+
+local p = function(t)
+    return M(0,2*sqrt(3)-sqrt(16-(t-4)^2),t)
+end
+local F = rotcurve(p, 6,2, {Origin, vecK}, 0, 360, {grid={21,37}})
+
+local q = function(t)
+    return M(0,sqrt(3) - sqrt(4 - (t - 1)^2),t)
+end
+local F1 = rotcurve(q, 2,3, {Origin, vecK}, 0, 360, {grid={41,37}})
+
+local r = function(t)
+    return M(0,sqrt(4-(t-4)^2),t)
+end
+local F2 = rotcurve(r, 3, 2, {Origin, vecK}, 0, 360, {grid={11,37}})
+g:Dmixfacet(F, {color="red", backcull=true, mode=mShadedOnly}, F1, {color="green"}, F2, {color="blue"})
+
+g:Show()
+\end{luadraw}
+\end{document} 

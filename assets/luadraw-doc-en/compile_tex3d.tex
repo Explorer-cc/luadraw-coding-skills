@@ -1,0 +1,38 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-compile-tex.tex (demo: Write on a cylinder)
+\begin{luadraw}{name=compile_tex3d}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Mc = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, pt3d.Mc
+
+local g = ld.graph3d:new{ window={-3,3,-4,4}, margin={0,0,0,0}, size={10,10}, viewdir={-50,60}}
+require 'luadraw_compile_tex'
+
+function curve_on_cylinder(curve,cylinder,screenNormal) 
+-- curve is a 3D polyline on a cylinder
+-- cylinder = {A,r,B} estle cylindre
+-- this function separate the visible part from the hidden part of the curve
+    local A,r,B = table.unpack(cylinder)
+    local U = B-A
+    local visibility_function = function(N)
+        local I = ld.dproj3d(N,{A,U})
+        return (pt3d.dot(N-I,screenNormal) >= 0)
+    end
+    return ld.split_points_by_visibility(curve,visibility_function)
+end
+
+local A, r, B = -3*vecK, 2, 2.5*vecK -- the cylinder
+local text = "Euler theorem: \\par \\(e^{i\\pi}=-1\\)"
+local L = ld.compile_tex(text, "essai") -- compile with shell-escape the first time to create "essai.eps" file
+local C = g:Compiled_tex2path3d(L,{scale=3, anchor=M(r,0,0), dir={vecJ,vecK}, polyline=true})
+--C is the text converted into 3D polylines, in the plane passing through anchor and basic direction dir, with a scale of 3.
+
+local f = function(A) return Mc(r,A.y/r,A.z) end -- returns the image of a point A on the cylinder by winding
+C = ld.ftransform3d(C,f) -- plane curve -> cylindrical curve transformation
+local Cv, Ch = curve_on_cylinder(C, {A,r,B}, g.Normal) -- visible part and hidden part of C, this may take some time
+Ch = ld.polyline2path3d(Ch) -- hidden part, conversion to path
+g:Dpath3d(Ch, "draw=none,fill=red!30")
+g:Dcylinder(A,r,B,{color="blue",opacity=0.5})
+Cv = ld.polyline2path3d(Cv) -- visible part, conversion to path
+g:Dpath3d(Cv, "draw=none,fill=red")
+g:Show()
+\end{luadraw}

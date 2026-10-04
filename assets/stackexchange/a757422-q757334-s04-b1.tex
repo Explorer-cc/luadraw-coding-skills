@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/757422 (question 757334, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/757334/how-to-create-tikz-figure-as-the-pictrure-shown-in-image
+
+\begin{document}
+\tikzset{->-/.style={decoration={markings, mark=at position #1 with {\arrow{Stealth}}},postaction={decorate}}}%
+\begin{luadraw}{name=volume}
+local cos, sin, pi, sqrt = math.cos, math.sin, math.pi, math.sqrt
+local g = graph3d:new{window3d={-3,3,-3,3,0,6}, adjust2d=true, size={12,12},bbox=false, viewdir=perspective("central",15,50,30)}
+local style = "shading=radial,inner color=blue!20,outer color=blue!80"
+local p = function(t) return M(1.25*cos(t)+sin(t)^2,2.5*sin(t),2+sqrt(8-3*sin(2*t)^2)) end
+local L = parametric3d(p, -pi,pi)
+local ctrn = cutpoly( prism( reverse(L[1]), -8*vecK,true), {Origin,vecK})
+local N, O, S = 5*vecK, M(-3,-3,0), 6.5*vecK+2*vecJ
+-- drawing
+g:Linewidth(8)
+g:Dscene3d( g:addAxes(O, {arrows=1}) )
+g:Dpolyline3d(pxy(L), "color=Navy,pattern color=LightBlue,pattern=north west lines,->-=0.6"); g:Dpolyline3d(pxy(L), "Navy,->-=0.1")
+g:Dpoly(ctrn,{mode = mShadedOnly, opacity=0.4})
+g:Dpolyline3d(L,style..",color=Navy,->-=0.6"); g:Dpolyline3d(L,"Navy,->-=0.1")
+g:Dpolyline3d({N,N+2*vecK},"Crimson,-stealth")
+g:Linewidth(6)
+g:Dpolyline3d({S,N+vecJ},"-stealth")
+g:Dpolyline3d({O+1.25*vecK,O+6*vecK},"dashed")
+g:Dlabel3d(
+    "$O$", O, {pos="NW"}, "$N$", N+2*vecK, {pos="N",node_options="Crimson"}, 
+    "$D$", Origin, {pos="center",dir={vecJ,-vecI}, node_options=""}, "$C'$", 2*vecI,{},
+    "$S$", N, {pos="S"}, "$C$", N+2*vecI,{pos="center",dir={vecJ,vecK}},
+    "$z=f(x,y)$",S,{pos="N",dir={}}
+)
+g:Show()
+\end{luadraw}
+\end{document}

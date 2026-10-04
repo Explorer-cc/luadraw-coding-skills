@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/749068 (question 749064, score 12, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749064/stereographic-projection-in-latex
+\begin{document}
+\begin{luadraw}{name=stereographie, exec=true}
+local i = cpx.I
+local g = graph3d:new{window={-9,10,-6,6}, size={12,12}, bg="gray!30",viewdir={30,60}}
+g:Linejoin("round"); g:Linewidth(8); g:Labelsize("footnotesize")
+local plan = {M(0,0,0),vecK}
+local Nord = M(0,0,3)
+local a = 3*pt3d.normalize( M(1,1,1.5) )
+local Sa = interDP( {Nord,a-Nord}, plan)
+local S = sphere(Origin,3,36,36)
+local V = g:Classifyfacet(S)
+local V1 = cutfacet(V,plan) -- visible part of sphere above the plane
+
+g:Dsphere(Origin,3,{mode=2,color="SteelBlue"})
+g:Dplane( plan, vecJ,12,12,15,"fill=Chocolate, fill opacity=0.5")
+g:Dpolyline3d( {{M(-6,0,0),M(7,0,0)}, {M(0,-6,0),M(0,7,0)}, {M(0,0,0),M(0,0,5)} }, "->")
+g:Dpolyline3d(border(V1), "ball color=SteelBlue")
+g:Dpolyline3d( {Nord, M(0,0,5)})
+g:Lineoptions(Hiddenlinestyle,nil,8); g:Dcircle3d(Origin,3,vecK)
+g:Dpolyline3d({ {Nord,a}, {M(-5,0,0),M(5,0,0)}, {M(0,-5,0),M(0,5,0)}, {M(0,0,-4),M(0,0,5)} })
+g:Linestyle("solid"); g:Dpolyline3d( {a,Sa} )
+g:Dlabel3d(
+    "$p$", Nord, {pos="W"},
+    "$x$", a, {},
+    "$\\varphi(x)$", Sa, {pos="E",dir={-vecI,-vecJ}},
+    "$R^m$", M(6,-5.5,0), {pos="E", dir={-vecI,-vecJ}} )
+g:Dcrossdots3d({{Nord,vecK},{Sa,vecK},{a,a}})
+g:Show()
+\end{luadraw}
+\end{document}

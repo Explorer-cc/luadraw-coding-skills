@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/765297 (question 199161, score 6, block 1)
+\documentclass[tikz]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+% images creation
+\begin{document}
+\begin{luacode*}
+local ld = luadraw
+local nbimages = 36
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local sin, cos, pi = math.sin, math.cos, math.pi
+
+local g = ld.graph3d:new{window={-5,5,-5,5}, margin=0, bg="lightgray"}
+require 'luadraw_spherical'
+local R = 4
+local p = function(u,v)
+    local x, y = 1-cos(u), sin(v/2)
+    return R*M(cos(v/2)*x*y, sin(u)*y, 1-y^2*x)
+end
+local alpha = ld.linspace(0,360,nbimages+1)
+local L = function(v) 
+    return ld.parametric3d( function(t) return p(t,v*ld.deg) end, -pi,pi,50)
+end
+for k = 1, nbimages do  -- -- create the image number k,
+    g:Setviewdir(alpha[k],60)
+    g:Define_sphere({radius=R, color="orange", opacity=0.7})
+    for j = 10, 350, 20 do
+        g:DScurve(L(j), {color="black",width=6})
+    end
+    g:Dspherical()
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\end{document} 

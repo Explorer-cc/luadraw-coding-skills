@@ -1,0 +1,114 @@
+% source: https://tex.stackexchange.com/a/766816 (question 444812, score 4, block 1)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+% images creation
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+ld.nbrot = 20
+ld.nbimages = 4*ld.nbrot+1
+
+local g = ld.graph3d:new{window={-3,3,-3,3},viewdir={"central",30,60},size={12,12}}
+g:Linewidth(8)
+-- declarations
+local O = M(-3,-3,-3)/2
+local facet_list = {}
+local calc_facet = function(dep,u,v,color)
+    local f = {dep,dep+u,dep+u+v,dep+v} -- first
+    local rep = {}
+    for x = 0, 2 do
+        for y = 0, 2 do
+            table.append(facet_list, {ld.shift3d(f,x*u+y*v),{color=color,twoside=false,contrast=0.25}})
+        end
+    end
+end
+-- initial cube (contains in facet_list):
+calc_facet(O,vecJ, vecI,"blue")
+calc_facet(O+3*vecK,vecI, vecJ,"green")
+calc_facet(O,vecJ, vecK,"white")
+calc_facet(O+3*vecI,vecK, vecJ,"yellow")
+calc_facet(O,vecI, vecK,"red")
+calc_facet(O+3*vecJ,vecK, vecI,"orange")
+-- rotations: 
+local rot = function(axe,slice,sens) --axe="x" or "y" or "z", slice=1 or 2 or 3, sens=1 or -1
+    local test
+    if axe == "x" then
+        axe = {Origin,vecI}
+        if slice == 1 -- first slice
+        then test = function(G) return (G.x < -0.5) end
+        elseif slice == 2 then test = function(G) return (math.abs(G.x) < 0.5) end
+        elseif slice == 3 then test = function(G) return (G.x > 0.5) end
+        end
+    elseif axe == "y" then
+        axe = {Origin,vecJ}
+        if slice == 1 -- first slice
+        then test = function(G) return (G.y < -0.5) end
+        elseif slice == 2 then test = function(G) return (math.abs(G.y) < 0.5) end
+        elseif slice == 3 then test = function(G) return (G.y > 0.5) end
+        end
+    elseif axe == "z" then
+        axe = {Origin,vecK}
+        if slice == 1 -- first slice
+        then test = function(G) return (G.z < -0.5) end
+        elseif slice == 2 then test = function(G) return (math.abs(G.z) < 0.5) end
+        elseif slice == 3 then test = function(G) return (G.z > 0.5) end
+        end
+    end
+    local rep = {}
+    for k,F in ipairs(facet_list) do
+        if k%2 == 0 then table.insert(rep,F) -- F is color option 
+        else -- F is a facet
+            if test(pt3d.isobar3d(F)) then table.insert(rep, ld.rotate3d(F,sens*90,axe))
+            else
+                table.insert(rep,F)
+            end
+        end
+    end
+    facet_list = rep
+end
+
+local actions = {}
+local Laxe, last, axe, slice, dir = {"x","y","z"}, {1,1,1}
+for k = 1, (ld.nbimages-1)/4 do
+    axe = Laxe[math.random(1,3)]
+    slice = math.random(1,3)
+    dir = 2*(math.random(1,2)-1.5)
+    if (axe == last[1]) and (slice == last[2]) and (dir == -last[3]) then dir = -dir end
+    last = {axe,slice,dir}
+    rot(axe,slice,dir)
+    table.insert( actions, 1, {axe,slice,dir} )
+end
+-- create the image number k, this function must be global
+function ld.makeframe(k) -- do not modify this line
+    if k > 1 then
+        if (k-1)%4 == 1 then 
+            axe, slice, dir = table.unpack( actions[(k+2)//4] )
+            rot(axe,slice,-0.25*dir)
+        elseif (k-1)%4 == 2 then rot(axe,slice,-0.25*dir)
+        elseif (k-1)%4 == 3 then rot(axe,slice,-0.25*dir)
+        else rot(axe,slice,-0.25*dir)
+        end
+    end
+    g:Dmixfacet( table.unpack(facet_list) ) -- display the cube
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls]{4}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

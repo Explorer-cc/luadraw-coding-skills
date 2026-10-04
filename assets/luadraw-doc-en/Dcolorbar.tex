@@ -1,0 +1,19 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-shadedforms.tex (demo: Color bars)
+\begin{luadraw}{name=Dcolorbar}
+local ld = luadraw
+local Z = ld.cpx.Z
+
+local g = ld.graph:new{size={10,10}, bbox=false}
+g:Labelsize("small")
+require 'luadraw_shadedforms'
+local pal = require 'luadraw_palettes'
+g:Dcolorbar(Z(-4,-4), pal.Rainbow)
+g:Dcolorbar(Z(-2,-4), pal.GasFlame, {minmax={0,7},values=8})
+g:Dcolorbar(Z(-1,1), pal.Autumn, {dir=1,length=6,width=1,addvalues={0.25,0.5,0.75},labelpos="S"})
+g:Dcolorbar(Z(-1,-1), pal.Viridis, {dir=1,length=6,width=-1,addvalues={0.25,0.5,0.75},labelpos="N"})
+g:Dlabel("No value", Z(-4.25,-4),{pos="S"},
+    "\\parbox{1.95cm}{minmax=\\{0,7\\}\\\\values=8}", Z(-2.25,-4), {},
+    "dir=1, length=6, width=1", Z(2,2), {pos="N"},
+    "dir=1, length=6, width=-1", Z(2,-2),{pos="S"})
+g:Show()
+\end{luadraw}

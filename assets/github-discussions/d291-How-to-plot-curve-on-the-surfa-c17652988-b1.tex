@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/291#discussioncomment-17652988 (pfradin, block 1)
+\documentclass[tikz]{standalone}
+\usepackage{fourier-otf}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name=saddle_surface}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{size={10,10},window3d={-2,2,-2,2,-2,2},window={-3,3,-2.5,1.5}, viewdir={-115,60}}
+--window={-2,1.5,-3,1.5}
+local f = function(x,y) return x^2/4-y^2/3 end
+local dot = function(x,y) return M(x,y,f(x,y)) end
+local A, B, C = dot(0,0.5), dot(-1.4,-1.65), dot(1.4,-1.65) -- three points on the surface
+local fAB = function(t)
+    local x = A.x + t*(B.x-A.x)
+    local y = A.y + t*(B.y-A.y)
+    return M(x,y,f(x,y))
+end
+
+local fCA = function(t)
+    local x = C.x + t*(A.x-C.x)
+    local y = C.y + t*(A.y-C.y)
+    return M(x,y,f(x,y))
+end
+
+local fBC = function(t)
+    local x = B.x + t*(C.x-B.x)
+    local y = B.y + t*(C.y-B.y)
+    return M(x,y,f(x,y))
+end
+
+local tri = function(t)
+    if t < 1 then return fAB(t)
+    elseif t < 2 then return fBC(t-1)
+    else return fCA(t-2)
+    end
+end
+local S = ld.cartesian3d(f,-2,2,-2,2,{30,30})
+
+g:Dfacet(S,{color="black",mode=ld.mShaded,edge=true,edgecolor="white"})
+g:Dparametric3d(tri,{t={0,3}, draw_options="red,line width=2"})
+g:Show()
+\end{luadraw}
+\end{document}

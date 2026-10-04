@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/60#discussioncomment-14261268 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/356121/how-to-draw-these-polyhedrons
+\begin{luadraw}{name=regular_octahedron}
+local g = graph3d:new{window={-8,8,-2,6},viewdir={140,70},size={10,10}}
+require 'luadraw_polyhedrons' -- see luadraw documentation 
+g:Linejoin("round"); Hiddenlinestyle = "dashed";g:Linewidth(4)
+local a = 5
+local P = parallelep(Origin, a*vecI,a*vecJ,a*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+local X = (A+C)/2
+local v = -5*vecJ-5*vecI
+local O1 = shift3d( Octaedre(Origin,a/2*vecK), M(a,a,a)/2)
+Hiddenlines = true
+g:Dpoly(P,{mode=4,color="LightBlue"})
+g:Dpoly( shift3d(O1,v), {mode=4, color="orange"})
+g:Lineoptions("dashed")
+g:Dpoly(O1,{mode=0})
+g:Show()
+\end{luadraw}
+\end{document} 

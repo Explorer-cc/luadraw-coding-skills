@@ -1,0 +1,34 @@
+% source: https://tex.stackexchange.com/a/755902 (question 755898, score 16, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/755898/drawing-a-sphere-and-ellipsoid-together
+\begin{document}
+
+\begin{luadraw}{name=sphere_ellipsoid3}
+local cos, sin, pi = math.cos, math.sin, math.pi
+local g = graph3d:new{viewdir={40,70},bbox=false, bg="lightgray"}
+require 'luadraw_spherical'
+Hiddenlines = true; Hiddenlinestyle = "dotted"
+g:Linewidth(8)
+local a = math.sqrt(7/20)
+local n1, n2 = pt3d.normalize(M(1,0,a)), pt3d.normalize(M(1,0,-a))
+local p = function(u,v) return M(2*cos(u)*sin(v),3*sin(u)*sin(v),4*cos(v)) end
+local ellipsoid = surface(p,-pi,pi,0,pi,{30,30})
+ellipsoid = g:Sortfacet(ellipsoid)
+
+g:Define_sphere( {center=Origin, radius=3, color="Orange"})
+g:DScircle({Origin, n1}, {color="ForestGreen"})
+g:DScircle({Origin, n2}, {color="ForestGreen"})
+g:DSpolyline(facetedges(ellipsoid), {hidden=false, color="Crimson",width=6})
+g:DSpolyline({{-4*vecI,4*vecI},{-4*vecJ,4*vecJ},{-5*vecK,5*vecK}}, {arrows=1})
+g:DSlabel("$x$", 4.25*vecI,{}, "$y$",4.25*vecJ,{}, "$z$",5*vecK,{pos="N"})
+g:Linestyle("noline"); g:Dspherical(); g:Lineoptions("dotted","Crimson",8)
+--g:Dlabel3d("$x$", 4*vecI,{pos="W"}, "$y$",4*vecJ,{pos="W"}, "$z$",5*vecK,{pos="N"})
+g:Savematrix(); g:Setmatrix3d( {Origin, 2*vecI, 3*vecJ, 4*vecK} )
+g:Dsphere(Origin,1,{mode=mBorder})
+g:Restorematrix()
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/754855 (question 754846, score 16, block 2)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+\begin{luacode*}
+nbimages = 36
+\end{luacode*}
+
+% images creation
+\begin{luacode*}
+local g = graph3d:new{ window3d={0,10,0,10,0,10}, window={-6.5,9,-8,9},bbox=false,bg="Beige", size={12,12}}
+require 'luadraw_polyhedrons'
+-- declarations
+local T,S,A,F = small_stellated_dodecahedron(M(5,5,5),M(5,5,9),true)
+local theta = linspace(0,360,nbimages+1) 
+
+-- create the image number k, this function must be global
+function makeframe(k) 
+    g:Defaultattr() -- do not modify
+    t = theta[k]; 
+    local S1 = rotate3d(S,t,{M(5,5,5),vecK})
+    local F1 = rotate3d(F,t,{M(5,5,5),vecK})
+    local A1 = rotate3d(A,t,{M(5,5,5),vecK})
+    g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray"})
+    g:Ddots3d( concat(pxy(S1), pxz(S1), pyz(S1)), "darkgray!50") -- projection of the vertices
+    g:Dpolyline3d( concat(pxy(F1), pxz(F1), pyz(F1)), true, "draw=none,fill=darkgray!50") -- projection of the facets
+    g:Dscene3d( g:addFacet(F1,{color="Crimson"}), g:addPolyline(A1, {color="Gold"}), g:addDots(S1) )
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\def\nb{\directlua{tex.print(nbimages)}}
+\def\makeframe#1{\directlua{makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+
+\end{document} 

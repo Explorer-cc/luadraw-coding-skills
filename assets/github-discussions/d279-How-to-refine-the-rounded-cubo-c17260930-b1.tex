@@ -1,0 +1,87 @@
+% source: https://github.com/pfradin/luadraw/discussions/279#discussioncomment-17260930 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name=round-cobuid}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, vecI, vecJ, vecK = pt3d.M, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sqrt, sin, cos = math.sqrt, math.sin, math.cos
+
+local g = ld.graph3d:new{
+  window3d={-5,5,-5,5,-5,5},
+  window={-4,3,-2,4},viewdir={35,80}
+}
+ld.Hiddenlinestyle = "dashed"
+-- length, width, height
+local L, W, H = 5.0, 2.4, 3.0
+local c = 1
+local bc = true
+local t = 0.5
+local nb1, nb2 = 18, 12
+local scene = {}
+
+local function add_quarter_cylinder(center, r1, r2, axis, n)
+  if pt3d.det(r1,r2,axis) < 0 then r1, r2 = r2,r1 end -- orientation
+  local arc1, arc2 = {}, {}
+  for k = 0,n do
+    local u = k*math.pi/2/n
+    local p = center + cos(u)*r1 + sin(u)*r2
+    table.insert(arc1, p)
+    table.insert(arc2, p+axis)
+  end
+  local poly = ld.prism(arc1,axis,false)
+  table.insert(scene, g:addPoly(poly, {color="white", contrast=c, backcull=bc}))
+  table.insert(scene, g:addPolyline( {arc1, arc2 }, {hidden=true}))
+end
+
+local function add_octant_sphere(center, r1, r2, r3, n)
+    if pt3d.det(r1,r2,r3) < 0 then r1, r2 = r2,r1 end -- orientation
+    local arc = {}
+    for k = 0, n do
+        local u = k*math.pi/2/n
+        table.insert(arc, center + cos(u)*r3 + sin(u)*r1)
+    end
+    local poly = ld.rotline(arc, {center,r3}, 0, 90, {nbdots=n})
+    table.insert(scene, g:addFacet(poly, {color="white", contrast=c, backcull=bc}))
+    table.insert(scene, g:addPolyline({{center,center+r1}, {center,center+r2}, 
+        {center,center+r3}}, {hidden=true}))
+end
+
+local facets = {
+  {M(0,0,H+t), M(L,0,H+t), M(L,W,H+t), M(0,W,H+t)} --top
+  ,{M(L+t,0,0), M(L+t, W,0), M(L+t,W,H), M(L+t, 0,H)} -- front
+  ,{M(L,W+t,0), M(0,W+t,0), M(0,W+t,H), M(L,W+t,H)} -- right
+  ,ld.reverse( {M(0,0,-t), M(L,0,-t), M(L,W,-t), M(0,W,-t)} ) --bottom
+}
+local box_inside = ld.parallelep(M(0,0,0), L*vecI, W*vecJ, H*vecK)
+--to avoid unnecessary facet intersection calculations
+table.insert(scene, g:addWall( ld.facet2plane(ld.getfacet(box_inside)) ))
+
+table.insert(scene, g:addFacet(facets, {color="white",contrast=c, backcull=bc, edge=true, hidden=true}))
+table.insert(scene, -- box inside
+    g:addPoly( box_inside,{ color="white",contrast=c, backcull=bc, edge=true, hidden=true }))
+
+add_quarter_cylinder(M(0,W,H), t*vecJ, t*vecK, L*vecI, nb1)
+add_quarter_cylinder(M(L,0,H), t*vecI, t*vecK, W*vecJ, nb1)
+add_quarter_cylinder(M(L,W,0), t*vecI, t*vecJ, H*vecK, nb1)
+add_quarter_cylinder(M(0,W,0), t*vecJ, -t*vecK, L*vecI, nb1)
+add_quarter_cylinder(M(L,0,0), t*vecI, -t*vecK, W*vecJ, nb1)
+
+add_octant_sphere(M(L,W,H), t*vecI, t*vecJ, t*vecK, nb2)
+add_octant_sphere(M(L,W,0), t*vecI, t*vecJ, -t*vecK, nb2)
+
+g:Dscene3d(table.unpack(scene))
+
+-- missing dashed lines
+g:Dpolyline3d({
+    {M(0,0,-t), M(0,0,0)}, {M(0,W,-t), M(0,W,0)}, {M(0,0,H), M(0,0,H+t)}, {M(0,W,H), M(0,W,H+t)},
+    {M(0,W,0), M(0,W+t,0)}, {M(0,W,H), M(0,W+t,H)}, {M(L+t,0,H), M(L,0,H), M(L,0,H+t)},
+    {M(L+t,0,0), M(L,0,0), M(L,0,-t)}}, "dashed")
+
+g:Show()
+\end{luadraw}
+\end{document}

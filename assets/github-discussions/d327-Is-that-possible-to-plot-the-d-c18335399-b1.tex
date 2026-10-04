@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/327#discussioncomment-18335399 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=cone_intersection}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{
+    window3d = {-5,5,-5,5,-5,5},window = {-6,10,-5,10},
+    viewdir = {25,70}, size={12, 12}
+}
+local Z = cpx.Z
+local Dist, ratio, ShiftDist = 5, 1.8, 2.5
+local Shift = M(0, ShiftDist, 0)
+local cone = ld.cone(Shift, -Shift, 12.5, 60, true)
+local coneUp = ld.cutpoly(cone, {O, vecK}) 
+local coneFront, coneBack = ld.cutpoly(coneUp, {M(-5,0,0), vecI}) --<- *cutpoly* once only, not twice
+
+g:Dpoly(coneBack,{edgestyle="noline"}) -- <- only facets, no edge
+g:Dedges( g:Edges(coneBack), {style="dashed"} ) --> only edges
+g:Show()
+\end{luadraw}
+\end{document}

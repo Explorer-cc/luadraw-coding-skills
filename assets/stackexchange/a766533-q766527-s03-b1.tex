@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/766533 (question 766527, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/766527/tikz-3d-different-planes-within-one-path
+\begin{document}
+\begin{luadraw}{name=cylinder_outline}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecK = pt3d.Origin, pt3d.vecK
+local g = ld.graph3d:new{ window={-2,2,-1,4}, size={12,12}}
+local center1, center2, R = Origin, 3*vecK, 2
+local C = g:Cylinder_outline(center1,R,center2)
+for _, s in ipairs(C.section)  do -- C.section is a list of 3D paths
+    g:Dpath3d(s, "draw=none, fill=red") 
+end
+g:Dpath3d(C.side, "draw=none, fill=blue") -- C.side is a 3D path
+g:Dpath3d(C.visible, "white"); -- C.visible is a 3D path (visible edges)
+g:Dpath3d(C.hidden, "white,dashed") -- C.hidden is a 3D path (hidden edges)
+g:Show()
+\end{luadraw}
+\end{document}

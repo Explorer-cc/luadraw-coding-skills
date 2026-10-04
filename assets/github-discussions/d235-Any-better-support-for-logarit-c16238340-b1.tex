@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/235#discussioncomment-16238340 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=power_function}
+   f = function(x) 
+       return math.exp(x)+math.pow(x, 3) 
+   end
+   logf = function(x) 
+       return math.log10(f(x)) 
+   end
+   local g = graph:new{window={-1, 10, -1, 17}}  
+   
+   local log_labels = function(i1, i2, step)
+       step = step or 1
+       local ticks = {}
+       for i = i1, i2, step do
+           table.insert(ticks, i)
+           table.insert(ticks, "$10^{"..i.."}$")
+       end
+       return ticks
+   end
+
+   g:Daxes({0, 1, 1}, {
+       arrows = "-Stealth", 
+       grid = true, 
+       xyticks={0,0},
+       gridstyle = "dashed",
+       labelpos={"bottom","left"}, 
+       --labelcolor={"","magenta"}, -- this should work, but there is a bug in luadraw_graph2d
+       ynode_options="magenta", -- patch 
+       myylabels = log_labels(1,6), 
+       legend = {"$x$", "$x^4$"},
+       legendsep={-0.05,0},
+       legendstyle = {"S","W"}
+   })
+
+   g:Linecolor("blue")
+   g:Dcartesian(f, {x={0, 2}, nbdiv=5})
+   g:Linecolor("magenta")
+   g:Dcartesian(logf, {x={0, 10}, nbdiv=5})
+
+   g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/118#discussioncomment-14653863 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/569683/tikz-with-equation-regions
+\begin{document}
+
+\begin{luadraw}{name=tikz-with-equation-regions}
+local g = graph3d:new{window3d = {-1,1,-1,1,-1,1},window={-2,2,-2,2},bbox=false,viewdir={-130,50},size={10,10}}
+local cos, sin, pi = math.cos, math.sin, math.pi
+local  p = function(u,v) return M(sin(u),cos(u-v),sin(v)) end
+local s = surface(p, -pi/2,pi/2,-pi,pi,{25,50})
+
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="lightgray",drawbox=true})
+g:Dfacet(s, {color="Pink"})
+g:Show()
+\end{luadraw}
+\end{document} 

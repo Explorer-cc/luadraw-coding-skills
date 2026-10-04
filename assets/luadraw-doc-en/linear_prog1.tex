@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-linprog.tex (demo: The \emph{g:DlinprogRegion())
+\begin{luadraw}{name=linear_prog1}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-3,6,-3,4.5}, size={10,10}}
+require 'luadraw_linprog'
+local system = \luastringO{$\begin{cases}x+y<2\\ x-y>2\\ x+y/3>-2\\ y>-2\end{cases}$}
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+g:DlinprogRegion(
+    {'x+y<2','x-y>-2','x+y/3>-2','y>-2'}, -- contraints
+    {draw_options="draw=none,fill=Pink, fill opacity=0.6",lines=true, color="blue", label=system, anchor=Z(0,-0.5),
+    node_options="inner sep=0,draw=none,fill=pink, fill opacity=0.8" }, -- options
+    {"-2*x+y"}, {color="red",dots=true, anchor1d=0.5} -- an objective and its options
+    )
+g:Show()
+\end{luadraw}

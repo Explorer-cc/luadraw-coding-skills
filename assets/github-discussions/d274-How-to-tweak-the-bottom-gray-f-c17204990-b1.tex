@@ -1,0 +1,54 @@
+% source: https://github.com/pfradin/luadraw/discussions/274#discussioncomment-17204990 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{document}
+\begin{luadraw}{name=step-function}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{
+    window3d={-1.5,8,-1.5,4.5,-0.5,3.5}, 
+    window={-4,5,-3,4}, 
+    viewdir={15,75}, 
+}
+--ld.Hiddenlines = true;ld.Hiddenlinestyle = "dashed"
+
+local x0, x1, x2 = 1.5, 4, 7.5
+local y0, y1, y2, y3 = 1.5, 2.25, 3, 3.75
+local h11, h12, h13, h21, h22, h23 = 2, 2.75, 2.5, 1.2, 1.8, 1.5
+
+local data = {
+    {x0,x1,y0,y1,h11},
+    {x1,x2,y0,y1,h21},
+    {x0,x1,y1,y2,h12},
+    {x1,x2,y1,y2,h22},
+    {x0,x1,y2,y3,h13},
+    {x1,x2,y2,y3,h23}
+}
+
+local function mycube(x1,x2,y1,y2,h)
+    return ld.parallelep(M(x1,y1,0),(x2-x1)*vecI,(y2-y1)*vecJ,h*vecK)
+end
+
+local polys = {}
+for _,b in ipairs(data) do
+    table.insert(polys,mycube(table.unpack(b)))
+end
+
+local scene = {}
+for _,p in ipairs(polys) do
+    table.insert(scene,g:addPoly(p,{color="white",contrast=0,edge=true,
+        edgecolor="black", edgewidth=6, opacity=0.7}))
+end
+table.insert(scene,g:addAxes(Origin,{arrows=1,labels={"$x$","$y$","$z$"},color="teal",width=12}))
+
+g:Dpolyline3d({M(x0,y0,0),M(x2,y0,0),M(x2,y3,0),M(x0,y3,0)},true,"fill=gray")
+
+g:Dscene3d(table.unpack(scene))
+
+g:Show()
+\end{luadraw}
+\end{document}

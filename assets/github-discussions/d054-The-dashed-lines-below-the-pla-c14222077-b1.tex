@@ -1,0 +1,20 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222077 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=interPP}
+local g = graph3d:new{window={-1.5,4.5,-2,5.2}, viewdir={30,60}, size={10,10}}
+g:Linejoin("round"); g:Linewidth(6)
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a,h=3,5,5
+local F = {M(0,0,0), M(a,0,0), M(a,0,h),M(0,0,h)} -- a facet
+local d = {Origin, vecK}
+local myangle1,myangle2,myangle3 = 40, 80,120
+local F1, F2, F3 = rotate3d(F,myangle1,d), rotate3d(F,myangle2,d), rotate3d(F,myangle3,d)
+ g:Dscene3d(
+    g:addFacet({F1,F2,F3},{edge=true}) -- if the 3 facets have the same color
+    )
+g:Show()
+\end{luadraw}
+\end{document} 

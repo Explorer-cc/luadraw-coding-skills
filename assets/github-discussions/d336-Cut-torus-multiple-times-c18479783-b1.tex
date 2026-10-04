@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/336#discussioncomment-18479783 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=torus_multiple_cuts}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{size={10,10}, margin={0,0,0,0}}
+local cos, sin, pi = math.cos, math.sin, math.pi
+local R, r = 2.5, 1
+local x0 = R-r
+local f = function(t) return M(0,R+r*cos(t),r*sin(t)) end
+local plan1 = {M(x0,0,0), -vecI} 
+local plan2 = {Origin, vecI + vecK} -- Second plane slanted at 45 degrees
+local C, wall = ld.rotcurve(f, -pi, pi, {Origin, vecK}, 360, 0, {grid={51,51}, addwall=2})
+local C1 = ld.cutfacet(C, plan1)   
+local C2 = ld.cutfacet(C1, plan2)  
+g:Dscene3d(
+    g:addWall(wall),
+    g:addPlane(plan1, {color="Pink", opacity=0.4, edge=true}), 
+    g:addPlane(plan2, {color="LightBlue", opacity=0.4, edge=true}), 
+    g:addFacet(C2, {color="Crimson", contrast=0.75}),
+    g:addAxes(Origin, {arrows=1})
+)
+g:Show()
+\end{luadraw}
+\end{document} 

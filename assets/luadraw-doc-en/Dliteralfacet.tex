@@ -1,0 +1,23 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-pdfliteral.tex (demo: Spherical bands)
+\begin{luadraw}{name=Dliteralfacet}
+local ld = luadraw
+local M, Ms = ld.pt3d.M, ld.pt3d.Ms
+local g = ld.graph3d:new{ size={10,10} }
+require 'luadraw_pdfliteral'
+local R, nb = 4, 5
+local phi2, phi11, dphi = math.pi, nil, math.pi/(2*nb+1)
+
+local sph_strip = function(p1,p2)
+    return ld.surface( function(u,v) return Ms(R,u,v) end, -math.pi, math.pi, p1, p2,{201,11})
+end
+
+local colors = ld.getpalette( ld.palAutumn, nb,true)
+local S = {}
+for k = 1, nb do
+    phi1 = phi2 -dphi; phi2 = phi1 - dphi
+    table.insert(S, sph_strip(phi1,phi2))
+    table.insert(S, {color=colors[k], mode=ld.mShadedOnly})
+end
+g:Dliteralfacet( table.unpack(S) ) -- 10^4 facets
+g:Show()
+\end{luadraw}

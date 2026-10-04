@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/269#discussioncomment-17178609 (pfradin, block 1)
+% Source - https://tex.stackexchange.com/a/763272
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=sphere}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    local Origin,vecI,vecJ,vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local sin, cos = math.sin, math.cos
+
+    require "luadraw_spherical"
+    local R = 4
+    local sphere = {Origin, R}
+    local g = ld.graph3d:new{window3d = {-6, 6, -6, 6, -6, 6},viewdir = {-20,75}}
+    ld.Hiddenlines = true;ld.Hiddenlinestyle = "dashed"
+
+    g:Define_sphere{
+        radius = R,
+        color="",
+        edgewidth=8,
+        edgecolor = "black",
+    }
+
+    local n1 = vecK
+    local n2 = vecJ
+    local n3 = pt3d.M(0,sin(60 * ld.deg),cos(60 * ld.deg))
+    local planes = { {Origin, n1}, {Origin, n2}, {Origin, n3} }
+    local colors = {"teal", "magenta", "cyan"}
+
+    for k, P in ipairs(planes)  do
+        g:DScircle(P, {color = colors[k], fill = colors[k], fillopacity=0.8})
+    end
+
+    g:Dspherical()
+    g:Show()
+\end{luadraw}
+\end{document}

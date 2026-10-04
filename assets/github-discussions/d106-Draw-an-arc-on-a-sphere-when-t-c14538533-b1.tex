@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/106#discussioncomment-14538533 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=triangle-on-3d-sphere}
+  local g = graph3d:new{window={-5,5,-5,5},viewdir={5,70},size={10,10}}
+  g:Linewidth(6); Hiddenlinestyle = "dashed"; Hiddenlines = true
+  require 'luadraw_spherical'
+  local R = 4
+  local O = Origin
+  
+  g:Define_sphere({center=O, radius=R}) -- first we define the sphere
+  local A =  sM(-20,70)   
+  local B =  sM(130,70)   
+  local P = {O, pt3d.prod(A,B)}
+  g:DScircle(P,{color="blue"})
+  g:Dspherical()
+  g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{},"$O$",O,{})
+  g:Ddots3d({A,B,O})
+  g:Show()
+\end{luadraw}
+\end{document}

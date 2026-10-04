@@ -1,0 +1,13 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-cvx-polyhedra-nets.tex (demo: Net of a parallelepiped)
+\begin{luadraw}{name=parallelep_net}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{viewdir={30,60},window={-8.5,8,-5,5},bbox=false, size={10,10}}
+require 'luadraw_cvx_polyhedra_nets'
+P = ld.parallelep(Origin, 4*vecI,5*vecJ,3*vecK)
+g:Dpolyhedron_net(P, {tabs=true, tabs_options="pattern=north west lines, pattern color=gray",
+  facet_options="fill=Orange!30", facet_name=true, edge_name=true})
+g:Show()
+\end{luadraw}

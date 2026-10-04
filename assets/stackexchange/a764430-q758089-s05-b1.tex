@@ -1,0 +1,18 @@
+% source: https://tex.stackexchange.com/a/764430 (question 758089, score 5, block 1)
+\documentclass[tikz]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/758089/how-to-improve-graphs-of-functions-of-two-variables-with-jagged-edges-in-pgfplot?rq=1
+\begin{document}
+\begin{luadraw}{name=cartesian_surface}
+local ld = luadraw
+local Z, M, Ms = ld.cpx.Z, ld.pt3d.M, ld.pt3d.Ms
+local g = ld.graph3d:new{ window3d={-3,3,-3,3,-3,3}, window={-5.5,5,-6,4.5},
+    viewdir={"central",220,65}, size={10,10} }
+local p = function(u,v) return M(u*v, u*(1+v), v) end  -- z=v, x=uz, y=u+x
+local S = ld.surface(p, -6,6,-3,3, {60,30})
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", drawbox=true})
+g:Dfacet(S, {usepalette={ld.palAutumn,"z"}, mode=ld.mShadedOnly, clip=true, twoside=false})
+g:Show()
+\end{luadraw}
+\end{document}

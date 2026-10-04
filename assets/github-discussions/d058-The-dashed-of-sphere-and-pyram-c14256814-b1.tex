@@ -1,0 +1,50 @@
+% source: https://github.com/pfradin/luadraw/discussions/58#discussioncomment-14256814 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/614030/how-to-draw-circle-passing-through-three-points-in-3d?rq=1
+\begin{luacode}
+function circle3d(A,B,C) -- circle through A, B and C
+    local P1, P2 = {(A+B)/2, B-A}, {(B+C)/2,B-C}
+    local D = interPP(P1,P2)
+    local N = pt3d.prod(B-A,C-A)
+    if N ~= nil then
+        local I = interDP(D, {A,N})
+        if I ~= nil then
+            local R = pt3d.abs(I-A)
+            return I, R, N -- center, radius and normal vector
+        end
+    end
+end
+\end{luacode}
+\begin{luadraw}{name=sphere-pyramid_29_08_2025}
+local g = graph3d:new{window={-5,5,-5,7}, viewdir={15,55}, size={10,10}};
+require 'luadraw_spherical' -- to use this extension
+g:Linejoin("round"); g:Linewidth(4)
+Hiddenlinestyle = "dashed"
+local a,b,h = 4,7,6
+local A, B,C,D,S = Origin, M(a,0,0), M(a,b,0), M(0,b,0),M(0,0,h)
+local I = (A+C)/2
+local  r = pt3d.abs(I-A) 
+local P = pyramid( {A,B,C,D}, S)
+g:Shift3d(-I) -- to put I on origin
+local R = pt3d.abs(I-A) 
+local H = dproj3d(A,{S,B-S})
+local K = dproj3d(A,{S,D-S})
+local J1, R1, N1 = circle3d(A,H,K) -- center, radius and normal vector
+Hiddenlines = true 
+
+g:Define_sphere({center=I, radius=R})
+g:DSpolyline( facetedges(P) )
+g:DScircle({A,N1})
+g:DScircle({I,vecK})
+g:Dspherical()
+
+g:Dballdots3d({S,A,B,C,D})
+g:Dlabel3d("$S$",S,{pos="N"}, "$A$",A,{pos="S"}, "$B$",B,{pos="S"}, "$C$",C,{pos="SE"}, "$D$",D,{pos="E"},"$H$",H,{pos="W"},"$K$",K,{pos="E"})
+
+g:Show()
+\end{luadraw}
+\end{document}

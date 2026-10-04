@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16875657 (pfradin, block 3)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=fill3}
+local ld = luadraw
+local cpx = ld.cpx
+local sqrt = math.sqrt
+local Z, i = cpx.Z, cpx.I
+local xmin, xmax, ymin, ymax = -1, 5, -2, 4
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax}}  
+g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(8)
+local d = ld.lineEq(4,-1,-11)
+local C = ld.parametric( function(t) return 2*Z(math.cosh(t),math.sinh(t)) end, -2,2)
+local S = ld.cutpolyline(C, d)
+g:Dpolyline(S,"draw=none,fill=green,fill opacity=0.6")
+g:Dpolyline(C, "violet"); g:Dline(d, "blue")
+g:Dlabel("$d$", Z(3.5,3.5),{pos="W"},"$C$",Z(2,1),{})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/763900 (question 621623, score 1, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/621623/how-to-draw-a-cylinder-above-a-cube-with-dashed-lines?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=cube_cylinder}
+local ld = luadraw
+local pt3d = ld.pt3d
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local M = pt3d.M
+
+local g = ld.graph3d:new{ window={-5,5,-3,3.5}, size={12,12} }
+ld.Hiddenlinestyle ="dashed"
+local a = 1.5
+local cube = ld.parallelep(M(-a,-a,-a), 2*a*vecI,2*a*vecJ, 2*a*vecK)
+-- left
+g:Shift(-2.5)
+g:Dpoly(cube, {color="green"})
+g:Dcylinder(M(0,0,a),a,M(0,0,2*a), {color="DarkBlue", hiddenstyle="noline"})
+-- right
+g:Shift(5)
+g:Dpoly(cube, {color="green"})
+g:Dcylinder(M(0,0,a),a,M(0,0,2*a), {color="DarkBlue"})
+g:Dpoly(cube, {mode=ld.mWireframe, edgestyle="dashed"}) -- dashed cube
+g:Show()
+\end{luadraw}
+\end{document}

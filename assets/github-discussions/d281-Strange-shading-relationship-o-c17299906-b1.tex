@@ -1,0 +1,52 @@
+% source: https://github.com/pfradin/luadraw/discussions/281#discussioncomment-17299906 (pfradin, block 1)
+% https://tex.stackexchange.com/a/763789/322482
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{fourier-otf}
+\usetikzlibrary{bending}
+\begin{document}
+
+\begin{luadraw}{name=spiral-cone-scene}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M,Origin,vecI,vecK = pt3d.M,pt3d.Origin,pt3d.vecI,pt3d.vecK
+local pi,sin,cos = math.pi,math.sin,math.cos
+
+local helix = function(t)
+  return M(t*sin(2.8*pi*t), t*cos(2.8*pi*t), t)
+end
+
+local tP = 2.925
+local P = helix(tP)
+local P0 = ld.pxy(P)
+
+local g = ld.graph3d:new{
+  window3d={-5,5,-5,5,0,5},
+  window={-6,6,-2,6.5},
+  --viewdir={25,80},
+  viewdir={25,70},
+}
+
+local helixCurve = ld.parametric3d(helix,4,0,300,false,5) --inverse order
+local u = pt3d.prod(vecK,g.Normal)
+local frontHelix, backHelix = ld.cutpolyline3d(
+  helixCurve,
+  {Origin, g.Normal} --<- projection plane, the normal vector g.Normal depends on viewdir
+)
+
+g:Dpolyline3d(backHelix,"BrickRed,thick")
+g:Dpolyline3d({{M(-5,0,0),M(5,0,0)},{M(0,-5,0),M(0,5,0)},{Origin,M(0,0,5.5)}},"-Stealth,black,thick")
+g:Dpolyline3d(frontHelix,"draw=white,double=green,double distance=0.8pt")
+g:Dpolyline3d({{Origin,P0},{P0,P}},false,"dashed")
+g:Darc3d(vecI,Origin,P0,1,1,vecK,"-Stealth")
+g:Ddots3d({P,P0},"MidnightBlue")
+g:Dlabel3d(
+    "$P$",P,{pos="NW"},
+    "$\\rho$",P0/2,{pos="S"},
+    "$z$",(P+P0)/2,{pos="NE"},
+    "$\\phi$",Origin,{pos="S",dist=.25}
+)
+g:Show()
+\end{luadraw}
+\end{document}

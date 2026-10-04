@@ -1,0 +1,37 @@
+% source: https://tex.stackexchange.com/a/761563 (question 709668, score 5, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/709668/how-is-it-possible-to-draw-2-merging-spherical-caps-with-tikz
+\begin{document}
+\begin{luadraw}{name=spheres_intersection}
+local R, h, x0, pi = 2.5, 1, 3.5, math.pi
+local g = graph3d:new{window3d={-4,7.5,-4,4,h,4}, 
+    viewdir= {45,60}, 
+    window={-6.5,4,-3,4}, size={12,12}, bbox=false}
+require 'luadraw_povray'
+
+local S1 = surface(function(u,v) return Ms(R,u,v) end, pi, -pi, 0, pi/2,{40,30})
+S1 = cutfacet(S1, {h*vecK, vecK})
+local S2 = shift3d(S1, x0*vecI)
+local I = g:Intersection3d(S2, {M(x0,0,0),vecI})
+local J = g:Intersection3d(S1, {M(0,0,0),vecI})
+local A, n, r, r2 = x0/2*vecI, vecI, math.sqrt(R^2-x0^2/4), math.sqrt(R^2-h^2)
+g:Pov_new() -- new Pov-Ray picture
+g:Pov_sphere( Origin, R, {clipplane={{h*vecK, vecK},{A,-n}}, color=Blue, opacity=0.6} )
+g:Pov_sphere( x0*vecI, R, {clipplane={{h*vecK, vecK},{A,n}}, color=ForestGreen, opacity=0.6} )
+g:Pov_axes( M(0,0,h), {arrows=1})
+g:Pov_polyline({ M(x0,r2,h),M(x0,0,h), M(x0,0,R)} )
+g:Pov_exec()-- execute Pov-Ray (needs -shell-escape option the first time)
+g:Dfacet( g:Plane2facet({h*vecK, vecK},0.75), {color="Beige"})
+g:Pov_show()-- display Pov-Ray picture
+local color = mixcolor(ForestGreen,0.6,Black,0.4)
+g:Dlabel3d("$H_0$",M(x0,0,(R+h)/2),{pos="E", dir={vecJ,vecK},node_options="color="..color}, 
+    "$R_0$", M(x0,r2/2,h),{pos="S", dir={vecJ,-vecI}})
+g:Dedges(I, {hidden=true, hiddenstyle="dashed"})
+g:Dedges(J, {hidden=true, hiddenstyle="dashed"})
+g:Dlabel3d( "$x$", M(7.5,0,h),{pos="S"}, "$y$", M(0,4,h), {}, "$z$", M(0,0,4), {pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

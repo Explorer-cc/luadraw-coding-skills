@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/271#discussioncomment-17194259 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+\begin{luadraw}{name=curve_cylinder2}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{
+    window3d={-3,3,-3,3,-4,4}, window={-5,5,-5,5}, 
+    viewdir={30,70}, size={10,10}
+}
+
+local function curve_on_cylinder(curve,cylinder)
+-- curve is a 3D polyline on a cylinder,
+-- cylinder = {A,r,V,B}
+    local A,r,V,B = table.unpack(cylinder)
+    if B == nil then B = V; V = B-A end
+    local U = B-A
+    local function visible_function(N)
+        local I = ld.dproj3d(N,{A,U})
+        return (pt3d.dot(N-I,g.Normal) >= 0)
+    end
+    return ld.split_points_by_visibility(curve,visible_function)
+end
+
+local sin, cos, pi = math.sin, math.cos, math.pi
+local r = 2
+local p = function(t)
+    return M(r*cos(t), r*sin(t), t/pi - 4)
+end
+local curve = ld.parametric3d(p, 0, 8*pi)
+local V, H = curve_on_cylinder(curve,{M(0,0,-4),r,M(0,0,4)}) 
+g:Dcylinder(M(0,0,-4),r,M(0,0,4), {color="cyan"})
+g:Dpolyline3d(V, "line width=2pt,red")
+g:Dpolyline3d(H, "line width=2pt,red,dotted")
+g:Show()
+\end{luadraw}
+\end{document}

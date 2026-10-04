@@ -1,0 +1,48 @@
+% source: https://github.com/pfradin/luadraw/discussions/283#discussioncomment-17334343 (pfradin, block 1)
+% Source - https://tex.stackexchange.com/a/763905
+% Posted by Explorer
+% Retrieved 2026-06-16, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=icosahedron_image}
+local ld = luadraw
+local M, Origin, vecI, vecJ = ld.pt3d.M, ld.pt3d.Origin, ld.pt3d.vecI, ld.pt3d.vecJ
+local poly = require 'luadraw_polyhedrons'
+
+local g = ld.graph3d:new{
+    window={-5,5,-5,5}, 
+    viewdir={25,65}, size={10,10}
+}
+
+local P, V, E, F = poly.icosahedron(Origin, M(0,0,4), true)
+
+g:Dscene3d(
+    g:addFacet(F, {color="red", opacity=0.8}),
+    g:addPolyline(E, {color="black", width=6}),
+    g:addDots(V, {color="black", scale=1.25})
+)
+local function project_vertex_image(k)
+    local A = V[k]
+    if A == nil then
+        return
+    end
+    local N = A - Origin
+    local U = ld.pt3d.normalize( ld.pt3d.prod(g:ScreenY(), N) ) or g:ScreenX()
+    local W = ld.pt3d.normalize(ld.pt3d.prod(N, U))
+    local mat = {}
+    g:BeginOnPlane({A,U,W}, {out=mat}) -- out returns a 2D matrix in the variable mat, redefining the axes
+        g:Dimage("example-image-duck", 0,
+            {matrix=mat, node_options="opacity=0.8", graphics_options="page=100,scale=0.35"})
+    g:EndOnPlane()
+end
+
+vertex_table = {12, 9, 5, 1,2,3,4,7,8}
+for _, k in ipairs(vertex_table) do
+    project_vertex_image(k)
+end
+g:Show()
+\end{luadraw}
+\end{document}

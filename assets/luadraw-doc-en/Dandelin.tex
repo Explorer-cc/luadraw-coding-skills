@@ -1,0 +1,60 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-8-More-Advanced-Examples.tex (demo: Illustration of Dandelin's Theorem)
+\begin{luadraw}{name=Dandelin}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window3d={-5,5,-5,5,-5,5}, window={-5,5,-5,6}, bg="lightgray",viewdir={-10,85}}
+g:Linewidth(8)
+local sqrt = math.sqrt
+local sqr = function(x) return x*x end
+local L, a = 4.5, 2
+local R = (a+5)*L/sqrt(100+L^2) --large sphere center=M(0,0,a) radius=R
+local S2 = ld.sphere(M(0,0,a),R,45,45)
+local k = 0.35 --homothety ratio
+local b, r = (a+5)*k-5, k*R -- small sphere center = M(0,0,b) radius = r
+local S1 = ld.sphere(M(0,0,b),r,45,45)
+local c = (b+k*a)/(1+k) --second center of homothety
+local z = a+sqr(R)/(c-a) --image of c under inversion with respect to the large sphere
+local M1 = M(0,sqrt(sqr(R)-sqr(z-a)),z)--point of the large sphere and the tangent plane
+local N = M1-M(0,0,a) --normal vector to the tangent plane
+local plane = {M(0,0,c),-N} --tangent plane
+local z2 = a+sqr(R)/(-5-a) --image of the vertex under inversion with respect to the large sphere
+local z1 = b+sqr(r)/(-5-b) --image of the vertex by the inversion with respect to the small sphere
+local P2 = M(sqrt(R^2-(z2-a)^2),0,z2)
+local P1= M(sqrt(r^2-(z1-b)^2),0,z1)
+local S = M(0,0,-5)
+local P = ld.interDP({P1,P2-P1},plane)
+local C = ld.cone(M(0,0,-5),10*vecK,L,45,true)
+local ellips = g:Intersection3d(C,plane)
+local plane1 = {M(0,0,z1),vecK}
+local plane2 = {M(0,0,z2),vecK}
+local L1, L2 = g:Intersection3d(S1,plane1), g:Intersection3d(S2,plane2)
+local F1, F2 = ld.proj3d(M(0,0,b), plane), ld.proj3d(M(0,0,a), plane) --focal points
+local s1, s2 = g:Proj3d(M(0,0,a)), g:Proj3d(M(0,0,b))
+local V, H = g:Classifyfacet(C) -- separate visible and invisible facets
+local V1, V2 = ld.cutfacet(V,plane)
+local H1, H2 = ld.cutfacet(H,plane)
+-- Drawing
+ -- faces not visible under the plane, fill only
+g:Dpolyline3d( ld.border(H2),"left color=white, right color=DarkSeaGreen, draw=none")
+g:Dsphere( M(0,0,b), r, {mode=ld.mBorder,color="Orange"}) -- small sphere
+ -- visible faces below the plane
+g:Dpolyline3d( ld.border(V2),"left color=white, right color=DarkSeaGreen, fill opacity=0.4")
+g:Dpolyline3d({S,P}) -- segment [S,P] which is partially below the plane
+g:Dfacet( g:Plane2facet(plane,0.75), {color="Chocolate", opacity=0.8}) -- the plane
+ -- outline of faces not visible above the plane, fill only
+g:Dpolyline3d( ld.border(H1),"left color=white, right color=DarkSeaGreen,draw=none,fill opacity=0.7")
+g:Dsphere( M(0,0,a),R, {mode=2,color="SteelBlue"}) -- large sphere
+ -- outline of faces visible above the plane
+g:Dpolyline3d( ld.border(V1),"left color=white, right color=DarkSeaGreen, fill opacity=0.6")
+g:Dcircle3d(M(0,0,5),L,vecK) -- opening of the cone
+g:Dpolyline3d({{P,F1},{F2,P,P2}})
+g:Dedges(L1,{hidden=true,color="FireBrick"})
+g:Dedges(L2,{hidden=true,color="FireBrick"})
+g:Dedges(ellips,{hidden=true, color="blue"})
+g:Dballdots3d({F1,F2,S,P1,P,P2},nil,0.75)
+g:Dlabel3d( "$F_1$",F1,{pos="N"}, "$F_2$",F2,{}, "$N_2$",P2,{},"$S$",S,{pos="S"}, 
+ "$N_1$",P1,{pos="SE"}, "$P$",P,{pos="SE"} )
+g:Show()
+\end{luadraw}

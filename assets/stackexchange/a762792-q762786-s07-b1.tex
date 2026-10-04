@@ -1,0 +1,43 @@
+% source: https://tex.stackexchange.com/a/762792 (question 762786, score 7, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/762786/how-to-shrink-with-a-certain-amount-of-offset#762789
+
+\usetikzlibrary{nfold}
+\makeatletter
+\tikzset{offset/.code=\tikz@addmode{\pgfgetpath\tikz@temp\pgfsetpath\pgfutil@empty\pgfoffsetpath\tikz@temp{#1}}}
+\makeatother
+
+\begin{document}
+\begin{luadraw}{name=parallel_curve, exec=true, auto=false}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i, cos, sin, pi = cpx.Z, cpx.I, math.cos, math.sin, math.pi
+
+local g = ld.graph:new{ window={-8,8,-8,0} }
+local a, rx, ry = Z(-6,-8), 12, 8
+
+-- function for the for verification
+local p = function(t) --parameterization of the curve parallel to the arc
+    return a+Z(rx*cos(t),ry*sin(t))-cpx.normalize(Z(ry*cos(t),rx*sin(t)))
+end
+
+local arc = ld.ellipticarc(a+rx, a, a+i*ry, rx, ry, 1) 
+local arc1 = ld.parallel_polyline(arc, 1) -- parallel arc
+-- intersection with the vertical and horizontal
+local A, B = table.unpack( ld.interL( {Z(-5,0),Z(-5,-7), Z(6,-7)}, arc1) )
+ld.epsilon=1e-12
+arc1 = ld.cut(arc1,A); arc1 = ld.cut(arc1,B,true) -- we cut the arc
+g:Dgrid({Z(-8,-8),Z(8,0)}, {gridcolor="lightgray"})
+g:Dpath({a, a+rx,"l", a, a+i*ry, rx, ry, 1, "ea", "cl"}, "line width=0.8pt")
+-- real curve 
+g:Dparametric(p,{t={0,pi/2}, draw_options="red,ultra thick"})
+-- goemetric solution 
+g:Dpolyline( ld.concat({A,Z(-5,-7),B}, arc1),"blue,ultra thick")
+-- Explorer proposal
+g:Writeln("\\draw[ultra thick,postaction={draw,ultra thick,Brown,offset=-1cm}] "..g:Coord(-6).." arc[x radius=12,y radius=8,start angle=90,end angle=0] -- "..g:Coord(-6-8*i).." -- cycle;")
+g:Show()
+\end{luadraw}
+\end{document}

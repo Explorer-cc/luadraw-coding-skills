@@ -1,0 +1,36 @@
+% source: https://github.com/pfradin/luadraw/discussions/80#discussioncomment-14370417 (pfradin, block 2)
+\begin{luadraw}{name = complementary-set}
+  local i = cpx.I
+
+  local A = set(0,90)
+
+  local lab_A, lab_A_not, lab_E = "$A$", "$\\overline{A}$", "$E$"
+  local col_A, col_A_not, col_E = "blue", "red", "black"
+
+  local graphview = graph:new{
+    window = {-7.25, 7.25, -5, 5},
+    size = {10, 10}
+  }
+
+  graphview:Fillopacity(0.2)
+
+ local B = table.copy(A)
+ table.insert(B,2,"m") -- add "move" after the first point
+ local compl = {-6.5 + 4*i, 6.5 + 4*i, 6.5 - 4*i,-6.5-4*i,0.25,"cla"} -- rectangle
+ insert(compl,B) -- compl = outline of E + the outline of A 
+ graphview:Dpath( compl, "fill=red,even odd") -- E is painted but not A
+ 
+  graphview:Dpath(
+    A,
+    col_A .. ", fill = " .. col_A
+  )
+
+  graphview:Fillopacity(.75)
+
+  graphview:Dlabel(
+    lab_A, 0, {node_options = col_A, pos = "center"},
+    lab_A_not, 4 + 2.7*i, {node_options = col_A_not, pos = "E"},
+    lab_E, -6.5 + 4*i, {node_options = col_E, pos = "NW"})
+
+  graphview:Show()
+\end{luadraw}

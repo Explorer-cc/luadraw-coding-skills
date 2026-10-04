@@ -1,0 +1,22 @@
+% source: https://github.com/pfradin/luadraw/discussions/340#discussioncomment-18519151 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=intersections}
+    local ld = luadraw
+    local cpx = ld.cpx
+    local g = ld.graph:new{ window={-1.5, 9, -0.1, 0.7}, size={10, 10, 0}}
+    ld.defaultlabelshift = 0
+    g:Daxes({0,1,0.1}, {
+        limits = {{0,8.5},{0,0.7}},
+        legendpos={0.5,0.5},-- <--?
+        legendstyle={"S","center"},
+        legendangle={0,90},
+        legendsep={-0.5,-1},-- <--?
+        legend = {"$\\text{Voltage}~(V)$", "$\\text{Probability Density}$"},
+    })
+    g:Show()
+\end{luadraw}
+\end{document}

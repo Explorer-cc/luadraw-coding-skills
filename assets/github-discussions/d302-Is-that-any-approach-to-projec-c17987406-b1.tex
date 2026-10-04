@@ -1,0 +1,63 @@
+% source: https://github.com/pfradin/luadraw/discussions/302#discussioncomment-17987406 (pfradin, block 1)
+% https://tex.stackexchange.com/a/765366/322482
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\definecolor{myblue}{RGB}{26,108,150}
+% https://tex.stackexchange.com/a/763175/322482
+% https://tex.stackexchange.com/q/278952/322482
+\begin{luacode*}
+local ld = luadraw
+local Z = ld.cpx.Z
+function ld.graph3d:BeginOnPlane2( system2d , view)
+-- system2d = {A, U, V} in space
+-- view = {x1,x2,y1,y2}
+-- canvas transformation to draw on the 3D plane {A, U, V} 
+--tikz matrix calculus :
+    local A, U, V = table.unpack(system2d)
+    view = view or {-5,5,-5,5}
+    local u, v, o = self:Proj3dV(U), self:Proj3dV(V), self:Proj3d(A)
+    u, v = table.unpack( self:MLtransform({u,v}) )
+    o = self:Mtransform({o})[1]
+    local a, b, c, d = u.re, u.im, v.re, v.im
+    local tx, ty = o.re-self.Xmin, o.im-self.Ymin
+    tx, ty = -(a-1)*tx-c*ty, -b*tx-(d-1)*ty
+    local matrix = "{"..ld.strReal(a)..","..ld.strReal(b)..","..ld.strReal(c)..","..ld.strReal(d)..",("..ld.strReal(tx*self.Xscale)..",".. ld.strReal(ty*self.Yscale)..")}"
+    self:Saveattr()
+    self:Writeln("\\begin{scope}[cm="..matrix.."]")
+    self:Writeln("\\pgflowlevelsynccm%") -- magic macro, but ALL is transformed
+    local x1,x2,y1,y2 = table.unpack(view)
+    local p = {Z(x1,y1),Z(x2,y1),Z(x2,y2),Z(x1,y2),"l","cl"}
+    self:Dpath(p,"",true) -- clipping
+    self.param.viewport = view
+    self.param.coordsystem = view
+end
+function ld.graph3d:EndOnPlane2( )
+    self:Writeln("\\end{scope}")
+    self:Restoreattr()
+end
+\end{luacode*}
+    
+\begin{document}
+\begin{luadraw}{name=projected_cylinder}
+    local ld = luadraw
+    local pt3d, cpx = ld.pt3d, ld.cpx
+    local Origin, vecI, vecJ, vecK, M, Z, Zp, i  = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, cpx.Z, cpx.Zp, cpx.I
+    
+    local g = ld.graph3d:new{size={10,10}, window={-2,2,-2,1},viewdir={20,70}}
+    
+    local function drawarrow(angle, sens)
+        local a = cpx.Zp(1,angle*ld.deg)
+        sens = sens or 1
+        local u = sens*a/1.5
+        g:Dpolyline({a-u, a+u}, 'line width=12,white,-Triangle')
+    end
+    
+    g:Dcylinder(Origin, 2, -vecK, {edgecolor="white",edgewidth=12,color="myblue", hiddenstyle="noline",gradside={100,100,100},gradsection={100,100,100}})
+    g:BeginOnPlane2({Origin, vecI, vecJ}, {-3,3,-3,3})
+        drawarrow(0); drawarrow(180); drawarrow(-90,-1); drawarrow(90,-1)
+    g:EndOnPlane2()
+    g:Show()
+\end{luadraw}
+\end{document}

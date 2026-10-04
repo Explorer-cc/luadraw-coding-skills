@@ -1,0 +1,29 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-povray.tex (demo: Intersection of two implicit surfaces)
+\begin{luadraw}{name=intersection_surf}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Z, M = cpx.Z, pt3d.M
+
+local g = ld.graph3d:new{window3d={0,1,0,1,0,2}, window={-0.25,1.5,-0.5,2.25}, size={10,10,0}, viewdir={-50,60}}
+local sqrt = math.sqrt
+require "luadraw_povray"
+local f = function(x,y,z) return x^3+y^3-z end
+local h = function(x,y,z) return (x*sqrt(1-y^2)+y*sqrt(1-x^2))^3-z end
+local L = ld.implicit(function(x,y) return f(x,y,0)-h(x,y,0) end,0.01,1,0.01,1,{25,25})
+L = ld.map(function(z) return M(z.re,z.im,z.re^3+z.im^3) end, L[1])  -- intersection curve
+-- using povray
+g:Pov_new()
+g:Pov_implicit("pow(x,3)+pow(y,3)-z", f, {color=ld.SteelBlue})
+g:Pov_implicit("z-pow(x*sqrt(1-y*y)+y*sqrt(1-x*x),3)", h, {color=ld.Crimson, containedby={M(0,0,0),M(0.999,0.999,2)}})
+g:Pov_exec()
+-- drawing
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray",xyzstep=0.5, drawbox=true})
+g:Pov_show() --Pov-Ray image
+g:Dpolyline3d(L, "line width=1.2pt,dotted,Navy") --we draw the curve over the image
+local d = 0.1
+g:Dsquare(Z(-0.25,2.25), Z(-0.25,2.25-d),1,"draw=none,fill=Crimson")
+g:Dsquare(Z(-0.25,2.25-2*d), Z(-0.25,2.25-3*d),1,"draw=none,fill=SteelBlue")
+g:Dlabel("$z=(x\\sqrt{1-y^2}+y\\sqrt{1-x^2})^3$", Z(-0.25+d,2.25-d/2) , {pos="E"},
+    "$z=x^3+y^3$", Z(-0.25+d,2.25-5*d/2),{})
+g:Show()
+\end{luadraw}

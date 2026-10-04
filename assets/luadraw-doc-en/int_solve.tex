@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-4-Computations-on-Lists.tex (demo: Function $f$ defined by $\int_x^{f(x))
+\begin{luadraw}{name=int_solve}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-3,3,-3,3},size={10,10}}
+local h = function(t) return math.exp(t^2) end
+local G = function(x,y) return ld.int(h,x,y)-1 end
+local H = function(y) return G(0,y) end
+local F = function(x,y) return math.exp(x^2-y^2) end
+local y0 = ld.solve(H,0,1)[1] -- solution of H(x)=0
+g:Daxes({0,1,1}, {arrows="->"})
+g:Dimplicit(G, {draw_options="line width=4.8pt,Pink"})
+g:Dodesolve(F,0,y0,{draw_options="line width=0.8pt"})
+g:Lineoptions("dashed","gray",4); g:DlineEq(1,-1,0); g:DlineEq(1,1,0) -- bisectors
+g:Dlabel("${\\mathcal C}_f$",Z(2.15,2),{pos="S"})
+g:Show()
+\end{luadraw}

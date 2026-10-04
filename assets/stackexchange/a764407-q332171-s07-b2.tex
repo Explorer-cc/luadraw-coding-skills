@@ -1,0 +1,44 @@
+% source: https://tex.stackexchange.com/a/764407 (question 332171, score 7, block 2)
+\documentclass[tikz]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/332171/draw-a-colored-sphere-in-tikz
+\begin{document}
+\begin{luadraw}{name=colored_spheres2}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Z, M, Ms = ld.cpx.Z, pt3d.M, pt3d.Ms
+local g = ld.graph3d:new{ window={-5,5,-3,3}, size={10,10}, bg="gray"}
+require 'luadraw_spherical'
+
+local function dpshere(pos2d,r,h, theta, phi, colors) -- theta, phi= view dir
+    colors = colors or {'Crimson','blue','Gold', 'ForestGreen'}
+    local function options(fill)
+        return {fill=fill, style="noline", fillopacity=0.5}
+    end
+    local function options_poles(fill)
+        return 'left color='..fill..'!30,right color='..fill..',draw=none'
+    end
+    local S = ld.sphere(M(0,0,0),r)
+    local S1 = ld.cutfacet(S, {M(0,0,h), M(0,0,1)})
+    local S2 = ld.cutfacet(S, {M(0,0,-h), M(0,0,-1)})
+    g:Define_sphere({radius=r, color='white'})
+    local A, B, C = ld.sM(0,0), ld.sM(0,90), ld.sM(0,180)
+    local D, E = ld.sM(120,90), ld.sM(240,90)
+    local r1 = math.sqrt(r^2-h^2)
+    g:Saveattr(); g:Setviewdir(theta,phi)
+    S1 = ld.border(g:Classifyfacet(S1)); S2 = ld.border(g:Classifyfacet(S2))
+    g:DSfacet({A,B,C,D}, options(colors[1]))
+    g:DSfacet({A,D,C,E}, options(colors[2]))
+    g:DSfacet({A,E,C,B}, options(colors[3]))
+    g:Shift(pos2d)
+    g:Dspherical()
+    g:Dpolyline3d( ld.concat(S1,S2), options_poles(colors[4]))
+    g:Restoreattr()
+end
+
+dpshere(Z(-3,0),2,1.5,60,70) 
+dpshere(Z(3,0),2,1.5,60,0)
+g:Show()
+\end{luadraw}
+\end{document}

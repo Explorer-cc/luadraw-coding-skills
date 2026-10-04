@@ -1,0 +1,53 @@
+% source: https://github.com/pfradin/luadraw/discussions/263#discussioncomment-17116483 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=dielectric_box}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    local sin, cos, tan = math.sin, math.cos, math.tan
+    local M, vecI,vecJ,vecK = pt3d.M, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local g = ld.graph3d:new{
+        window3d={-5,5,-5,5,-5,5},
+        window={-8,8,-8,8}, viewdir={-75,65}
+    }
+    local S = M(-5,-3,-4)
+    local v1,v2,v3 = 10 * vecI, 6 * vecJ, 4 * vecK
+    local theta_i, theta_t = 50*ld.deg, 20*ld.deg
+    local planez_up, planez_down = 3.5, 4
+    local delta_i, delta_t = planez_up*tan(theta_i), planez_down*tan(theta_t)
+    local I1,I2,I0 = M(-delta_i,3,planez_up), M(-delta_i,-3,planez_up), M(-delta_i,0,planez_up)
+    local R1,R2,R0 = M(delta_i,3,planez_up), M(delta_i,-3,planez_up), M(delta_i,0,planez_up)
+    local T1,T2,T0 = M(delta_t,3,-planez_down), M(delta_t,-3,-planez_down), M(delta_t,0,-planez_down)
+    
+    local get_sinus = function(origin, xaxe, yaxe, len)
+        local u, v = pt3d.normalize(xaxe), pt3d.normalize(yaxe)
+        local C = ld.cartesian( function(x) return math.sin(8*x) end,0,len*math.pi)[1]
+        local rep = {}
+        for _,z in ipairs(C) do
+            table.insert(rep, origin + (0.5+z.re)*u + z.im*v)
+        end
+        return {rep}
+    end
+    
+    local O,O1,O2 = M(0,0,0), M(0,-3,0), M(0,3,0)
+    local box = ld.parallelep(S, v1, v2, v3)
+    local P1,P2,P3,P4 = M(-5,0,-4), M(5,0,-4), M(5,0,4), M(-5,0,4)
+    
+    local sin1 = get_sinus(I0, O-I0, vecJ, 1)
+    local sin2 = get_sinus(O, R0, vecJ, 1)
+    local sin3 = get_sinus(O, T0, vecJ, 1)
+    
+    ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+    g:Dscene3d(
+        g:addFacet({P1,P2,P3,P4},{color="gray",edge=true}),
+        g:addFacet({{O1,O2,I1,I2},{O1,O2,R1,R2},{O1,O2,T1,T2}},{color="teal!50!white", edge=true}),
+        g:addPoly(box, {color="white",opacity=0.2,edge=true}),
+        g:addPolyline( ld.concat(sin1,sin2,sin3), {width=8})
+    )
+    g:Dpolyline3d({{I0,O},{O,R0},{O,T0}},"line width=1.2pt,magenta,-Stealth")
+    g:Dballdots3d({O,O1,O2},"violet")
+    g:Show()
+    \end{luadraw}
+\end{document}

@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/750922 (question 750874, score 11, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/750874/how-can-i-draw-a-simple-three-dimensional-coil/750897#750897
+\begin{document}
+\begin{luadraw}{name=3d_coil}
+local g = graph3d:new{size={10,10}, window={-4,2.5,-3.5,4},margin={0,0,0,0},viewdir={0,70}}
+local cos, sin, pi = math.cos, math.sin, math.pi
+g:Linewidth(8);
+
+local curve = parametric3d(function(t) return Mc(2,2*t,t/4) end,-2*pi,3*pi+pi/2,100,false,2) -- helix on cylinder
+local u = pt3d.prod(vecK,g.Normal)
+-- If M is a point of the helix and A is its orthogonal projection on the axis,
+-- then A is visible if the vector AM has the same direction as 
+-- the vector g.Normal (vector directed towards the observer), that is to say if 
+-- the scalar product between AM and g.Normal is positive. The limiting case is 
+-- when this scalar product is zero, that is to say when AM is orthogonal to g.Normal, 
+-- or AM is orthogonal to the vector vecK (vector of the axis), 
+-- therefore when AM is collinear to the vector product between vecK and g.Normal, that is to say u.
+-- The plane containing the axis of the helix and the vector u cuts it into two parts, 
+-- one whose points are visible (in front), and the other whose points are "hidden" (behind).
+Vi, Hi = cutpolyline3d(curve,plane(-5*vecK,5*vecK,5*vecK-u))-- separate front and back of helix
+
+g:Dpolyline3d(Hi,"blue") -- back
+g:Dpolyline3d(Vi,"draw=white,double=blue,double distance=0.8pt") -- front
+local A, B = table.unpack( g:Proj3d({Mc(2,pi,7*pi/8), Mc(2,0,-pi/2)}) ) -- coil ends
+g:Dpath( {A,A-5,B-5,B,"b"},"blue") -- to join A and B
+g:Show() 
+\end{luadraw}
+\end{document}

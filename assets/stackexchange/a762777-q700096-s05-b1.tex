@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/762777 (question 700096, score 5, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/700096/drawing-a-shaded-region-with-implicit-functions
+\begin{document}
+\begin{luadraw}{name=clip_circle}
+local ld = luadraw
+local Z, i = ld.cpx.Z, ld.cpx.I
+local g = ld.graph:new{window={-1,1,-1,1},size={10,10}}
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", nbsubdiv={1,1}, legend={"$x$","$y$"},
+    legendpos={1,1}, legendsep= {0,0} })
+g:Beginclip({1,0.5,"l",0,i*0.5,0.5,1,"ca",i,"l",0,1,1,-1,"ca"})
+    g:Dcircle(i/2,0.5,"draw=none, fill=orange, fill opacity=0.6")
+g:Endclip()
+g:Dcircle(0,1); g:Linewidth(8)
+g:Dcircle(0,1/2, "red"); g:Dcircle(Z(0,1/2),1/2, "blue")
+g:Show()
+\end{luadraw}
+\end{document}

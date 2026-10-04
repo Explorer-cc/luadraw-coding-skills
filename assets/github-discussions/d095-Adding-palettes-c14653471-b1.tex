@@ -1,0 +1,44 @@
+% source: https://github.com/pfradin/luadraw/discussions/95#discussioncomment-14653471 (pfradin, block 1)
+\documentclass[10pt,a4paper,twocolumn]{article}%
+\usepackage{fouriernc}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage[margin=1.5cm,headheight=15pt]{geometry}
+\title{The \emph{luadraw\_palette} extension}
+\date{}
+\begin{document}
+\maketitle{}
+
+
+\begin{luacode*}
+require 'luadraw_palettes'
+
+palNames={["palAccent"]=palAccent, ["palAfmhot"]=palAfmhot, ["palAutumn"]=palAutumn, ["palBerlin"]=palBerlin, ["palBinary"]=palBinary, ["palBlindFish"]=palBlindFish, ["palBlues"]=palBlues, ["palBone"]=palBone, ["palBrBG"]=palBrBG, ["palBrg"]=palBrg, ["palBuGn"]=palBuGn, ["palBuPu"]=palBuPu, ["palBwr"]=palBwr, ["palCMRmap"]=palCMRmap, ["palCividis"]=palCividis, ["palCool"]=palCool, ["palCoolwarm"]=palCoolwarm, ["palCopper"]=palCopper, ["palCubehelix"]=palCubehelix, ["palDark2"]=palDark2, ["palFlag"]=palFlag, ["palGasFlame"]=palGasFlame, ["palGistEarth"]=palGistEarth, ["palGistGray"]=palGistGray, ["palGistGrey"]=palGistGrey, ["palGistHeat"]=palGistHeat, ["palGistNcar"]=palGistNcar, ["palGistRainbow"]=palGistRainbow, ["palGistStern"]=palGistStern, ["palGistYarg"]=palGistYarg, ["palGistYerg"]=palGistYerg, ["palGnBu"]=palGnBu, ["palGnuplot"]=palGnuplot, ["palGnuplot2"]=palGnuplot2, ["palGray"]=palGray, ["palGrays"]=palGrays, ["palGreens"]=palGreens, ["palGrey"]=palGrey, ["palGreys"]=palGreys, ["palGroovyRainbow"]=palGroovyRainbow, ["palHot"]=palHot, ["palHsv"]=palHsv, ["palInferno"]=palInferno, ["palJet"]=palJet, ["palMagma"]=palMagma, ["palManagua"]=palManagua, ["palNipySpectral"]=palNipySpectral, ["palOcean"]=palOcean, ["palOrRd"]=palOrRd, ["palOranges"]=palOranges, ["palPRGn"]=palPRGn, ["palPaired"]=palPaired, ["palPastel1"]=palPastel1, ["palPastel2"]=palPastel2, ["palPiYG"]=palPiYG, ["palPink"]=palPink, ["palPlasma"]=palPlasma, ["palPrism"]=palPrism, ["palPuBu"]=palPuBu, ["palPuBuGn"]=palPuBuGn, ["palPuOr"]=palPuOr, ["palPuRd"]=palPuRd, ["palPurples"]=palPurples, ["palRainbow"]=palRainbow, ["palRdBu"]=palRdBu, ["palRdGy"]=palRdGy, ["palRdPu"]=palRdPu, ["palRdYlBu"]=palRdYlBu, ["palRdYlGn"]=palRdYlGn, ["palReds"]=palReds, ["palSeismic"]=palSeismic, ["palSet1"]=palSet1, ["palSet2"]=palSet2, ["palSet3"]=palSet3, ["palSpectral"]=palSpectral, ["palSpring"]=palSpring, ["palSummer"]=palSummer, ["palTab10"]=palTab10, ["palTab20"]=palTab20, ["palTab20b"]=palTab20b, ["palTab20c"]=palTab20c, ["palTerrain"]=palTerrain, ["palTurbo"]=palTurbo, ["palTwilight"]=palTwilight, ["palTwilightShifted"]=palTwilightShifted, ["palTwilightsShifted"]=palTwilightsShifted, ["palVanimo"]=palVanimo, ["palViridis"]=palViridis, ["palWinter"]=palWinter, ["palWistia"]=palWistia, ["palYlGn"]=palYlGn, ["palYlGnBu"]=palYlGnBu, ["palYlOrBr"]=palYlOrBr, ["palYlOrRd"]=palYlOrRd}
+
+function Dpalette(pal,name)
+    local g = graph:new{window={-5,5,-5,5},bbox=false, border=false}
+    g:Linewidth(1)
+    local A, h, dh, L, N = Z(-5,4), Z(0,-1), Z(0,-1.1), 5, 100
+    local dl = L/N
+    for k = 1, N do
+        local color = palette(pal,(k-1)/(N-1))
+        g:Drectangle(A,A+h,A+h+dl,"color="..color..",fill="..color)
+        A = A+dl
+    end
+    g:Drectangle(A,A+h,A+h-L); g:Dlabel(name,A+h/2,{pos="E"})
+    g:Sendtotex()
+    tex.sprint("\\par")
+end
+
+local names = {}
+for key,val in pairs(palNames) do -- on extrait les noms
+    table.insert(names,key)
+end
+
+table.sort(names) -- ordre alphabétique
+
+for _,nom in ipairs(names) do
+    Dpalette(palNames[nom],nom)
+end
+\end{luacode*}
+\end{document} 

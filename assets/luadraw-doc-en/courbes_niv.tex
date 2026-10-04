@@ -1,0 +1,27 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Example of contour lines on a surface)
+\begin{luadraw}{name=courbes_niv}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Z = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, ld.cpx.Z
+local cos, sin = math.cos, math.sin
+local g = ld.graph3d:new{window3d={0,5,0,10,0,11}, adjust2d=true, size={10,10},
+    viewdir={"central",220,60,15,M(2.5,5,5.5)}}
+g:Labelsize("footnotesize")
+local S = ld.cartesian3d(function(u,v) return (u+v)/(2+cos(u)*sin(v)) end,0,5,0,10,{30,30})
+local n = 10 -- number of levels
+local Colors = ld.getpalette(ld.palGasFlame,n,true) -- list of 10 colors in table format
+local niv, S1 = {}
+for k = 1, n do
+    S1, S = ld.cutfacet(S,{M(0,0,k),-vecK}) -- section of S with the plane z=k
+    ld.insert(niv,{S1, {color=Colors[k],mode=ld.mShaded,edgewidth=0.5}}) -- S1 is the part below the plane and S is above it
+end
+ld.insert(niv,{S, {color=Colors[n+1]}}) -- inserting the last level
+-- niv is a list of the type {facets1, options1, facets2, options2, ...}
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray"})
+g:Dmixfacet(table.unpack(niv))
+for k = 1, n do
+    g:Dballdots3d( M(5,0,k), ld.rgb(Colors[k]))
+end
+g:Dlabel("$z=\\frac{x+y}{2+\\cos(x)\\sin(y)}$", Z((g:Xinf()+g:Xsup())/2, g:Yinf()), {pos="N"})
+g:Show()
+\end{luadraw}

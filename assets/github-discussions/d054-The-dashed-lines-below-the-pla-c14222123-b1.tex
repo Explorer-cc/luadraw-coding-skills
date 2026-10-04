@@ -1,0 +1,51 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222123 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+
+\begin{luacode}
+function truncated_pyrmamid(R,r,h,n,A,V)
+-- A center of the circle with radius R
+-- V direction vector of the pyramid axis
+    if A == nil then A = Origin end
+    if V == nil then V = vecK end
+    V = pt3d.normalize(V)
+    local u = pt3d.prod(vecJ,V)
+    if pt3d.N1(u) < 1e-12 then u = pt3d.prod(vecI,V) end
+    u = pt3d.normalize(u)
+    local w = pt3d.prod(V,u) -- (A,u,w) is an orthonormalframe of the plane (A,V)
+    local b1 = polyreg(0,R,n)
+    local b2 = polyreg(0,r,n)
+    local base1 = map(function(z) return A+z.re*u+z.im*w end, b1)
+    local base2 = map(function(z) return A+z.re*u+z.im*w end, b2)
+    local base2 = shift3d( base2, h*V )
+    local rep = {}
+    rep.vertices = concat(base1,base2)
+    rep.facets = { range(n,1,-1), range(n+1,2*n)}
+        for k = 1, n-1 do
+        table.insert(rep.facets,{k,k+1,n+k+1,n+k})
+    end
+    table.insert(rep.facets,{n,1,n+1,2*n})
+    return rep
+end
+
+function truncated_pyrmamid_side(a,b,h,n,A,V)
+    local sin, pi = math.sin, math.pi
+    local R, r = a/(2*sin(pi/n)), b/(2*sin(pi/n))
+    return truncated_pyrmamid(R,r,h,n,A,V) -- we use the first function
+end
+\end{luacode}
+
+\begin{document}
+\begin{luadraw}{name=truncated-pyramid}
+local g = graph3d:new{window={-5.5,5,-5,5}, viewdir={10,70}, size={10,10}};
+
+local T1 = truncated_pyrmamid(2,1,4,6,M(-2,-2,0),vecK-vecJ)
+local T2 = truncated_pyrmamid_side(3,2,4,4,M(-2,2,0), vecI+vecK)
+
+g:Dpoly(T1, {mode=0})
+g:Dpoly(T2, {mode=4,color="LightBlue",edgecolor="Blue"})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,33 @@
+% source: https://github.com/pfradin/luadraw/discussions/109#discussioncomment-14551123 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=half_sphere}
+local g = graph3d:new{size={10,10},viewdir={70,60}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local r = 4
+local O= Origin
+local sph = poly2facet( sphere(O,r,40,40) ) -- 40*40 = 1600 facets
+Cyl = cutfacet(sph, {Origin,vecK}) -- faster than cutpoly
+Cyl = g:Classifyfacet(Cyl) -- visible facets
+local L = g:Intersection3d(sph,{Origin,vecK})
+g:Dpolyline3d( border(Cyl), "ball color = orange")
+g:Dedges(L,{color="red"})
+ g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=half_sphere2}
+local g = graph3d:new{size={10,10},viewdir={70,60}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local r = 4
+local O= Origin
+local sph = sphere(O,r,40,40) -- 40*40 = 1600 facets
+local L = g:Intersection3d(sph,{Origin,vecK})
+local visible = L.visible[1]
+local B, A = visible[1], visible[#visible]
+g:Dpath3d( {A,Origin,B,r,1,vecK,"ca",Origin,A,r,1,g.Normal,"ca"}, "ball color=orange")
+g:Dedges(L,{color="red"})
+ g:Show()
+\end{luadraw}
+\end{document} 

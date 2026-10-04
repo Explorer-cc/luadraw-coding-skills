@@ -1,0 +1,31 @@
+% source: https://github.com/pfradin/luadraw/discussions/218#discussioncomment-16020176 (pfradin, block 1)
+\documentclass{standalone} % lualatex only
+\usepackage{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+
+\begin{luadraw}{name=gamma_function}
+-- \Gamma(x) = \sum_{k=0}^{\infty} \frac{(-1)^k}{k!(x+k)} + \int_{1}^{\infty} t^{x-1} e^{-t} dt
+    gamma = function(x)
+        local den, sg = 1, 1
+        local S = 1/x
+        for k = 1, 25 do  -- 25 iterations are sufficient
+            sg = -sg; den = den*k
+            S = S + sg/den/(x+k)
+        end
+        return S + int(function(t) return math.exp((x-1)*math.log(t)-t) end, 1, 10)
+    end
+
+    local g = graph:new{window={-4, 5, -6, 6}}  -- no axis here
+    g:Linewidth(8)
+    g:Daxes({0, 1, 1}, {
+        arrows = "-Stealth", 
+        grid = true, 
+        gridstyle = "dashed",
+        legend = {"$x$", "$y$"},
+    })
+    g:Linecolor("magenta")
+    g:Dcartesian(gamma, {x={-4, 4.5}, discont=true,  nbdiv=10})
+    g:Show()
+\end{luadraw}
+\end{document}

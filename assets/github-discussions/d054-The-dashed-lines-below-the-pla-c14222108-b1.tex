@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222108 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/165459/how-to-let-hidden-line-be-displayed-as-dash-style-in-pst-solides3d
+\begin{luadraw}{name=cone_in_sphere}
+local g = graph3d:new{window={-3,6,-3,5},viewdir={20,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(8); Hiddenlinestyle = "dashed"
+local a = 3
+local A, B, C, D = M(-a,-a,-a),   M(a, 0, 0),   M(0, a, 0),   M(0, 0, a) 
+local P = pyramid( {A,B,C}, D)
+Hiddenlines = true 
+g:Dscene3d(
+g:addPoly(P,{edge=true,width=12,color="orange"}),
+g:addAxes(Origin, {arrows=1,arrowscale=0.75})
+)
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{pos="S"}, "$D$",D,{pos="NE"})
+g:Show()
+\end{luadraw}
+\end{document} 

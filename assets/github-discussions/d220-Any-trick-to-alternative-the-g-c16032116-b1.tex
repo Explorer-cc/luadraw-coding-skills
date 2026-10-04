@@ -1,0 +1,51 @@
+% source: https://github.com/pfradin/luadraw/discussions/220#discussioncomment-16032116 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage{fourier}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=grid2x2}
+    local g = graph:new{
+        window={-5,5,-5,5}, 
+        size={10,10}
+    }
+
+    g:Saveattr()
+    local d = 0.25 -- half margin
+    g:Viewport(-5, -d, d, 5)
+    g:Coordsystem(-2, 2, -2, 2)
+        g:Daxes({0,1,1},{
+            arrows="-Stealth"
+        })
+        g:Dcartesian(function(x) return x*x end, {draw_options="magenta"})
+        g:Dlabel("$y=x^2$", Z(0,1.5),{pos="E"})
+    g:Restoreattr()
+
+    g:Saveattr()
+    g:Viewport(d, 5, d, 5) 
+    g:Coordsystem(-math.pi, math.pi, -1.5, 1.5)
+        g:Daxes({0,1,1})
+        g:Dcartesian(math.sin, {draw_options="blue"})
+        g:Dlabel("$y=\\sin(x)$", Z(0,1.2),{pos="E"})
+    g:Restoreattr()
+
+    g:Saveattr()
+    g:Viewport(-5, -d, -5, -d)
+    g:Coordsystem(-2, 2, -2, 2)
+        g:Daxes({0,1,1})
+        g:Dcartesian(function(x) return x^3 end, {draw_options="ForestGreen"})
+        g:Dlabel("$y=x^3$", Z(0,1.5),{pos="E"})
+    g:Restoreattr()
+
+    g:Saveattr()
+    g:Viewport(d, 5, -5, -d)
+    g:Coordsystem(-0.5, 4, -2, 2)
+        g:Daxes({0,1,1})
+        g:Dcartesian(math.log, {draw_options="orange"})
+        g:Dlabel("$y=\\ln(x)$", Z(2,1),{pos="N"})
+    g:Restoreattr()
+
+    g:Show()
+    \end{luadraw}
+\end{document}

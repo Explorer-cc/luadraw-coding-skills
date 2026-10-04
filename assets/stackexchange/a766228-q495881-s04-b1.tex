@@ -1,0 +1,56 @@
+% source: https://tex.stackexchange.com/a/766228 (question 495881, score 4, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+%https://tex.stackexchange.com/questions/495881/drawing-a-3d-cone-cut-by-a-vertical-plane
+\begin{luadraw}{name=cone_intersection}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-6,10,-5,10}, viewdir={25,70}, size={12, 12} }
+local Z = cpx.Z
+local Dist, ratio, ShiftDist = 5, 1.8, 2.5
+local Shift = M(0, ShiftDist, 0)
+local ALength, AWidth = 2, 0.3
+local cone = ld.cone(O, Dist*ratio, Shift, 100, true)
+local coneUp = ld.cutpoly(cone, {O, vecK}) 
+local coneFront, coneBack = ld.cutpoly(coneUp, {M(-Dist,0,0), vecI})
+local inter = g:Intersection3d(coneUp, {M(-Dist,0,0), vecI})
+
+g:Dpolyline3d({-Dist*ratio*vecI, -Dist*ratio*vecI+2*ShiftDist*vecJ, Dist*ratio*vecI+2*ShiftDist*vecJ,
+    Dist*ratio*vecI}, true, "fill=gray!20, draw=none")
+g:Dpolyline3d( ld.border(coneBack), true, 'left color=gray!80, right color=gray, opacity=0.7')
+g:Dpolyline3d({Shift, M(-Dist, ShiftDist, 0)}, "dashed, color=cyan" )
+g:Dpolyline3d({{Shift,Shift-2*vecI},{Shift,Shift+vecJ},{Shift,Shift+vecK}}, "color=magenta, -Stealth, thick")
+g:Dedges(inter, {color="red", width=12})
+g:BeginOnPlane({M(-Dist,0,0), vecJ, vecK})
+    g:Drectangle(Z(0,0), Z(2*ShiftDist, Dist*ratio), "fill=blue!50, draw=none,opacity=0.5")
+    local style = "fill, draw=white, ultra thick, line join=round"
+    local blade = {Z(0,0.125), Z(2,0.125), Z(2,0), Z(0.5,-0.375)}
+    local hub = Z(ShiftDist, 3)
+    g:Dpolyline(ld.shift(ld.rotate(blade,  60), hub), true, style)
+    g:Dpolyline(ld.shift(ld.rotate(blade, 180), hub), true, style)
+    g:Dpolyline(ld.shift(ld.rotate(blade, 300), hub), true, style)
+    g:Dpath({Z(ShiftDist-0.25,0), Z(ShiftDist,0), Z(ShiftDist+0.25,0), 0.25, 0.0625, 1, "ea", Z(ShiftDist+0.0625,3), Z(ShiftDist-0.0625,3), "l", "cl"}, style)
+    g:Drectangle(Z(ShiftDist-0.25, 2.75), Z(ShiftDist+0.25, 3.25), style)
+g:EndOnPlane()
+g:Dpolyline3d({M(-Dist*ratio, 0, 0), M(Dist*ratio, 0, 0)},  "dashed, color=cyan")
+g:Dpolyline3d( ld.shift3d({M(AWidth,-ALength,0)/2, M(AWidth,ALength,0)/2, M(-AWidth,ALength,0)/2,
+    M(-AWidth,-ALength,0)/2},Shift), true, "thick, color=yellow!50!black, fill")
+g:Dpolyline3d({{O,2*vecI},{O,vecJ},{O,vecK}}, "color=magenta, -Stealth,thick,dashed")
+g:Dpolyline3d({{Shift,Shift-2*vecI},{Shift,Shift+vecJ},{Shift,Shift+vecK}}, "color=magenta, -Stealth, thick")
+g:Dlabel3d(
+    "$x$",2*vecI,{pos="S",node_options="magenta"},
+    "$y$",vecJ,{pos="E"},
+    "$z$",vecK,{pos="N"},
+    "$y$",Shift-2*vecI,{pos="NE",node_options="magenta"},
+    "$x$",Shift+vecJ,{pos="E"},
+    "$z$",Shift+vecK,{pos="N"}
+)
+g:Dpolyline3d( ld.border(coneFront), true, 'left color=gray!30, right color=gray!80, middle color=gray!10, opacity=0.7')
+g:Show()
+\end{luadraw}
+\end{document}

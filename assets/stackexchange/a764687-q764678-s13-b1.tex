@@ -1,0 +1,41 @@
+% source: https://tex.stackexchange.com/a/764687 (question 764678, score 13, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/764678/hollowed-out-sphere-effect
+\begin{document}
+\begin{luadraw}{name=sphere_hollow}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Ms, deg = pt3d.M, pt3d.Ms, ld.deg
+local O, R, I, J, K = M(0,0,0), 2, M(1,0,0), M(0,1,0), M(0,0,1)
+local color = "orange"
+local color_in = "orange"
+local sM = function(a,b)
+    return Ms(R,a*deg,b*deg)
+end
+local g = ld.graph3d:new{ window={-3,5,-3,5}, size={12,12}, viewdir={20,60}}
+local P = 10*sM(35,55)
+local V = { sM(50,30), sM(5,60), sM(15,90), sM(55,90), sM(75,60), sM(50,30), } -- hollow vertices
+local V2 = ld.scale3d(V,0.9)
+local border_hollow, inside_hollow = {V[1],"m"}, {V2[1],"m"}
+local sphere = {O + R*g:ScreenX(), O, g.Normal, "c"}
+for k = 2, #V do 
+    ld.insert(border_hollow, {O,V[k],R,1,"ca"}) 
+    ld.insert(inside_hollow, {O,V2[k],0.9*R,1,"ca"}) 
+end
+-- drawing
+g:Dcircle3d(O,R,g.Normal,"left color="..color_in.."!60, right color="..color_in.."!10") --back
+g:Dpolyline3d({{O,O+5*I}, {O,O+4*J}, {O, O+5*K}}); g:Dballdots3d(O) -- inside
+g:Dpath3d( ld.concat(sphere, border_hollow), "even odd rule, ball color="..color) -- front
+g:Dpath3d( ld.concat(border_hollow, inside_hollow), 
+    "even odd rule, pattern=north west lines, preaction={even odd rule,fill=gray}") -- hollow border
+g:Linewidth(8)
+g:Ddots3d(P)
+g:Dpolyline3d({{R*I,O+5*I}, {R*J,O+4*J}, {R*K, O+5*K}, {O,P}}, "-stealth")
+g:Dlabel3d("$x$",5*I,{pos="SW"}, "$y$",4*J,{pos="E"}, "$z$",5*K,{pos="N"}, 
+"$P$",P,{}, "$m$",P,{pos="SE"})
+g:Show()
+\end{luadraw}
+\end{document}

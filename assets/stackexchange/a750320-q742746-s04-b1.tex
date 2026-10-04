@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/750320 (question 742746, score 4, block 1)
+% !TeX TS-program = lualatex
+\documentclass{standalone}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/742746/pgfplots-3d-schoolbook-style-grid-tick-marks
+\begin{document}
+\tikzset{%
+>=latex
+}
+\begin{luadraw}{name=German_schoolbooks}
+local g = graph:new{window={-5.5,5.5,-5.5,5.5},size={10,10}}
+local i = cpx.I
+--
+defaultlabelshift = 0
+defaultlegendsep = 0
+--
+g:Daxes(nil,-- (valeur par défaut) {0,1,1}
+    {
+        arrows="->",
+        nbsubdiv={1,1},
+        originpos={"none","none"},
+        legend={"$x_2$","$x_3$"},
+        grid=true,
+        gridcolor="lightgray"
+    })
+g:Linejoin("round"); 
+--
+g:Dgradline({0,(-1-i)/2}, {arrows="->", limits={-9.5,9.5}, labelpos="top", legend="$x_1$"})
+--
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/759326 (question 759308, score 10, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/759308/finding-and-displaying-the-intersection-points-of-two-surfaces
+\begin{document}
+\begin{luadraw}{name=intersection_surf}
+local g = graph3d:new{window3d={0,1,0,1,0,2}, window={-0.25,1.5,-0.5,2.5}, size={12,12,0},margin={0,0,0,0}, viewdir={-50,60}}
+local sqrt = math.sqrt
+local f = function(x,y) return x^3+y^3 end
+local h = function(x,y) return (x*sqrt(1-y^2)+y*sqrt(1-x^2))^3 end
+local I = implicit(function(x,y) return f(x,y)-h(x,y) end, 0.01, 1, 0.01, 1, {35,35})
+local L = ftransform(I, function(z) return M(z.re,z.im,f(z.re,z.im)) end)
+
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray",xyzstep=0.5})
+g:Writeln( "\\node[inner sep=-0.15pt, above right] at ".. g:Coord(Z(-0.25,-0.5)) .. "{\\includegraphics[width=12cm, height=12cm] {intersection_surf.png}};" )
+g:Dpolyline3d(L, 'line width=2.4pt, dotted, Navy')
+g:Show()
+\end{luadraw}
+\end{document}

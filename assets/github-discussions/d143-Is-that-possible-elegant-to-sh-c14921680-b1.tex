@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/143#discussioncomment-14921680 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=box3d}
+local g = graph3d:new{
+    window={-5,5,-2,2},
+    --adjust2d=true,  -- not adjust3d!
+    viewdir={30,60},
+    size={10,10}
+}
+
+local P = parallelep(Origin,4*vecI,8*g:ScreenX(),1.5*vecK)
+table.remove(P.facets,2)
+g:Shift3d(-isobar3d(P.vertices)) -- center the figure on the origin
+g:Dscene3d(
+    g:addPoly(P,{edge=true,hidden=true,contrast=0,twoside=false,edgewidth=6}),
+    g:addFacet( getfacet(P,1) ,{color="LightGray"})
+)
+g:Show()
+\end{luadraw}
+\end{document} 

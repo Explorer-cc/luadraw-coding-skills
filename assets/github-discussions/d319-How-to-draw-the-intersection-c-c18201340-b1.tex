@@ -1,0 +1,60 @@
+% source: https://github.com/pfradin/luadraw/discussions/319#discussioncomment-18201340 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=two_cylinders_intersection}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, K = pt3d.M, pt3d.Mc, pt3d.Origin, pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+
+function ld.graph3d:Curve_on_cylinder(curve,cylinder)
+-- curve is a 3D polyline on a cylinder,
+-- cylinder = {A,r,V,B}
+    local A,r,V,B = table.unpack(cylinder)
+    if B == nil then B = V; V = B-A end
+    local U = B-A
+    local visible_function
+    if ld.projection_mode == "central" then
+        visible_function = function(N)
+            local I = ld.dproj3d(N,{A,U})
+            local M1, M2 = ld.interCS({I,r,U},{ (I+ld.camera)/2, pt3d.abs(I-ld.camera)/2})
+            local alpha = pt3d.angle3d(M1-I,ld.camera-I)
+            return pt3d.angle3d(N-I,ld.camera-I) <= alpha
+            end
+    else
+        visible_function = function(N)
+            local I = ld.dproj3d(N,{A,U})
+            return (pt3d.dot(N-I,self.Normal) >= 0)
+            end
+    end
+    return ld.split_points_by_visibility(curve,visible_function)
+end
+
+local g = ld.graph3d:new{window={-4,4,-5,5}, viewdir={-30,60}, size={12,12}, bg="lightgray"}
+require 'luadraw_povray'
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+local A1 = M(0, 0, -4)
+local B1 = M(0, 0, 4)
+local r1 = 1
+local A2 = M(-2, -2, -2)
+local B2 = M(2, 8/5, 2)
+local V = B2-A2
+local r2 = 4/5
+local C1 = ld.cylinder(A1,r1,B1,50)
+local C2 = ld.cylinder(A2,r2,B2,50)
+local C3 = ld.border( ld.clip3d(C2,C1) )
+local Iv, Ih = g:Curve_on_cylinder(C3, {A2,r2,B2})
+
+g:Pov_new()
+g:Pov_cylinder(A1,r1,B1, {color=ld.LightBlue, opacity=1})
+g:Pov_cylinder(A2,r2,B2, {color=ld.Orange, opacity=1})
+g:Pov_exec()
+g:Pov_show()
+g:Dpolyline3d(Iv, "red,line width=0.8")
+g:Dpolyline3d(Ih, "dashed, red,line width=0.6")
+g:Show()
+\end{luadraw}
+\end{document}

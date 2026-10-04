@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/232#discussioncomment-16164671 (pfradin, block 1)
+% https://github.com/pfradin/luadraw/issues/123
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier}
+\begin{document}
+\begin{luadraw}{name=saddle}
+local g = graph3d:new{
+    window3d={-2,2,-2,2,0,8}, 
+    viewdir={30,75},
+    adjust2d=true,size={15,15}
+}
+local f = function(x,y) return x^2+y^2 end
+local S = cartesian3d(f, -3, 3, -3, 3, {25,25})
+_, S = cutfacet(S,{M(0,0,7.5),vecK})
+S = clip3d(S,g:Box3d()) -- this instruction was commented
+g:Dboxaxes3d{grid=true}
+g:Dfacet(S, {
+    usepalette={palRainbow,"z"}, 
+    mode=mShaded,
+    --clip=true 
+}) -- clip=true not work as my expected?
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/754968 (question 754957, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/754957/help-with-3d-surface-plot-tikz
+\begin{document}
+\begin{luadraw}{name= 3d-surface-plot}
+local cos, sin, pi, sqrt = math.cos, math.sin, math.pi, math.sqrt
+local g = graph3d:new{ window3d={-2,2,-2,2,-2,2}, window={-4,3.5,-4,3.5}, bbox=false,viewdir={30,60}, size={10,10}}
+
+local p = function(u,v)  -- surface parameterization
+    local a = sqrt(v^2+1)
+    return M(a*cos(u), v*sin(u), 4-2*a)
+end
+
+local s = surface(p,pi,-pi,0,sqrt(3),{35,25})
+s = concat(s, reverse_face_orientation( sym3d(s,{Origin,vecK})) )--symmetry with respect to the xy plane
+
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray"})
+g:Dfacet(s, {usepalette = {palAutumn,"z"},backcull=true})
+g:Show() 
+\end{luadraw}
+\end{document}

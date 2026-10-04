@@ -1,0 +1,16 @@
+% source: https://tex.stackexchange.com/a/751302 (question 646483, score 7, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/646483/real-projective-plane-with-tikz-pstricks
+\begin{document}
+\begin{luadraw}{name=projective_plane}
+local g = graph3d:new{size={12,12}, viewdir={170,80}}
+local p = function(x,y)
+    return Mc(3*y,2*x,3*y*math.cos(x))
+end
+local s = surface(p,2*math.pi,0,0,1,{150,2})
+g:Dscene3d( g:addFacet(s,{color="Gold"}) )
+g:Show()
+\end{luadraw}
+\end{document}

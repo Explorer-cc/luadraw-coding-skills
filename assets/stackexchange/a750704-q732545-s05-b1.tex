@@ -1,0 +1,18 @@
+% source: https://tex.stackexchange.com/a/750704 (question 732545, score 5, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/732545/draw-small-spheres-on-cube-vertices-in-3d-using-tikz
+\begin{luadraw}{name=sphere_in_cube}
+local g = graph3d:new{window={-6,1.5,-2,5},viewdir={110,65},size={10,10}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"
+local a = 4
+local P = parallelep(Origin, a*vecI,a*vecJ,a*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+g:Dpoly(P,{mode=3,color="LightBlue"})
+g:Dballdots3d(P.vertices,"orange",4)
+g:Dpoly(P,{mode=0,edgestyle="dashed"})
+g:Show()
+\end{luadraw}
+\end{document} 

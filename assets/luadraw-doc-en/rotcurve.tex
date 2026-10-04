@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Example with rotcurve)
+\begin{luadraw}{name=rotcurve}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local cos, sin, pi = math.cos, math.sin, math.pi
+local g = ld.graph3d:new{viewdir={30,60},size={10,10}}
+local p = function(t) return M(0,sin(t)+2,t) end -- curve in the plane yOz
+local axe = {Origin,vecK}
+local S = ld.rotcurve(p,pi,-pi,axe,0,360,{grid={25,35}})
+local visible, hidden = g:Classifyfacet(S)
+g:Dfacet(hidden, {mode=ld.mShadedOnly,color="cyan"})
+g:Dline3d(axe,"red,line width=1.2pt")
+g:Dfacet(visible, {mode=5,color="cyan"})
+g:Dline3d(axe,"red,line width=1.2pt,dashed")
+g:Dparametric3d(p,{t={-pi,pi},draw_options="red,line width=1.2pt"})
+g:Show()
+\end{luadraw}

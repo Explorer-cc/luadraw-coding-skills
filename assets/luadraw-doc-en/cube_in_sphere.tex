@@ -1,0 +1,37 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: Cube in a Sphere)
+\begin{luadraw}{name=cube_in_sphere}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-9,9,-4,5},viewdir={25,70},size={16,8}}
+require 'luadraw_spherical'
+g:Linewidth(6); ld.Hiddenlinestyle = "dashed"
+local a = 4
+local O = Origin
+local cube = ld.parallelep(O,a*vecI,a*vecJ,a*vecK)
+local G = pt3d.isobar3d(cube.vertices)
+cube = ld.shift3d(cube,-G) -- to center the cube at the origin
+local R = pt3d.abs(cube.vertices[1])
+
+local dessin = function()
+    g:DSaxes(Origin, {width=8, arrows=1, xyzlimits={0,5}, xdist=0.1})
+    g:DSplane({a/2*vecK,vecK},{color="blue",scale=0.9,angle=20}); 
+    g:DScircle({-a/2*vecK,vecK},{color="blue"})
+    g:DSpolyline( ld.facetedges(cube) ); g:DSlabel("$O$",O,{pos="W"})
+    g:Dspherical()
+end
+
+g:Saveattr(); g:Viewport(-9,0,-4,5); g:Coordsystem(-5,5,-5,5)
+ld.Hiddenlines = true; g:Define_sphere({radius=R, arrowBstyle = "-stealth"})
+dessin()
+g:Dlabel("Hiddenlines=true",0.5-4.5*cpx.I,{})
+g:Restoreattr()
+
+g:Saveattr(); g:Viewport(0,9,-4,5); g:Coordsystem(-5,5,-5,5)
+ld.Hiddenlines = false; g:Define_sphere({radius=R,opacity=0.7, arrowBstyle = "-stealth"} )
+dessin()
+g:Dlabel("Hiddenlines=false, opacity=0.7",0.5-4.5*cpx.I,{})
+g:Restoreattr()
+g:Show()
+\end{luadraw}

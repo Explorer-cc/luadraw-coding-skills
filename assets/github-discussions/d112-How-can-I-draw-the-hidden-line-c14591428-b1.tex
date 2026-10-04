@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/112#discussioncomment-14591428 (pfradin, block 1)
+\begin{luadraw}{name=sphere_cone3}
+local g = graph3d:new{window={-5,6,-8,5},viewdir={20,70},size={10,10}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"; g:Linewidth(4);
+require 'luadraw_spherical'
+local R,r=4,3.5
+local h = math.sqrt(R^2 - r^2)
+local a =math.asin(r/R)
+local H=r*math.tan(a)
+local d = h + H
+local O,T = Origin, M(0,0,-d)
+local ends = {}
+g:Define_sphere({radius=R, edgecolor="black", edgewidth=6})
+g:DScircle({M(0,0,H-d),vecK}, {out=ends})
+local A, B = table.unpack(ends) -- ends of the visible circle arc
+g:Dspherical()
+g:Dpath3d( {A,M(0,0,-h),B,r,1,"ca",T,"l","cl"}, "left color=DarkBlue!50, right color=DarkBlue, middle color=DarkBlue!10") --cone
+g:Dcircle3d(M(0,0,0),R,g.Normal,"dashed")  -- border of sphere
+g:Ddots3d({O,T})
+g:Dpolyline3d( {T,O}, "dashed")
+g:Dlabel3d("$O$",O,{pos="N"}, "$T$",T,{pos="S"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,31 @@
+% source: https://tex.stackexchange.com/a/761910 (question 761894, score 5, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/761894/problem-with-tkz-grapheur-package
+\begin{document}
+
+\begin{luadraw}{name=lin_prog}
+local g = graph:new{window={-3,3,-4,4},size={12,12}}
+local i = cpx.I
+
+local constraint = function(a,b,c) -- ax+by+c>0 or ax+by+c>=0
+    local D, n, u = lineEq(a,b,c), Z(a,b), Z(b,-a)
+    local A, B = D[1], D[1]+n -- {A,u} is the line D
+    if cpx.dot(B,n)+c < 0 then u = -u end
+    --g:Box2d() represents the 2D window as a polygon; 
+    --this polygon is cut with the line {A,u}, the result is a two new polygons
+    -- the one that is the solution followed by the other polygon
+    return cutpolyline(g:Box2d(), {A,u}, true) -- returns the two polygons 
+end
+
+-- example : constraint 3x+2y-6>=0
+local P1, P2 = constraint(3,2,-6) -- P1 is the solution polygon, P2 is the other polygon
+-- drawing
+g:Dpolyline(P1,"draw=none, pattern=north east lines, pattern color=blue!20")
+g:DlineEq(3,2,-6,"blue!20,dashed, line width=1.2pt")
+g:Daxes({0,1,1},{arrows="->",grid=true,legend={"$x$","$y$"}})
+g:Show()
+\end{luadraw}
+\end{document}

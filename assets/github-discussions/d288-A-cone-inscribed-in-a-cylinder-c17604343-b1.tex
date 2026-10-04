@@ -1,0 +1,54 @@
+% source: https://github.com/pfradin/luadraw/discussions/288#discussioncomment-17604343 (pfradin, block 1)
+\documentclass[border=3pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=cylinder-cone_01}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi = math.sin, math.cos, math.pi
+local g = ld.graph3d:new{window={-2.5,2.5,-1,7},viewdir={70,70},size={12,12}}
+ld.Hiddenlinestyle= "dashed"
+local R = 2
+local h = 3*R
+local H = M(0,0,h)
+local u = pt3d.normalize( pt3d.prod(vecK,g.Normal) )
+-- points of tangency for the cone
+local I, J = pt3d.vecI, pt3d.vecJ -- *(O, I, J)* is an orthogonal coordinate system for the base of the cone.
+local f = function(t) 
+-- M = O*R*cos(t)*I+R*sin(t)*J is a point on the circular base.
+-- f returns the determinant of the vectors g.Normal, M-H, and d(M-H)/dt
+    return pt3d.det( g.Normal, O+R*cos(t)*I+R*sin(t)*J-H, -R*sin(t)*I+R*cos(t)*J ) 
+end
+-- The points of tangency are the points on the circle where the function f vanishes.
+local T = ld.solve(f, -pi, pi)
+local C, D = Mc(R,T[1],0), Mc(R,T[2],0)
+-- 
+g:Dcylinder(O,R,H) -- cylinder
+g:Dpolyline3d({{C,H,D},{O,H}},"dashed")
+g:Ddots3d({O,H})
+g:Dlabel3d( "$O$",O,{pos="S"}, "$H$",H,{pos="N"})
+g:Show()
+\end{luadraw}
+
+
+\begin{luadraw}{name=cylinder-cone_02}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O,vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi = math.sin, math.cos, math.pi
+local g = ld.graph3d:new{window={-2.5,2.5,-1,7},viewdir={70,70},size={12,12}}
+ld.Hiddenlinestyle= "dashed"
+local R = 2
+local h = 3*R
+local H = M(0,0,h)
+g:Dcone(O,R,H,{color="blue"}) -- cone first
+g:Dcylinder(O,R,H,{color="orange", opacity=0.3}) 
+g:Ddots3d({O,H})
+g:Dlabel3d( "$O$",O,{pos="S"}, "$H$",H,{pos="N"})
+g:Dpolyline3d({O,H},"dashed")
+g:Show()
+\end{luadraw}
+\end{document}

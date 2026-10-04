@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/765868 (question 765867, score 6, block 1)
+\documentclass[border=5pt]{standalone} %lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/765867/tikz-pgfplot-fill-area-between-multiple-graphs-or-paths
+\begin{document}
+\begin{luadraw}{name=bac_a_sable2D, exec=true, auto=false}
+local ld = luadraw
+local g = ld.graph:new{ window={-1.25,2.75,-0.5,1.5}, size={12,12} }
+local f = function(x) return 1-x^2 end
+local h = function(x) return f(x-1.5) end
+local k = function(x) return 2/21*(x-1.5)+1 end
+local k2 = function(x) return 0 end
+g:Daxes({0,1,1}, {arrows="-stealth", legend={"$x$","$y$"}})
+g:Dinequalities({f,">", h,">", k,"<"}, 
+    {draw_options="fill=gray, fill opacity=0.6",view={1/3,1.5,0,1}})
+g:Dinequalities({f,"<", h,"<", k2,">"}, 
+    {draw_options="fill=gray, fill opacity=0.6",view={1/3,1.5,0,1}})
+g:Linewidth(12)    
+g:Dcartesian(f, {x={-1,1}, draw_options="red"})
+g:Dcartesian(h, {x={0.5,2.5},draw_options="red"})
+g:Show()
+\end{luadraw}
+\end{document}

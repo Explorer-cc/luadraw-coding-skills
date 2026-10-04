@@ -1,0 +1,25 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Surfaces using the \emph{addwall)
+\begin{luadraw}{name=surface_with_addWall}
+local ld = luadraw
+local pi, ch, sh = math.pi, math.cosh, math.sinh
+local O = ld.pt3d.Origin
+local g = ld.graph3d:new{window3d={-4,4,-4,4,-5,5}, window={-10,10,-4,4}, size={10,10}, viewdir={60,60}}
+g:Labelsize("footnotesize")
+local S,wall = ld.cartesian3d(function(x,y) return x^2-y^2 end,-2,2,-2,2,nil,"xy")
+g:Saveattr(); g:Viewport(-10,0,-4,4); g:Coordsystem(-4.5,4.5,-4.5,4.75)
+g:Dscene3d(
+    g:addWall(wall), -- 2 facet cutouts with this instruction, and 529 facet cutouts without it
+    g:addFacet(S,{color="SteelBlue"}),
+    g:addAxes(O,{arrows=1}) )
+g:Restoreattr()
+g:Saveattr(); g:Viewport(0,10,-4,4); g:Coordsystem(-5,5,-5,5)
+local r = function(u,v) return ch(u) end
+local z = function(u,v) return sh(u) end
+S,wall = ld.cylindrical_surface(r,z,-2,2,-pi,pi,{25,51},"zv")
+g:Dscene3d(
+    g:addWall(wall), -- 13 facet cutouts with this instruction, and more than 17000 facet cutouts without it ...
+    g:addFacet(S,{color="Crimson"}),
+    g:addAxes(O,{arrows=1}) )
+g:Restoreattr()
+g:Show()
+\end{luadraw}

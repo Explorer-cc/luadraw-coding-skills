@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-5-Dscene3d-Method.tex (demo: Example with addWall (the two transparent pink facets are normally invisible))
+\begin{luadraw}{name=addWall}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{size={10,10},window={-8,8,-4,8}, margin={0,0,0,0}}
+local C = ld.cylinder(M(0,0,-1),5*vecK,2)
+g:Dscene3d(
+    g:addWall( {{Origin,vecI}, {Origin,vecJ}}),
+    g:addPlane({Origin,vecI}, {color="Pink",opacity=0.3,scale=1.125,edge=true}), -- to show the first wall
+    g:addPlane({Origin,vecJ}, {color="Pink",opacity=0.3,scale=1.125,edge=true}), -- to show the second wall
+    g:addPoly( ld.shift3d(C,M(-3,-3,1)), {color="Cyan"} ),
+    g:addPoly( ld.shift3d(C,M(-3,3,0.5)), {color="ForestGreen"} ),
+    g:addPoly( ld.shift3d(C,M(3,-3,-0.5)), {color="Crimson"} )
+)
+g:Show()
+\end{luadraw}

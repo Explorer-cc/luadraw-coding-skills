@@ -1,0 +1,28 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-5-Dscene3d-Method.tex (demo: Torus and lemniscate)
+\begin{luadraw}{name=torus}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{size={10,10}, margin={0,0,0,0}}
+local cos, sin, pi = math.cos, math.sin, math.pi
+local R, r = 2.5, 1
+local x0 = R-r
+local f = function(t) return M(0,R+r*cos(t),r*sin(t)) end
+local plan = {M(x0,0,0),-vecI} -- plane whose section with the torus gives the lemniscate
+local C, wall = ld.rotcurve(f,-pi,pi,{Origin,vecK},360,0,{grid={25,37},addwall=2})
+local C1 = ld.cutfacet(C,plan) -- part of the torus in the half-space containing -vecI
+g:Dscene3d(
+    g:addWall(plan), g:addWall(wall), -- addition of partition walls
+    g:addFacet( C1, {color="Crimson", backcull=false}),
+    g:addPlane(plan, {color="Pink",opacity=0.4,edge=true}), -- sectional plane
+    g:addAxes( Origin, {arrows=1})
+)
+-- Cartesian equation of the torus : (x^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x^2+y^2) = 0
+-- the lemniscate therefore has the equation (x0^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x0^2+y^2)=0 (implicit curve)
+local h = function(y,z) return (x0^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x0^2+y^2) end
+local I = ld.implicit(h,-4,4,-3,3,{50,50}) -- 2D polygonal line (list of lists of complex numbers)
+local lemniscate = ld.map(function(z) return M(x0,z.re,z.im) end, I[1]) -- conversion to 3D coordinates
+g:Dpolyline3d(lemniscate,"Navy,line width=1.2pt")
+g:Show()
+\end{luadraw}

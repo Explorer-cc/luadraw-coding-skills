@@ -1,0 +1,56 @@
+% source: https://tex.stackexchange.com/a/765297 (question 199161, score 6, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/199161/parabolic-moebius-map-on-sphere-using-tikz
+\begin{document}
+\begin{luadraw}{name=parabole, exec=true, auto=false}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Z = ld.cpx.Z
+local Origin, vecI, vecJ, vecK, M, Ms = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, pt3d.Ms
+local sin, cos, pi = math.sin, math.cos, math.pi
+
+local g = ld.graph3d:new{window={-5,5,-5,5}, viewdir={30,60}, 
+    size={12,12}, bg="lightgray"}
+require 'luadraw_spherical'
+local R = 2
+local k = 10
+local q = function(t) return Ms(R, k*math.log(math.tan(t/2)), t) end -- loxodromic
+local p = function(u,v) -- parabolic
+    local x, y = 1-cos(u), sin(v/2)
+    return R*M(cos(v/2)*x*y, sin(u)*y, 1-y^2*x)
+end
+
+g:Shift(Z(-2.5,2.5)) -- elliptic
+g:Define_sphere({radius=R, color="orange", opacity=0.7})
+for k = 10, 170, 20 do
+    g:DScurve(ld.parametric3d(function(t) return Ms(R,t,k*ld.deg) end,-pi,pi,50), 
+        {color="blue",width=6})
+end
+g:Dspherical(); g:Dlabel("elliptic",Z(0,2),{pos="N"})
+
+g:Shift(5) -- hyperbolic
+g:Define_sphere({radius=R, color="orange", opacity=0.7})
+for k = 1, 10 do
+    g:DScurve(ld.parametric3d(function(t) return Ms(R,36*k*ld.deg,t) end,0,pi,50), 
+        {color="blue",width=6})
+end
+g:Dspherical(); g:Dlabel("hyperbolic",Z(0,2),{pos="N"})
+
+g:Shift(Z(-5,-5)) -- loxodromic
+g:Define_sphere({radius=R, color="orange", opacity=0.7})
+g:DScurve(ld.parametric3d(q,0,pi,50), {color="blue",width=6})
+g:Dspherical(); g:Dlabel("loxodromic",Z(0,-2),{pos="S"})
+
+g:Shift(5) -- parabolic
+g:Define_sphere({radius=R, color="orange", opacity=0.7})
+for k = 10, 350, 20 do
+    g:DScurve(ld.parametric3d(function(t) return p(t,k*ld.deg) end,-pi,pi,50), 
+        {color="blue",width=6})
+end
+g:Dspherical(); g:Dlabel("parabolic",Z(0,-2),{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

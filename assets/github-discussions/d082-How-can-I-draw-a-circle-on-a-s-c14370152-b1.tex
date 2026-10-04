@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/82#discussioncomment-14370152 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=circumsphere}
+local g = graph3d:new{window={-4,4,-3,4},viewdir={30,60},size={10,10}}
+-- g:Linejoin("round") --Useless instruction, it has become a default option.
+g:Linewidth(4); 
+Hiddenlines = true; -- don't forget this if you want dashed lines...
+Hiddenlinestyle = "dashed"
+require 'luadraw_spherical'
+local A, B, C, D = Origin, M(3,0,0), M(0,3,0), M(0,0,3)
+local I1,R1,n1 = circumcircle3d(B,C,A)
+local I,R= circumsphere(A,B,C,D)
+local T = tetra(A,B-A,C-A,D-A)
+
+-- now we use luadraw_spherical, see documentation
+g:Define_sphere({center=I, radius=R}) 
+g:DScircle({I1,n1})
+g:DSpolyline( facetedges(T) )
+g:Dspherical()
+-- end of luadraw_spherical
+
+g:Ddots3d({A,B,C,D,I,I1})
+g:Dlabel3d( "$A$",A,{pos="W"}, "$B$",B,{}, "$C$",C,{pos="SE"}, "$D$",D,{pos="E"},"$I$",I,{pos="E"},"$I_1$",I1,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document} 

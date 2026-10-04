@@ -1,0 +1,40 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-5-Dscene3d-Method.tex (demo: Solid cylinder immersed in water)
+\begin{luadraw}{name=cylindres_imbriques}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-5,5,-7,5}, viewdir={"central",30,65,20},
+    size={10,10},margin={0,0,0,0}}
+ld.Hiddenlines = false
+local R, r, A, B = 3, 1.5
+local C1 = ld.cylinder(M(0,0,-5),5*vecK,R)  -- to model water
+local C2 = ld.cylinder(Origin,2*vecK,R,35,true) -- part of the container above the water (open cylinder)
+local C3 = ld.cylinder(M(0,0,-3),7*vecK,r) -- small cylinder submerged in water
+-- under the 3D scene
+g:Lineoptions(nil,"gray",12)
+g:Dcylinder(M(0,0,-5),7*vecK,R,{hiddenstyle="noline"}) -- outline of the container (large cylinder)
+-- scène 3D
+g:Dscene3d(
+        g:addPoly(C1,{contrast=0.125,color="cyan",opacity=0.5}), -- water
+        g:addPoly(C2,{contrast=0.125,color="WhiteSmoke", opacity=0.5}), -- part of the container above the water
+        g:addPoly(C3,{contrast=0.25,color="Salmon",backcull=true}), -- small cylinder in the water
+        g:addCircle(M(0,0,2),R,vecK,{color="gray"}), -- upper edge of the container
+        g:addCircle(M(0,0,-5),R,vecK,{color="gray"}), -- lower edge of the container
+        g:addCircle(Origin,R-0.025,vecK, {width=2,color="cyan"}) -- upper edge water
+        )
+-- over the 3D scene
+g:Lineoptions(nil,"black",8); A = 4*vecK; B = A+r*g:ScreenX()
+g:Dpolyline3d( {A,B}, "<->"); g:Dlabel3d("$3\\,$cm",(A+B)/2,{pos="N",dist=0.25})
+A = Origin+(r+1)*g:ScreenX(); A = ld.rotate3d(A,-10,{Origin,vecK})
+B = A-3*vecK
+g:Dpolyline3d( {A,B}, "<->"); g:Dlabel3d("h",(A+B)/2,{pos="E"})
+g:Lineoptions("dashed")
+g:Dpolyline3d({{A,A-g:ScreenX()},{B,B-g:ScreenX()}})
+A = Origin-(R+1)*g:ScreenX(); A = ld.rotate3d(A,10,{Origin,vecK})
+B = A-vecK
+g:Dpolyline3d({{A,A+g:ScreenX()},{B,B+g:ScreenX()}})
+g:Linestyle("solid")
+g:Dpolyline3d( {A,B}, "<->"); g:Dlabel3d("$2$\\,cm",(A+B)/2,{pos="W"})
+g:Show()
+\end{luadraw}

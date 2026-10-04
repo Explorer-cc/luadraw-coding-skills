@@ -1,0 +1,60 @@
+% source: https://github.com/pfradin/luadraw/discussions/274#discussioncomment-17205141 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{document}
+\begin{luadraw}{name=step-function}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{
+    window3d={-1.5,8,-1.5,4.5,-0.5,3.5}, 
+    window={-4,5,-3,4}, 
+    viewdir={15,75}, 
+}
+
+local x0, x1, x2 = 1.5, 4, 7.5
+local y0, y1, y2, y3 = 1.5, 2.25, 3, 3.75
+local h11, h12, h13, h21, h22, h23 = 2, 2.75, 2.5, 1.2, 1.8, 1.5
+local data = {
+    {x0,x1,y0,y1,h11},
+    {x1,x2,y0,y1,h21},
+    {x0,x1,y1,y2,h12},
+    {x1,x2,y1,y2,h22},
+    {x0,x1,y2,y3,h13},
+    {x1,x2,y2,y3,h23}
+}
+local function mystep(x1,x2,y1,y2,h)
+    return {M(x1,y1,h), M(x2,y1,h), M(x2,y2,h), M(x1,y2,h)}
+end
+
+local scene = {}
+for _,b in ipairs(data) do
+    table.insert(scene,mystep(table.unpack(b)))
+end
+
+g:Dpolyline3d( {{-1.5*vecI, 8*vecI},{-1.5*vecJ,4.5*vecJ},{-0.5*vecK,3.5*vecK}}, "-stealth")
+g:Dpolyline3d({M(x0,y0,0),M(x2,y0,0),M(x2,y3,0),M(x0,y3,0)},true,"fill=lightgray")
+
+for _, x in ipairs({x0,x1,x2}) do
+    g:Dpolyline3d( {M(x,0,0), M(x,y3,0)}, "dashed,gray")
+end
+
+for _, y in ipairs({y0,y1,y2,y3}) do
+    g:Dpolyline3d( {M(0,y,0), M(x2,y,0)}, "dashed,gray")
+end
+
+scene = g:Sortfacet(scene)
+
+for _, f in ipairs(scene) do
+    for _, A in ipairs(f) do
+        g:Dpolyline3d( {A, ld.pxy(A)},"line width=0.8, gray")
+    end
+    g:Dfacet(f, {color="white", contrast=0.5, opacity=0.9})
+end
+g:Dlabel3d( "$x$", 8*vecI,{pos="SW"}, "$y$", 4.5*vecJ, {pos="E"}, "$z$", 3.5*vecK,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,25 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-3-Geometric-Constructions.tex (demo: Example with \emph{line2strip)
+\begin{luadraw}{name=line2strip}
+local ld = luadraw
+local g = ld.graph:new{bbox=false, bg="lightgray"}
+local i = ld.cpx.I; g:Linewidth(8)
+local p = {-3+3*i,-3,"l",0,3,3,1,"ca", 3+3*i,"l"}
+local P = ld.path(p)  -- p is first converted to polyline
+g:Setmatrix({-3+3*i,0.5,0.5*i})
+local L = ld.line2strip(P,1,true)
+g:Dpath(L,"Crimson,fill=Gold"); g:Dpath(p,"gray,dashed")
+g:Dlabel("close=true",i,{})
+g:Setmatrix({3+3*i,0.5,0.5*i})
+L = ld.line2strip(P,1,false)
+g:Dpath(L,"Crimson,fill=Gold"); g:Dpath(p,"gray,dashed")
+g:Dlabel("close=false",i,{})
+g:Setmatrix({-3-i,0.5,0.5*i})
+L = ld.line2strip(P,1,false,"round","right")
+g:Dpath(L,"Crimson,fill=Gold"); g:Dpath(p,"gray,dashed")
+g:Dlabel('mode="right"',1.5*i,{}); g:Dlabel('ends="round"',0.5*i,{})
+g:Setmatrix({3-i,0.5,0.5*i})
+L = ld.line2strip(P,1,true,false,"left")
+g:Dpath(L,"Crimson,fill=Gold"); g:Dpath(p,"gray,dashed")
+g:Dlabel('mode="left"',1.5*i,{}); g:Dlabel("close=true",0.5*i,{})
+g:Show()
+\end{luadraw}

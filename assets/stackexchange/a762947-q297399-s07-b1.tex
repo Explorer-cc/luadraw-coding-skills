@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/762947 (question 297399, score 7, block 1)
+\documentclass[12pt]{standalone} % compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=ribbon_cylinder}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{window={-3,3,-5,5},viewdir="central",size={10,10}}
+ld.Hiddenlinestyle = "noline"
+local h, R, delta, N = 4, 2, 0.5, M(0,-0.5,1) 
+local nb = 6
+local zpos = ld.linspace(-3.5,3.5,nb)
+local color = "red"
+local C = ld.cylinder(M(0,0,-h),R, M(0,0,h), 50, true)
+local V = g:Classifyfacet(C) -- visible facets only
+local P, B
+-- drawing
+g:Dcylinder(M(0,0,-h),R, M(0,0,h), {color="cyan"})
+for k, z in ipairs(zpos) do
+    local A = M(0,0,z)
+    P = {A,N}; V = ld.cutfacet(V,P) -- we cut V with the plane P
+    P = {A+M(0,0,delta), N} -- We move P along the OZ axis and cut V again
+    V, B = ld.cutfacet(V,P) -- B is a slice (ribbon), V is the rest of the cylinder
+    g:Dpolyline3d( ld.border(B),
+        "left color="..color.."!25, right color="..color) --..", middle color="..color.."!30")
+end
+g:Show()
+\end{luadraw}
+\end{document}

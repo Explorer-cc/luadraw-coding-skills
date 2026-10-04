@@ -1,0 +1,46 @@
+% source: https://tex.stackexchange.com/a/759208 (question 759198, score 12, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/759198/improve-of-solid-efffect-of-stack-of-unit-cube-legos-solid-draw-with-hole-prot
+\begin{document}
+\begin{luadraw}{name=cube_lego}
+local g = graph3d:new{viewdir=perspective("yz",0.5,135)}
+
+local Dunitcube = function(O, color, prot)
+    -- O = reference point
+    -- prot = "top" or "left" or "front"
+    local cyl = function(A,V,r)
+        g:Dpoly(cylinder(A,V,r,45),{color=color, contrast=1.5,backcull=true, mode=mShadedOnly})
+    end
+    local r, h = 0.2, 0.1
+    local circles_opt1 = 'draw=none,fill=black'
+    local circles_opt2 = 'draw=none,fill='..color.."!80!black"
+    g:Dpoly( parallelep(O,vecJ, -vecI,vecK), {color=color, mode=mShadedOnly, backcull=true})
+    --front
+    if prot == "front" then cyl(O+M(0,0.5,0.5), h*vecI, r)
+    else g:Dcircle3d( O+M(0,0.54,0.5), r, vecI,circles_opt1); g:Dcircle3d(O+M(0,0.5,0.5),r,vecI,circles_opt2)
+    end
+    -- left
+    if prot == "left" then cyl(O+M(-0.5,0,0.5), -h*vecJ, r)
+    else g:Dcircle3d( O+M(-0.55,0,0.5), r, vecJ,circles_opt1); g:Dcircle3d(O+M(-0.5,0,0.5),r,vecJ,circles_opt2)
+    end
+    -- top
+    if prot == "top" then cyl(O+M(-0.5,0.5,1), h*vecK, r)
+    else g:Dcircle3d( O+M(-0.54,0.52,1), r, vecK,circles_opt1); g:Dcircle3d(O+M(-0.5,0.5,1),r,vecK,circles_opt2)
+    end
+end
+
+-- some examples
+Dunitcube(Origin,"SteelBlue","left"); Dunitcube(Origin-vecJ,"SeaGreen","left")
+Dunitcube(Origin+vecK,"Gold",nil); Dunitcube(Origin-2*vecJ,"Beige","left"); 
+Dunitcube(Origin-3*vecJ,"Crimson","left")
+local A = 3*vecJ-3*vecK
+Dunitcube(A,"SteelBlue","top"); Dunitcube(A+vecK,"SeaGreen","top")
+Dunitcube(A+2*vecK,"Gold","top"); Dunitcube(A+3*vecK,"Beige","top")
+Dunitcube(A+4*vecK,"Salmon","top"); Dunitcube(A+5*vecK,"cyan","top")
+g:Dlabel3d("$5$", Origin-vecJ, {pos="S"}, "$6$", A+0.5*vecJ, {pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

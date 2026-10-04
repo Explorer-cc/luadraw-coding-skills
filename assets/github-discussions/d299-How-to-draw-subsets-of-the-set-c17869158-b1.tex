@@ -1,0 +1,41 @@
+% source: https://github.com/pfradin/luadraw/discussions/299#discussioncomment-17869158 (pfradin, block 1)
+\documentclass[border=5mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw} 
+\usepackage{amsmath,amssymb}
+\begin{document}
+\begin{luadraw}{name=interval}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window = {0,1.8,-1, 2}, size = {12,3,0}, bbox = false }
+local wd = 0.25
+local inf = math.huge
+local function interval(x1,x2,y,left,right,legend,labelx1,labelx2,pattern)
+    local u1,u2,v1,v2 = table.unpack( g:Getview() )
+    labelx1 = labelx1 or x1 --default value
+    labelx2 = labelx2 or x2 --default value
+    pattern = pattern or "pattern=north east lines,pattern color=gray" --default value
+    local dx = 0.25/g.Xscale -- to see the arrow
+    left = "$\\mathbf{"..left.."}$"
+    right = "$\\mathbf{"..right.."}$"
+    if x1 > x2 then x1, x2 = x2, x1 end
+    if x1 == -inf then x1 = u1 end
+    if x2 == inf then x2 = u2 end
+    if x1 > u1 then
+        g:Drectangle(Z(u1,y-wd/2), Z(x1,y+wd/2), "draw=none,"..pattern)
+        g:Dlabel(left, Z(x1,y), {}, "$"..labelx1.."$", Z(x1,y), {pos="S",dist=0.1})
+    end
+    if x2 < u2 then
+        g:Drectangle(Z(x2,y-wd/2), Z(u2-dx,y+wd/2), "draw=none,"..pattern)
+        g:Dlabel(right, Z(x2,y), {}, "$"..labelx2.."$", Z(x2,y), {pos="S",dist=0.1})
+    end
+    g:Dlabel(legend, Z((x1+x2)/2,y), {pos="N"})
+    g:Dline({Z(x1,y),1}, "thick,-Stealth")
+end
+
+interval(1/15,math.sqrt(2),1,"[","]","", "\\frac{1}{15}","\\sqrt{2}", "fill=blue")
+interval(1/7,1,1,"(","]","", "\\frac{1}{7}","1","pattern=north west lines,pattern color=red")
+g:Show()
+\end{luadraw}
+\end{document} 

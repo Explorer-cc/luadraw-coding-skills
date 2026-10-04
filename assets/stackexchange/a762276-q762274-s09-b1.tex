@@ -1,0 +1,27 @@
+% source: https://tex.stackexchange.com/a/762276 (question 762274, score 9, block 1)
+% Source - https://tex.stackexchange.com/q/762274
+% Posted by minthao_2011
+% Retrieved 2026-04-26, License - CC BY-SA 4.0
+
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=sphere_clip3d_fixed}
+local R = 3
+local g = graph3d:new{window={-R-2, R+1, -R-1, R}, viewdir={110, 60}, size={10, 10}}
+Hiddenlinestyle = "dashed"
+local S, P = sphere(Origin, R, 40, 40), {1.5*vecK, vecK}
+local S_top, S_bottom = cutfacet(S,P) -- cutting the sphere with P (plane)
+local vector = 2*vecK + 5*vecJ 
+local S_top_shiftedV, S_top_shiftedH  = g:Classifyfacet( shift3d(S_top, vector) ) -- visible and hidden part
+local S_bottomV, S_bottomH = g:Classifyfacet(S_bottom ) -- -- visible and hidden part
+g:Dpolyline3d( border(S_bottomH) , "fill=orange!60"); -- bottom hidden border
+g:Dpolyline3d( border(S_bottomV), "ball color=orange") -- bottom visible border
+g:Dpolyline3d( border(S_top_shiftedH) , "fill=orange!60") --top hidden border
+g:Dpolyline3d( border(S_top_shiftedV), "ball color=orange") -- top visible border
+local I, r, n = interPS(P, {Origin,R}) -- circle
+g:Dcircle3d( I,r,n, Hiddenlinestyle); g:Dcircle3d( I+vector,r,n, Hiddenlinestyle)
+g:Show()
+\end{luadraw}
+\end{document} 

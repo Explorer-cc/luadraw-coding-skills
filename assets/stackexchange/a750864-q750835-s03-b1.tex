@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/750864 (question 750835, score 3, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/750835/clip-3d-shape-in-tikz
+\begin{document}
+\begin{luadraw}{name=clip_3d_shape}
+local g = graph3d:new{size={10,10},window={-0.5,2.5,1.5,4.5}, viewdir="xOy"}
+local a, r = 4, 0.2
+local F0,F1,F2 = M(0,a/2,a/2), M(a/2,a,a/2), M(a/2,a/2,a/2)
+local u01, u02,u12 = r*pt3d.normalize(F1-F0), r*pt3d.normalize(F2-F0), r*pt3d.normalize(F2-F1)
+local F01,F02,F10,F12,F20,F21 = F0+u01, F0+u02, F1-u01, F1+u12, F2-u02, F2-u12
+--g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray"})
+local shape = {F10,F1,F12,r,1,"ca",F21,"l",F2,F20,r,1,"ca",F02,"l",F0,F01,r,1,"ca","cl"} 
+g:Dpath3d( shape, "fill=blue, fill opacity=0.4")
+g:Ddots3d({F1,F2})
+g:Dsphere(F0,r,{mode=2,color="gray"})
+g:Show()
+\end{luadraw}
+\end{document}

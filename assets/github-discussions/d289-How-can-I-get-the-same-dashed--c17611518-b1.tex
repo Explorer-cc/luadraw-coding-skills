@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/289#discussioncomment-17611518 (pfradin, block 1)
+\documentclass[border=3pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=cylinder-cone-sphere}
+local ld = luadraw
+require 'luadraw_spherical'
+
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local Rsphere = 5
+local Rcone = 2 * sqrt(2) * Rsphere / 3
+local hcone = 4 / 3 * Rsphere
+local B = M(0, 0, -Rsphere / 3) 
+local T = M(0, 0, hcone - Rsphere / 3)
+local Rcylinder = 2 * Rcone / 3
+local hcylinder = hcone / 3
+local H_cyl = M(0, 0, -Rsphere / 3 + hcylinder) 
+local g = ld.graph3d:new{window={-Rsphere-1,Rsphere+1,-Rsphere-1,Rsphere+1},viewdir={70,60},size={12,12}}
+ld.Hiddenlinestyle = "dashed" -- after the declaration of graph g
+
+-- points of tangency for the cone
+local I, J = pt3d.vecI, pt3d.vecJ -- *(B, I, J)* is an orthogonal coordinate system for the base of the cone.
+local f = function(t) 
+    local R = Rcone
+    local H = T
+-- M = B+R*cos(t)*I+R*sin(t)*J is a point on the circular base.
+-- f returns the determinant of the vectors g.Normal, M-H, and d(M-H)/dt
+    return pt3d.det( g.Normal, B+R*cos(t)*I+R*sin(t)*J-H, -R*sin(t)*I+R*cos(t)*J ) 
+end
+-- The points of tangency are the points on the circle where the function f vanishes.
+local t = ld.solve(f, -pi, pi)
+local C, D = B+Rcone*(cos(t[1])*I+sin(t[1])*J), B+Rcone*(cos(t[2])*I+sin(t[2])*J)
+-- 
+
+g:Dcylinder(B, Rcylinder, H_cyl, {edgestyle="dashed", edgecolor="red"}) 
+--g:Dcone(B, Rcone, T, {edgestyle="dashed", edgecolor="green"})
+g:Dpolyline3d( {C,T,D}, "green,dashed")
+g:Define_sphere({radius=Rsphere, center=O, mode=ld.mBorder, color="", edgecolor="blue"})
+g:DScircle({B, vecK}, {hidden=true,color="green"}) 
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

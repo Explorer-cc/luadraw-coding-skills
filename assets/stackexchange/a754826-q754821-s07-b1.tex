@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/754826 (question 754821, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/754821/how-to-add-stripes-layers-to-a-tikz-cube
+\begin{document}
+\begin{luadraw}{name=cube_layers}
+local g = graph3d:new{ bbox =false, size={12,12}}
+local a = 4
+local n = 20
+local width = a/n
+local colors = {"SteelBlue","Crimson"}
+local P, P1 = poly2facet( parallelep(Origin,a*vecI,a*vecJ,a*vecK) )
+local F = {}
+for k = 1, n-1 do 
+    P, P1 = cutfacet(P, {k*width*vecI,-vecI})
+    insert(F, {P,{color = colors[k%2+1], opacity=0.8}})
+    P = P1
+end
+insert(F, {P1,{color = colors[n%2+1]}}) -- last layer
+g:Dmixfacet( table.unpack(F) )
+g:Show()
+\end{luadraw}
+\end{document}

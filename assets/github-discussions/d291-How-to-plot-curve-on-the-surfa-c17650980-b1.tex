@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/291#discussioncomment-17650980 (pfradin, block 1)
+\documentclass[tikz]{standalone}
+\usepackage{fourier-otf}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+\begin{luadraw}{name=saddle_surface}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{size={10,10},window3d={-2,2,-2,2,-2,2},window={-3,3,-2.5,1.5}, viewdir={-115,60}}
+--window={-2,1.5,-3,1.5}
+local f = function(x,y) return x^2/4-y^2/3 end
+local dot = function(x,y) return M(x,y,f(x,y)) end
+local A, B, C = dot(0,0.5), dot(-1.4,-1.65), dot(1.4,-1.65) -- three points on the surface
+local a, b, c = ld.pxy(A,-2), ld.pxy(B,-2), ld.pxy(C,-2) -- their projections on the z=-2 plane
+local a1, b1, c1 = table.unpack( ld.scale3d({a,b,c},0.925, (a+b+c)/3) )
+local P = ld.prism({a,b,c},M(0,0,4))
+local P1 = ld.prism({a1,b1,c1},M(0,0,4))
+local S = ld.cartesian3d(f,-2,2,-2,2,{30,30})
+local S2 = ld.clip3d(S, P) -- part of S inside P
+local S1 = ld.clip3d(S, P1) -- part of S inside P1
+g:Dfacet(S,{color="black",mode=ld.mShaded,edge=true,edgecolor="white"})
+local L = ld.concat( ld.polyline2path3d( ld.border(S2) ), ld.polyline2path3d( ld.border(S1) ) )
+g:Dpath3d(L, "even odd rule, fill=red, draw=none")
+g:Show()
+\end{luadraw}
+\end{document}

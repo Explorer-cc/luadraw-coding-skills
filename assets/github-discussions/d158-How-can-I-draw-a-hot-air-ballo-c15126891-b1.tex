@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/158#discussioncomment-15126891 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name=balloon2}
+local i = cpx.I
+local g = graph:new{window={-3,3,-1.5,5}, margin={0,0,0,0}, bg="LightBlue!50", size={12,12}}
+g:Lineoptions("solid","Navy",8); g:Fillopacity(0.8)
+
+local style = function(color)
+    return "left color="..color.."!50, right color="..color..", middle color="..color.."!10, shading angle = 180"
+end
+
+local arc = function(u1,u2)
+    return {(u1+u2)/2, u2, cpx.abs(u2-u1)/2, 1, "ca"}
+end
+
+local a, b1, b2, b3, b4, b5 = 5*i, -0.7, -0.5, -0.3, -0.1, 0.1
+local path1 = {b1,b1-3+4*i,a-1,a,"b",a-1, b2-2.5+3.5*i,b2,"b","cl"}
+local path2 = {b3,b3-1.5+2.5*i,a-1,a,"b",a-1, b2-2.5+3.5*i,b2,"b","cl"}
+local path3 = {b3,b3-1.5+2.5*i,a-1,a,"b",a-0.5, b4-0.5+1.5*i,b4,"b","cl"}
+local path4 = {-b4,-b4+0.5+1.5*i,a+0.5,a,"b", a-0.5,b4-0.5+1.5*i,b4,"b","cl"}
+g:Setmatrix({Z(0,0),Z(1.25,0),i}) -- scale 1.25 on Ox
+g:Dpath(path1, style("Yellow")); g:Dpath(path2,style("Blue"))
+g:Dpath(path3,style("ForestGreen")); g:Dpath(path4,style("Crimson"))
+local mat = {Z(0,0),Z(-1,0),Z(0,1)} -- symmetry with respect to Oy
+g:Dpath(mtransform(path1,mat), style("Yellow"))
+g:Dpath(mtransform(path2,mat),style("Blue"))
+g:Dpath(mtransform(path3,mat),style("ForestGreen"))
+local c1,c2,c3,c4,c5 = table.unpack( mtransform({b1,b2,b3,b4,b5}, {-1.125*i,Z(0.6,0),i}) )
+local path = concat( {c1,b1,"l"}, arc(b1,b2), arc(b2,b3), arc(b3,b4), arc(b4,b5), arc(b5,-b4), arc(-b4,-b3), arc(-b3,-b2), arc(-b2,-b1),{-c1.re+i*c1.im,"l","cl"})
+g:Dpath(path, "fill=Maroon")
+local k = 1.2
+local d1,d2,d3,d4,d5 = b1+k*(c1-b1), b2+k*(c2-b2), b3+k*(c3-b3), b4+k*(c4-b4), b5+k*(c5-b5)
+g:Drectangle(d3,-d3.re+i*d3.im,d3+0.175*i,"pattern = north east lines")
+g:Dpolyline( {{b1,d1,-d1.re+i*d1.im,-b1},{b2,d2},{b3,d3},{b4,d4},{b5,d5},{-b4,-d4.re+i*d4.im}, {-b3,-d3.re+i*d3.im}, {-b2,-d2.re+i*d2.im}})
+g:Show()
+\end{luadraw}
+\end{document} 

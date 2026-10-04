@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/180#discussioncomment-15615431 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=answer3}
+local a = 2
+local A,B,C,D,S = M(0,0,0),M(a,0,0),M(a,a,0),M(0,2*a,0),M(0,0,2*a)
+local G = (A+B+S)/3
+local P = pyramid( {A,B,C,D}, S)
+
+local g = graph3d:new{window3d={0,a+1,0,2*a+1,0,2*a+1}, adjust2d=true, bbox=false, viewdir={20,70},size={10,10}}
+Hiddenlinestyle = "dashed";Hiddenlines = true;
+g:Dscene3d( g:addAxes(Origin, {arrows=1,arrowscale=0.75,color="blue"}) )
+g:Dpoly(P, {color="orange", mode=mShadedHidden})
+ g:Dlabel3d("$S$",S,{pos="W"},"$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{pos="S"}, "$G$",G,{},{pos="E"})
+g:Ddots3d({A,B,C,D,S,G})
+g:Show()
+\end{luadraw}
+\end{document} 

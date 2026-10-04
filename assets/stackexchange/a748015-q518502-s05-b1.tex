@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/748015 (question 518502, score 5, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/518502/circle-made-from-intersecting-spheres
+\begin{document}
+\begin{luadraw}{name=interSS}
+local g = graph3d:new{window={-10,13,-10,15},viewdir={240,50},size={10,10}}
+ g:Linewidth(4); Hiddenlinestyle = "dashed";Hiddenlines = true
+require 'luadraw_spherical'
+local I1, I2 = M(3,-4,0), M(3,2,8)
+local R1,R2 = 8, 6
+local S1,S2 = {I1, R1},{I2, R2}
+local I,r,n = interSS(S1, S2)
+g:Define_sphere({center=I1, radius=R1}) 
+g:DScircle({I,n},{color="Blue"})
+g:DSpolyline({I1,I2})
+g:Dspherical()
+local d = interPP({I2,g.Normal},{I,n})
+local u = pt3d.normalize(d[2])
+local A, B = I+r*u, I-r*u
+g:Dpath3d({A,I,B,r,1,n,"ca",I2,A,R2,-1,"ca"},"ball color=blue,blue,fill opacity=0.5") --outline of the visible part of the blue sphere
+g:Ddots3d({I1,I2,I})
+g:Dlabel3d("$I_1$",I1,{pos="S"}, "$I_2$",I2,{pos="N"}, "$I$",I,{pos="E"})
+g:Show()
+\end{luadraw} 
+\end{document} 

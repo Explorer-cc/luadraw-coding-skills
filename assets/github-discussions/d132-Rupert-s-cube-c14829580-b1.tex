@@ -1,0 +1,46 @@
+% source: https://github.com/pfradin/luadraw/discussions/132#discussioncomment-14829580 (pfradin, block 1)
+\documentclass[border=2 mm]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\usepackage[a4paper,margin=0cm]{geometry}
+\usepackage[active,tightpage]{preview}
+\pagestyle{empty}
+
+\directlua{%
+nb = 11
+basename = cachedir.."Rupert_cube"
+}%
+
+\begin{luadraw}{name=Rupert_cube}
+local g = graph3d:new{window={-3,3,-2,2}, size={10,10},bg="Beige",margin={0,0,0,0},viewdir={30,60}}
+local C1 = parallelep(Origin,vecI,vecJ,vecK)
+local a = (math.sqrt(3)-1)/2
+local C2 = parallelep(-a*vecJ,vecI,(2*a+1)*vecJ,vecK)
+C2 = rotate3d(C2,45,{M(0.5,0.5,0.5),vecK})
+local u = vecI+vecK-vecJ
+local alpha = angle3d(vecJ-vecI,u)
+C2 = rotate3d(C2,alpha*rad,{M(0.5,0.5,0.5),vecI+vecJ})
+local C4 = clip3d(C1,C2,true) -- we clip C1 with C2, true means that we keep what is exterior
+local dep = linspace(-1.5,1.5,nb)
+dep = concat(dep, reverse(dep)) -- to do it in both directions
+for k,d in ipairs(dep) do
+    g:Dscene3d(
+        g:addPoly(shift3d(C2,d*u),{color="green",edge=true}),
+        g:addFacet(C4,{color="orange"}), 
+        g:addPolyline( facetedges(C1) )
+        )
+    g:Savetofile(basename..k..".tkz")
+    g:Cleargraph()
+end
+\end{luadraw}
+
+\begin{document}
+\begin{luacode*}
+for k = 1, 2*nb do
+    tex.print("\\begin{preview}")
+    tex.print("\\input{"..basename..k..".tkz}")
+    tex.print("\\end{preview}")
+end
+\end{luacode*}
+\end{document} 

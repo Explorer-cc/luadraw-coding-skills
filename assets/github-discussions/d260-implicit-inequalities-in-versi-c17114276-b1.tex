@@ -1,0 +1,41 @@
+% source: https://github.com/pfradin/luadraw/discussions/260#discussioncomment-17114276 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/699986/draw-shaded-region-using-tikz-and-pgfplots
+\usepackage[left=2cm,right=2 cm,top=2cm,bottom=2cm]{geometry}
+
+\begin{document}
+\begin{luadraw}{name=implicit_inequalities1}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window = {-3, 4, -2, 6}, size = {10, 10} }
+g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+local f1 = function(x,y) return x^2 + y^2 - 2*x - 4*y - 4 end
+local f2 = function(x,y) return y-math.sin(8*x)  end
+local f3 = function(x,y) return math.sin(8*x)  end
+local filloptions = "draw=none,pattern= north west lines, pattern color=cyan"
+g:Dimplicit_inequalities( {f1,'<',f2,">"}, {grid={100,100}, draw_options=filloptions})
+g:Dimplicit(f1, {draw_options="red,thick"})
+g:Dcartesian(f3, {draw_options="blue"});
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=implicit_inequalities2}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window = {-3, 4, -2, 6}, size = {10, 10} }
+g:Daxes({0,1,1}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+local f1 = function(x,y) return x^2 + y^2 - 2*x - 4*y - 4 end
+local f2 = function(x,y) return y-math.sin(8*x)  end
+local f3 = function(x,y) return math.sin(8*x)  end
+local filloptions = "draw=none,pattern= north west lines, pattern color=cyan"
+g:Dimplicit_inequalities( {f1,'<',f2,"<"}, {grid={100,100}, draw_options=filloptions})
+g:Dimplicit(f1, {draw_options="red,thick"})
+g:Dcartesian(f3, {draw_options="blue"});
+g:Show()
+\end{luadraw}
+\end{document} 

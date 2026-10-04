@@ -1,0 +1,34 @@
+% source: https://tex.stackexchange.com/a/762729 (question 360412, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%%https://tex.stackexchange.com/questions/360412/drawing-cylinder-in-3d-plane
+\begin{document}
+\begin{luadraw}{name=two-cylinders}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{ viewdir="central" }
+ld.Hiddenlinestyle = "dashed"
+local C1 = ld.cylinder(M(0,0,-3), 3, M(0,0,3), 80, true)
+local C1v, C1h = g:Classifyfacet(C1) -- visible and hidden parts of the large cylinder
+g:Dpolyline3d( ld.border(C1h), "left color=SteelBlue!25, right color=SteelBlue!50,"..
+    "middle color=SteelBlue!18, fill opacity=0.8") -- outline of the  hidden part
+g:Dpolyline3d({{M(0,0,-3), M(0,0,5)}, {M(0,0,0-3),M(4,0,-3)},
+    {M(0,0,-3), M(0,4,-3)}}, '-stealth') -- axes
+g:Dcylinder( M(0,1.5,-3), 1, M(0,1.5,3), {color="black"}) -- small cylinder
+g:Dpolyline3d( {{M(0,0,-3), M(0,0,5)}, {M(0,0,0-3),M(4,0,-3)}, {M(0,0,-3),M(0,4,-3)}}, 'dashed')
+g:Dpolyline3d( ld.border(C1h), "dashed")
+g:Dlabel3d( "$U_n$",M(0,0,0),{pos="W"}, "$W$",M(1,2,0.5),{pos="center"}, 
+    "$\\prime U$",M(0,0,-3),{pos="S", dist=0.25})
+g:Dpolyline3d( ld.border(C1v), "left color=SteelBlue!50, right color=SteelBlue,".. 
+    "middle color=SteelBlue!10, fill opacity=0.8") -- outline of the visible part
+g:Dcircle3d(M(0,0,3),3,M(0,0,1),"fill=SteelBlue!30, fill opacity=0.8") -- top of large cylinder
+g:Dpolyline3d( {M(0,0,3),M(0,0,5)}, "-stealth")
+g:Dcrossdots3d( {M(0,0,3), M(0,0,1)} )
+g:Dlabel3d("$\\prime x$", M(4,0,-3),{pos="S"}, "$\\prime y$", M(0,4,-3),{},
+    "$\\prime W$", M(2,2,-3),{pos="S",dist=0.25}, "$|z_n|$",M(0,0,4.5),{pos="E"},
+    "$U$", M(3,-0.5,0.5),{pos="center"})
+g:Show()
+\end{luadraw}
+\end{document}

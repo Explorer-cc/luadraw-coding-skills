@@ -1,0 +1,40 @@
+% source: https://tex.stackexchange.com/a/760420 (question 760416, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/760416/drawing-a-tank-consisting-of-a-cylinder-topped-with-a-hemisphere-of-the-same-rad
+\begin{document}
+\pgfdeclareradialshading[]{mysphereshading}
+{\pgfpoint{0 bp}{-10 bp}}
+{color(0bp)=(blue!10); color(20bp)=(blue!50); color(35bp)=(blue!85)}% 
+
+\begin{luadraw}{name=tank}
+local ld = luadraw -- version 3.1
+local cpx, pt3d = ld.cpx, ld.pt3d
+local vecK = pt3d.vecK
+
+local cos, sin, pi = math.cos,math.sin, math.pi
+local g = ld.graph3d:new{window={-3,3,-4,4},viewdir={30,70},size={12,12}}
+ld.Hiddenlinestyle= "dashed"
+local r = 2
+local h = 5
+local A = -3*vecK
+local B = A+h*vecK
+local u = pt3d.normalize( pt3d.prod(vecK,g.Normal) )
+local C, D = B+r*u, B-r*u -- points of tangency
+--cylinder
+g:Dcylinder(A,h*vecK,r,{color="blue!85"})
+--hemisphere
+g:Dpath3d( {D, "m", B, C, r, 1, vecK, "ca", B, D, r, 1, g.Normal,"ca"},-- "shading=mysphereshading")
+    "left color=blue!50, right color=blue, middle color=blue!25")
+    --"bottom color=blue!25, top color=blue")
+-- dashed circle
+g:Dcircle3d(A+h*vecK,r,vecK,"dashed")
+--legends
+local i, c = cpx.I, g:Proj3d(C)+0.5
+local a = g:Proj3d(A)-i
+g:Dseg( {c,c-h*i}, "<->"); g:Dlabel("$h$",c-h*i/2,{pos="E"})
+g:Dseg( {a,a+r}, "<->"); g:Dlabel("$r$",a+r/2,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document} 

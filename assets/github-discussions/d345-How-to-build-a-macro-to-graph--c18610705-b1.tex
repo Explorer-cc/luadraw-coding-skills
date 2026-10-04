@@ -1,0 +1,89 @@
+% source: https://github.com/pfradin/luadraw/discussions/345#discussioncomment-18610705 (pfradin, block 1)
+\documentclass[12pt]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com
+\usepackage{fourier-otf}
+\usepackage{float}
+\usepackage[top=15mm,bottom=20mm,left=2cm,right=2cm]{geometry}
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+
+function ld.critical_points(f,x1,x2)
+    local df = function(x)
+        local h = 1e-6
+        local a, b = ld.evalf(f,x+h), ld.evalf(f,x-h)
+        if (a~=nil) and (b~=nil) then return (a-b)/(2*h) end
+    end
+    return ld.solve(df,x1,x2)  -- approximate solutions in [x1;x2] of f'(x)=0
+end
+
+function ld.draw(a,b,c,m,n,t)
+    local f = function(x) return (a*x^2 + b*x + c)/(m*x + n)  end
+    local h = function(x) return b/m - (a*n)/m^2 + (a*x)/m end
+    local k = function(x) return 0 end
+    local x0 = -n/m
+    local y0 = h(x0) 
+    local xmin, xmax, ymin, ymax= x0 - t, x0 + t,y0 - t, y0 + t
+    local g = ld.graph:new{window={xmin, xmax, ymin, ymax},size = {10, 10}}  
+    local Roots = ld.solve(f, xmin, xmax) -- approximate solutions in [xmin, xmax] of f(x)=0
+    local eps = 1e-4
+    g:Linewidth(8)
+    local Critic = {}    
+    local S = ld.critical_points(f,xmin,xmax)
+    if S ~= nil then
+        for _,x in ipairs(S) do
+            table.insert(Critic, Z(x,f(x)))
+            g:Dpolyline({{Z(x, 0), Z(x, f(x))}}, "dashed, line width = 0.5pt, color = cyan")
+            g:Dpolyline({{Z(0, f(x)), Z(x, f(x))}}, "dashed, line width = 0.5pt, color = cyan")
+        end
+    end
+    --
+    g:Dpolyline({{Z(x0,ymin),Z(x0,ymax)}},"color = blue") 
+    g:Daxes({0,1,1}, {grid=false, arrows="-Stealth", legend={"$x$","$y$"}, xnode_options='fill=white'})
+    g:Dpolyline(Critic, "color = green")
+    g:Ddots({Z(x0, y0)})
+    g:Ddots(Critic, "color = red, fill = red")
+    g:Dinequalities({f,'<', k,'>'}, {view={Roots[1], Roots[2]-eps, 0, ymax}, draw_options="pattern = north east lines,pattern color = yellow,draw=none"})
+    g:Dcartesian(f, {x={xmin, xmax}, nbdots=200,discont=true,draw_options="red"}) 
+    g:Dcartesian(h, {draw_options="blue, thick"})
+    
+    g:Sendtotex()
+end
+\end{luacode*}
+
+\begin{document}
+
+The function \[y = \dfrac{a x^2 + b x + c}{m x + n}\] here $a m \neq 0$.
+
+\section{$4 a c m^2 - 4 a b m n + 4 a^2 n^2>0$ and $am>0$}
+\begin{figure}[H]
+  \centering
+ \directlua{luadraw.draw(1, -5, 3, 1, -5, 6)}%
+  \caption{$4 a c m^2 - 4 a b m n + 4 a^2 n^2>0$ and $am>0$}
+\end{figure}
+
+\section{$4 a c m^2 - 4 a b m n + 4 a^2 n^2>0$ and $am<0$}
+
+\begin{figure}[H]
+  \centering
+   \directlua{luadraw.draw(-1, -4,2, 1, -1, 7)}%
+  \caption{$4 a c m^2 - 4 a b m n + 4 a^2 n^2>0$ and $am<0$}
+\end{figure}
+
+\section{$4 a c m^2 - 4 a b m n + 4 a^2 n^2>0$ and $am>0$}
+
+\begin{figure}[H]
+  \centering
+  \directlua{luadraw.draw(-1, -1, 2, 1, 1, 4)}%
+ \caption{$4 a c m^2 - 4 a b m n + 4 a^2 n^2<0$ and $am<0$}
+\end{figure}
+
+\section{$4 a c m^2 - 4 a b m n + 4 a^2 n^2<0$ and $am>0$}
+\begin{figure}[H]
+  \centering
+  \directlua{luadraw.draw(1, -2, -3, 1, -2, 4)}%
+ \caption{$4 a c m^2 - 4 a b m n + 4 a^2 n^2<0$ and $am>0$}
+\end{figure}
+\end{document}

@@ -1,0 +1,46 @@
+% source: https://tex.stackexchange.com/a/765629 (question 615881, score 6, block 1)
+\documentclass[border=5pt, tikz]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/615881/tikz-3d-plot-of-poles-zeros
+\begin{document}
+% figure 1
+\begin{luadraw}{name=surface_contour}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local vecI, vecJ, vecK, Origin = pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.Origin
+local min, sqrt = math.min, math.sqrt
+local j, Z = cpx.I, cpx.Z
+
+-- |H(s)| with s = x + j*y
+-- H = 3*(s+1)(s+2)/((s+3)(s+1+j)(s+1-j))
+local function H(x, y)
+    local s = Z(x,y)
+    local num = (s+1)*(s+2)
+    local den = (s+3)*(s+1+j)*(s+1-j)
+    return cpx.abs(num/den)
+end
+
+local f = function(x, y) return 3*H(x, y) end
+local F = ld.cartesian3d(f,-4,0,-2,2,{71,71} )
+
+local g = ld.graph3d:new{
+    window3d = {-4, 0, -2, 2, 0, 4.5},
+    window = {-5.5, 1.5, -1, 6}, 
+    viewdir = {-65, 75}
+}
+require 'luadraw_pdfliteral'
+
+g:Dboxaxes3d( {grid = true, gridcolor = "gray", fillcolor = "LightGray", ylegendsep=0.75, zstep=0.5} )
+-- contour drawing
+local levels = ld.linspace(0.25, 4.25, 9)
+local cols = ld.getpalette(ld.palRainbow, #levels)
+g:BeginOnPlane({Origin, vecI, vecJ}, {view = {-4, 0, -2, 2}})
+    g:Dcontour(f, levels, {grid = {60, 60}, colors = cols})
+g:EndOnPlane()
+-- surface drawing
+g:Dliteralfacet(F, {mode=ld.mShadedOnly, clip=true, usepalette={ld.palRainbow, "z"}})
+g:Show()
+\end{luadraw}
+\end{document}

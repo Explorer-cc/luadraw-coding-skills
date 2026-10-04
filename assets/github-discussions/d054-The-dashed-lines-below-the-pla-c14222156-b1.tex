@@ -1,0 +1,35 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222156 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/282388/how-can-i-fill-this-pyramid-like-this-picture
+\begin{luadraw}{name=regular_pyramid_08_08_2025}
+local g = graph3d:new{window={-5,6,-5,5},viewdir={150,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local a, n ,h = 4, 6, 5
+local R = a/(2*math.sin(math.pi/n))
+local base = map(toPoint3d, polyreg(0, R, n))
+local A, D, C, B = table.unpack(base)
+local S = M(a/2,a/2,h)
+local m = (A+D)/2
+local n = (S+B)/2
+local P = pyramid( {A, D, C, B}, S)
+local X = {m,pt3d.prod(C-A,m-n)}
+local I1, section = g:Intersection3d(P,X) -- section is the list of intersection points
+local N,F,E,M,G = table.unpack(section)
+local I = interDD({G,G-F},{m,m-n})
+local O = interDD({A,A-C},{m,m-B})
+g:Dpoly(P,{mode=5,color="LightBlue"})  -- draw P without edges
+g:Filloptions("fdiag","red")
+g:Dpolyline3d(section,"draw=none") -- fill section without edges
+g:Dpoly(P,{mode=0,edgewidth=4})  -- draw edges of P, they must be above red hatches
+g:Filloptions("none","black")
+g:Dedges(I1,{hidden=true,color="blue"})
+g:Dpolyline3d({{A,C},{B,M},{G,F},{M,N},{S,O}},"dashed")
+g:Ddots3d(P.vertices)
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{pos="S"}, "$S$",S,{pos="N"},"$D$",D,{pos="S"},"$N$",N,{pos="N"},"$M$",M,{pos="S"},"$E$",E,{pos="S"},"$F$",F,{pos="E"},"$G$",G,{pos="W"},"$I$",I,{pos="N"},"$O$",O,{pos="S"})
+g:Show()
+\end{luadraw}
+ \end{document} 

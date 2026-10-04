@@ -1,0 +1,185 @@
+% source: https://tex.stackexchange.com/a/764195 (question 762384, score 8, block 1)
+% Source - https://tex.stackexchange.com/a/762133
+% Posted by PHL, modified by community. See post 'Timeline' for change history
+% Retrieved 2026-04-22, License - CC BY-SA 4.0
+
+% !TEX TS-program = LuaLaTeX
+\documentclass[tikz]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+
+\makeatletter
+\def\luadrawLiteral#1{\pgfsys@invoke{#1}}% writes in pf stream
+\makeatother
+
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+
+function ld.graph:bpCoord(z) -- z=coordinates, conversion cm -> bp
+    local a, b = self:coord(z.re,z.im)
+    local c = 28.3464567
+    return  ld.strReal(a*c,2).." "..ld.strReal(b*c,2) -- two decimals
+end
+
+function ld.graph:Dliteralpolyline(...) -- writes polylines in the enter image description herepdf stream
+-- Dliteralpolyline( polyline1, args1, polyline2, args2, ...)
+-- args = {fill= rgb table, color = rgb table, close = false}, (fill is solid)
+-- fill="none" => no fill, color="none" => no line 
+    local fill, draw, ends = {}, {}
+    local close = false
+    local literalstr = {}
+    local strcolor, strfill, strdraw 
+    
+    local function apolyline(polyline,args)
+        if (type(polyline[1]) == "number") or cpx.isComplex(polyline[1]) then
+            polyline = {polyline}
+        end
+        fill = args.fill or fill
+        draw = args.draw or draw
+        if args.close ~= nil then close = args.close end
+        if (draw == "none") and (fill == "none") then return -- no fill, no stroke
+        elseif (draw == "none") then ends = "f" -- only fill
+        elseif (fill == "none") then ends = "s" -- only stroke
+        else ends = "b" -- fill and stroke
+        end 
+        if (type(fill) == "table") and (#fill == 3) then
+            strcolor = ld.strReal(fill[1],3).." "..ld.strReal(fill[2],3).." "..ld.strReal(fill[3],3)
+            if strcolor ~= strfill then
+                table.insert(literalstr,strcolor.." rg" ) -- fill color
+                strfill = strcolor
+            end
+        end
+        if (type(draw) == "table") and (#draw == 3) then
+            strcolor = ld.strReal(draw[1],3).." "..ld.strReal(draw[2],3).." "..ld.strReal(draw[3],3)
+            if strcolor ~= strdraw then
+                table.insert(literalstr,strcolor.." RG" ) -- line color
+                strdraw = strcolor
+            end
+        end
+        local aux = {}
+        local L = self:Mtransform( polyline )
+        local last
+        for _,cp in ipairs(L) do
+            for k,z in ipairs(cp) do 
+                z = cpx.toComplex(z)
+                if k == 1 then table.insert(literalstr, self:bpCoord(z).." m") 
+                else
+                    local bpcoord = self:bpCoord(z)
+                    if  last ~= bpcoord then table.insert(literalstr, bpcoord.." l") end
+                    last = bpcoord
+                end
+            end
+            if close then table.insert(literalstr, "h") end
+        end
+        table.insert(literalstr, ends)
+    end
+    
+    local n = select("#", ...)  -- Nombre total d'arguments
+    for i = 1, n-1, 2 do   -- Pas de 3 (1,4,7...)
+        local polyline, args = select(i, ...)  -- Récupère les 3 args
+        if polyline ~= nil then apolyline(polyline,args) end
+    end
+    self:Writeln("\\luadrawLiteral{"..table.concat(literalstr,"\n").."}")
+end
+\end{luacode*}
+
+\directlua{t1 = os.clock()}%
+
+\begin{document}
+\begin{luadraw}{name=penrose, exec=true}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, Zp = cpx.Z, cpx.Zp
+local iterations = 8
+
+ -- golden ratio, its inverse and it's inverse squared
+local phi, invphi, invphisq = (1+math.sqrt(5))/2, 2/(1+math.sqrt(5)), (2/(1+math.sqrt(5)))^2
+
+local r = {} -- to store the tenth roots of unity
+for k = 0, 9 do
+    r[k] = Zp(1, k*math.pi/5)
+end
+
+local S = {} -- store the Robinson triangles
+-- we start with the wheel
+for k = 1, 8 do
+    if (k % 2 == 0) then
+        S[k] = {4, 0, r[k], r[k+1]}
+    else
+        S[k] = {3, 0, r[k+1], r[k]}
+    end
+end
+S[9] = {3,0, 1, r[9]}
+S[10] = {4,0, 1, r[1]}
+
+-- {n, v1, v2, v3}
+-- 1 = counter clockwise gnomon
+-- 2 = clockwise gnomon
+-- 3 = counter clockwise golden triangle
+-- 4 = clockwise golden triangle
+-- v1 = the only one with a different angles, then follows the given direction
+-- replacement procedure for Robinson triangles
+local function selfsim(R)
+    local t, a, b, c = table.unpack(R)
+    local d = b*invphi + c*invphisq
+    local e = c*invphi + a*invphisq
+    local f = a*invphi + b*invphisq
+    if t == 1 then
+        return {{1, d, a, b}, {4, c, d, a}}
+    elseif t == 2 then
+        return {{2, d, a, b}, {3, c, d, a}}
+    elseif t == 3 then
+        return {{4, b, f, e}, {3, b, c, e}, {1, f, e, a}}
+    else
+        return {{3, b, f, e}, {4, b, c, e}, {2, f, e, a}}
+    end
+end
+
+-- iteratively construct the full list of triangles
+-- construct the full list of tiles
+for k = 1, iterations do -- iterate
+    local newS = {} -- temp variable
+    for _, s in ipairs(S) do -- for each j element of S
+        for t, v in ipairs(selfsim(s)) do -- do selfsim(j), obtains 2 or 3 triples, for each thus triple
+            table.insert(newS, v) -- add it to the new list
+        end
+    end
+    S = newS -- S is now the new list
+end
+
+-- start the graph
+local x1,x2,y1,y2 = ld.getbounds(ld.map(function(v) return {v[2],v[3],v[4]} end, S))
+local sc = math.sqrt(2)
+local g = ld.graph:new{ window={x1,x2,y1,y2}, size={10,10},margin={0,0,0,0}}
+
+-- draw the polygons
+local colors = {ld.LightBlue, ld.Orange, ld.ForestGreen, ld.Indigo}
+local opacity = 1
+local triangles = false
+g:Lineoptions("solid","white",1)
+g:Scale(sc)
+local pdfliteral = {}
+g:Filloptions(nil,nil, opacity) --only once to adjust the opacity
+for j = 1, #S do
+    local t, a, b, c = table.unpack(S[j])
+    --g:Filloptions("full",colors[t], opacity) -- takes far too long
+    if triangles then
+        table.insert(pdfliteral, {a,b,c})
+        table.insert(pdfliteral, {close=true, fill=colors[t]})
+    else
+        if t == 1 then -- t=1 <=> anti-clockwise gnomon
+            table.insert(pdfliteral, {a, b, c, a + r[7] * (c - a)})
+            table.insert(pdfliteral, {close=true, fill=colors[t]})
+        elseif t == 4 then -- t=3 <=> anti-clockwise golden triangle
+            table.insert(pdfliteral, {a, b, c, c + invphi*r[3]*(c - a)})
+            table.insert(pdfliteral, {close=true, fill=colors[t]})
+        end
+    end
+end
+g:Dliteralpolyline( table.unpack(pdfliteral) )
+g:Show()
+\end{luadraw}
+
+\directlua{t2 = os.clock(); print("\\ntime=",t2-t1)}%
+\end{document}

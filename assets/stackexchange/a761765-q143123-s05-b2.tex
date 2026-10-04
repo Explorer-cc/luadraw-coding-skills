@@ -1,0 +1,60 @@
+% source: https://tex.stackexchange.com/a/761765 (question 143123, score 5, block 2)
+% Source - https://tex.stackexchange.com/a/760979
+% Posted by Explorer
+% Retrieved 2026-03-18, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=calabi_yau}
+local g = graph3d:new{ 
+    window3d={-1.5,1.5,-1.5,1.5,-1.5,1.5}, 
+    window={-2.5,2.5,-2.5,2.5},
+    size={12,12}, viewdir={45,65} }
+g:Labelsize("footnotesize")
+require 'luadraw_povray'
+
+local color_map = function(pal, opacity)
+    opacity = opacity or 1
+    local cmap, n = "", #pal
+    for k = 0, n-1 do
+        local col = pal[k+1]
+        cmap = cmap.."["..(k/(n-1)).. " rgbt<"..col[1]..","..col[2]..","..col[3]..","..(1-opacity)..">]"
+    end
+    return cmap
+end
+
+local texture = "texture{ pigment{ function{ (z+1.2)/2.4 } color_map{"..color_map(palRainbow,1).."}} finish{ambient 0.35 diffuse 0.8 phong 0.5 reflection 0.05}}"
+
+g:Pov_new({shadow=false})
+local pi, sin, cos = math.pi, math.sin, math.cos
+local n, alpha = 5, 0.3*pi
+local all_surfaces = {}
+local num = 1
+for k1 = 0, n - 1 do
+    for k2 = 0, n - 1 do
+    local function cy(u, v)
+        u = u^3 -- u^3 is better than u
+        local w = Z(u,v)
+        local z1, z2
+        local cw = cpx.cosh(w)
+        local sw = cpx.sinh(w)
+        local r1 = cpx.exp(cpx.I * (2 * pi * k1 / n))
+        local r2 = cpx.exp(cpx.I * (2 * pi * k2 / n))
+        z1, z2 = r1 * cpx.pow(cw, 2/n), r2 * cpx.pow(sw, 2/n)
+        local x, z, y = z2.re, z1.re, cos(alpha) * z1.im + sin(alpha) * z2.im
+        return M(x, y, z)
+    end
+    
+    g:Pov_surface(cy, -1,1, 0, pi/2, {grid = {25, 20}, render=false})
+    table.insert(all_surfaces, "object"..num); num = num+1 -- list of created objects
+    end
+end
+g:Dboxaxes3d({ grid=true, fillcolor="lightgray", xyzstep=0.5, zlabelstyle="W", zlabelsep=0,ylabelsep=0.375})
+--g:Pov_union(all_surfaces, {mytexture=texture}) -- this should works, but there is a bug with the mytexture option
+g:Pov_union(all_surfaces, {name="surf", render=false}); g:Pov_special("object{surf "..texture.."}") -- patch
+g:Pov_exec(); g:Pov_show()
+g:Show()
+\end{luadraw}
+\end{document}

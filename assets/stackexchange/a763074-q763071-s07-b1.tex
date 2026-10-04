@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/763074 (question 763071, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/763071/help-sketching-the-polarity-of-hcl-h%e2%82%82o-and-co%e2%82%82-in-latex
+\begin{document}
+\begin{luadraw}{name=H2O}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{viewdir="yOz", window={-7,7,-5,7}, size={12,12},
+    bg="Beige"}
+require 'luadraw_povray'
+local A, B, C, R, r, R2 = M(0,0,3), M(0,-3,0), M(0,3,0), 1.75, 0.5, 4
+g:Pov_new( {shadow=true} )
+g:Pov_sphere(A,R,{name="O", render=false})
+g:Pov_cylinder(A,r,(A+B)/2, {name="AB", render=false})
+g:Pov_cylinder(A,r,(A+C)/2, {name="AC", render=false})
+
+g:Pov_sphere(B,R,{name="HB", render=false})
+g:Pov_cylinder(B,r,(A+B)/2, {name="BA", render=false})
+g:Pov_sphere(C,R,{name="HC", render=false})
+g:Pov_cylinder(C,r,(A+C)/2, {name="CA", render=false})
+
+g:Pov_sphere(A,R2, {name="SA", render=false})
+g:Pov_sphere(B,R2, {name="SB", render=false})
+g:Pov_sphere(C,R2, {name="SC", render=false})
+
+g:Pov_merge( {"O","AB","AC"}, {color=ld.Red, shadow=false})
+g:Pov_merge( {"HB","BA"}, {color=ld.Gray, shadow=false})
+g:Pov_merge( {"HC","CA"}, {color=ld.Gray, shadow=false})
+g:Pov_merge( {"SA", "SB", "SC"}, {usepalette={ {ld.Gray,ld.Red},"z",{-R2,3+R2}}, opacity=0.2})
+g:Pov_exec(); g:Pov_show()
+g:Dlabel3d( "$O$", A, {}, "$H$", B, {}, "$H$", C, {},
+"$2\\delta^-$", M(0,0,3+R2),{pos="N"}, "$\\delta^+$", M(0,3,-R2), {pos="S"}, "$\\delta^+$", M(0,-3,-R2), {})
+g:Show()
+\end{luadraw}
+\end{document}

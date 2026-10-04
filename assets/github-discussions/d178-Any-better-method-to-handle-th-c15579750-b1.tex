@@ -1,0 +1,32 @@
+% source: https://github.com/pfradin/luadraw/discussions/178#discussioncomment-15579750 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{xcolor}
+\usepackage{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=intersections}
+    local g = graph:new{window={-1,10,-1,10},size={12,12}}
+    -- calculations
+    local f = function(X,u)
+        u = cpx.normalize(u)
+        local mat = {X,u,cpx.I*u}
+        local C = cartesian(function(x) return x^2/15 end, -8,6)
+        return mtransform(C,mat)
+    end
+    local A, d, a = 8, Z(0,6), 7.5
+    local X ,u, Z = (A+d)/2, A-d, Z(4.5,3.5)
+    local C1, C2 = f(X,u), f(Z,u)
+    local b = table.unpack( interDL({a,cpx.I},C2) )
+    local c, e = interD({a,cpx.I},{A,u}), interD({0,cpx.I},{b,u})
+    local Y = proj(Z,{b,u})
+    local C3 = f(Y,u)
+    local u1, u2, u3 = interDL({9,cpx.I},C1), interDL({9,cpx.I},C2), interDL({9,cpx.I},C3)
+    -- drawing
+    g:Daxes({0,1,1}, {arrows="-stealth", legend={"Hours of paid Work",""},legendsep={0.5,0.2}, legendpos = {0.85,0.975}})
+    g:Dpolyline({a,b,e,d,c},"line width=0.8pt,teal")
+    g:Dpolyline(C1,"teal"); g:Dpolyline(C2,"blue"); g:Dpolyline(C3,"red")
+    g:Ddots({b,c,d,e,X,Y})
+    g:Dlabel( "$X$",X,{pos="S"}, "$Y$",Y,{pos="N"}, "$a$",a,{pos="S"}, "$c$",c,{pos="E"}, "$b$",b,{pos="N"}, "$e$",e,{pos="W"}, "$d$",d,{pos='E'}, "$U_1$",u1[1],{node_options="teal,fill=white"}, "$U_2$",u2[1],{node_options="blue,fill=white"}, "$U_3$",u3[1],{node_options="red,fill=white"})
+    g:Show()
+    \end{luadraw}
+\end{document}

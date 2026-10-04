@@ -1,0 +1,156 @@
+% source: https://tex.stackexchange.com/a/751587 (question 751568, score 12, block 2)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/751568/illustrating-the-complex-gamma-function-in-3d
+
+% we define a function to create the gamma_data.dat with python (mudulus  and angle)
+% and a function to read the data and create facets
+% These functions are reusable.
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+
+function ld.createfile(xvalues, yvalues)
+    local f = io.open("gamma.py","w")
+    if f ~= nil then
+        f:write( table.concat({
+            'import numpy as np',
+            'from scipy.special import gamma',
+            'x = np.array(['.. table.concat(xvalues,",")..'])',
+            'y = np.array(['.. table.concat(yvalues,",")..'])',
+            'X, Y = np.meshgrid(x, y)',
+            'Z = X + 1j * Y',
+            'I = gamma(Z) ',
+            'M = np.abs(I) # modulus',
+            'A = np.angle(I) # angle',
+            'with open("gamma_data.dat", "w") as f:',
+            '    f.write("X Y M A\\n") # Column headers',
+            '    for i in range(len(y)):',
+            '        for j in range(len(x)):',
+            '            f.write(f"{X[i, j]:.6f} {Y[i, j]:.6f} {M[i, j]:.6f} {A[i, j]:.6f}\\n")'
+            }, '\n')) -- end of python code
+        f:close()
+    end
+    os.execute("python3 gamma.py") -- needs --shell-escape option
+end
+
+function ld.read_table3d(data,options) -- read 3D data, build facets and functions
+    options = options or {}
+    local x, y, z = options.x or 1, options.y or 2, options.z or 3
+    local scale = options.scale or 1
+    local funclist = options.func or {}
+    if type(funclist) == "number" then funclist = {funclist} end
+    local triangle = options.triangle or false
+    local vertex = options.vertices or false
+    local bbox = options.bbox or false
+    local facet = options.facets
+    if facet == nil then facet = true end
+    local edge = options.edges or false
+    local order = options.order
+    if order == nil then
+        if data[1][x] == data[2][x] then order = "x" else order = "y" end
+    end
+    local inverse = false
+    if order == "y" then x, y = y, x; inverse= true; order = "x" end
+    local result, vertices, facets, edges, functions, bbox3d = {}, {}, {}, {}, {}, {}
+    local nb, nbx, nby = #data
+    local oldx, xval = data[1][x]
+    local lg = {}
+    for index = 1, nb do
+        xval = data[index][x]
+         if xval ~= oldx then
+            if #lg > 0 then table.insert(vertices, lg); lg = {} end
+            oldx = xval
+        end
+        if inverse then
+            table.insert(lg, M(data[index][y], xval, scale*data[index][z]) )
+        else
+            table.insert(lg, M(xval, data[index][y], scale*data[index][z]) )
+        end
+    end
+    table.insert(vertices, lg) -- last line
+    if bbox then
+        bbox3d = {ld.getbounds3d(vertices)}
+    end
+    nbx = #vertices; nby = nb//nbx 
+    for _, func in ipairs(funclist) do --the column numbered 'func' became a function of x and y via linear interpolation.
+        local f = function(u,v)
+            if inverse then u, v = v, u end
+            local lgx = 1
+            while (lgx <= nb)  and (data[lgx][x] < u) do lgx = lgx + nby end
+            if (lgx == 1) then if (data[lgx][x] > u) then return else lgx = 1+nby end end
+            if (lgx > nb)  then return end
+            local k = 0
+            while (k < nby) and (data[lgx+k][y] < v) do k = k+1 end
+            if (k == 0) then if (data[lgx+k][y] > v) then return else k = 1 end end
+            if (k == nby) then return end
+            local x1y1, x1y2, x2y1, x2y2 = lgx-1-nby+k, lgx-nby+k, lgx+k-1, lgx+k
+            local u1, u2, v1, v2 = data[lgx-1][x], data[lgx][x], data[lgx+k-1][y], data[lgx+k][y]
+            local tu, tv = (u-u1)/(u2-u1), (v-v1)/(v2-v1)
+            local V11, V12, V21, V22 = data[x1y1][func], data[x1y2][func],data[x2y1][func], data[x2y2][func]
+            local V1, V2 = V11+tv*(V12-V11), V21+tv*(V22-V21)
+            return V1+tu*(V2-V1)
+        end
+        table.insert(functions, f)
+    end 
+    if facet or edge then
+        for k = 1, nbx-1 do --construction of facets with or without triangulation, with or without edges
+            for j = 1, nby-1 do
+                local a, b, c, d
+                if inverse then
+                    a, d, c, b = vertices[k][j], vertices[k+1][j], vertices[k+1][j+1], vertices[k][j+1]
+                else
+                    a, b, c, d = vertices[k][j], vertices[k+1][j], vertices[k+1][j+1], vertices[k][j+1]
+                end
+                if triangle then
+                    if pt3d.abs(d-b) < pt3d.abs(c-a) then
+                        if facet then table.insert(facets,{a,b,d}); table.insert(facets,{b,c,d}) end
+                    else
+                        if facet then table.insert(facets,{a,b,c}); table.insert(facets,{a,c,d}) end
+                    end
+                else
+                    if facet then table.insert(facets, {a,b,c,d}) end
+                end
+                if edge then table.insert(edges, {a,b,c,d}) end
+            end
+        end
+    end
+    if #functions > 0 then 
+        if #functions == 1 then functions = functions[1] end
+        result.func = functions
+    end
+    if vertex then result.vertices = vertices end
+    if facet then result.facets = facets end
+    if edge then result.edges = edges end
+    if bbox then result.bbox = bbox3d end
+    return result
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=gamma_3d}
+local ld = luadraw -- version >= 3
+local pt3d = ld.pt3d
+local g = ld.graph3d:new{window3d={-4,5,-5,5,0,6}, adjust2d=true, size={10,10},
+    viewdir={-120,60}}
+local xvalues = ld.linspace(-4,0.25,50, 5,20)
+local yvalues = ld.linspace(-5,-1,10, 1,50, 5,10)
+ld.createfile(xvalues,yvalues) -- to create gamma_data.dat, the first time compile with --shell-escape option
+
+local data = ld.read_csv_file("gamma_data.dat", {header=true, sep=" ", comment="%%"})
+local S = ld.read_table3d(data, {facets=true, func=4, bbox=true })
+local W = S.func -- W is a function, W : (x,y) -> arg(gamma(x+iy)) (column 4)
+
+local colorpos = function(f)  -- position in the color palette based on the argument of gamma(x,y)
+    local G = pt3d.isobar3d(f)
+    return W(G.x,G.y)
+end
+
+local pal = ld.mixpalette(ld.rainbow,70,ld.White,30)
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="LightGray"})
+g:Dfacet(S.facets, {clip=true, mode=ld.mShadedOnly, usepalette={pal,colorpos}})
+g:Show()
+\end{luadraw}
+\end{document}

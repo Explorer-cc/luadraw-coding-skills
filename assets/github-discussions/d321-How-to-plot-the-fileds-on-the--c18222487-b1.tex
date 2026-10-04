@@ -1,0 +1,87 @@
+% source: https://github.com/pfradin/luadraw/discussions/321#discussioncomment-18222487 (pfradin, block 1)
+% https://tex.stackexchange.com/q/709139
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=sphere_fields}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sin, cos, pi, abs = math.sin, math.cos, math.pi, math.abs
+require 'luadraw_spherical'
+local sM = ld.sM
+local g = ld.graph3d:new{
+    window3d = {-6,6,-6,6,-1,6},
+    window = {-6,9,-3,4},
+    -- adjust2d = true,
+    viewdir = {10,60},
+    size={15,15}
+}
+local function midpoint(P1,P2,lambda)
+    -- return the (lambda)-th point on the arc(big circle) from P1 to P2
+    local A, B = ld.toSphere(P1), ld.toSphere(P2)
+    return ld.toSphere( (1-lambda)*A + lambda*B)
+end
+
+local function reduce_arc(P1,P2,l1,l2)
+    -- return the arc(big circle) from P1 to P2 reduced from l1 percent to l2 percent
+    local A, B = ld.toSphere(P1), ld.toSphere(P2)
+    return { ld.toSphere( (1-l1)*A + l1*B), ld.toSphere( (1-l2)*A + l2*B) }
+end
+
+local function draw_fields(C,P,Q,color)
+    color = color or "black"
+    local l1, l2 = 0.15, 0.95
+    local tmp1 = midpoint(P,Q,0.2)
+    local tmp2 = midpoint(P,Q,0.5)
+    local tmp3 = midpoint(P,Q,0.8)
+    g:DSarc(reduce_arc(C,tmp1,l1,l2), 1, {color=color, arrows=1})
+    g:DSarc(reduce_arc(C,tmp2,l1,l2), 1, {color=color, arrows=1})
+    g:DSarc(reduce_arc(C,tmp3,l1,l2), 1, {color=color, arrows=1})
+end
+------------------------
+local R = 3
+g:Shift(-4)
+g:Define_sphere({center = Origin, radius = R, show = false, arrowBstyle="-latex"}) -- define sphere first
+local OO = sM(45,50) 
+local A1,A2,A3 = R*vecI, R*vecJ, R*vecK
+local B1,B2,B3 = sM(80,40), sM(10,40), sM(45,80)
+g:DSarc({A1, A2}, 1, {style = "dashed", color = "black"})
+g:DSarc({A2, A3}, 1, {style = "dashed", color = "black"})
+g:DSarc({A3, A1}, 1, {style = "dashed", color = "black"})
+
+g:DSfacet({B1,B2,B3}, {color="blue",width=8})
+draw_fields(A3,B1,B2,"teal")
+draw_fields(A1,B2,B3,"teal")
+draw_fields(A2,B3,B1,"teal")
+g:DSlabel(
+    "$r_2$", 1.5 * A1, {pos = "SW",node_options="inner sep=1pt"}, 
+    "$r_1$", 1.5 * A2, {pos = "SE"}, 
+    "$r_3$", 1.5 * A3, {pos = "N"}
+)
+g:Dpolyline3d({{Origin,1.5*A1}, {Origin, 1.5*A2}, {Origin, 1.5*A3}}, "LightGray,-latex")
+g:Dspherical()
+-------------------------
+g:Shift(8)
+g:Define_sphere({center = Origin, radius = R, show = false, arrowBstyle="-latex"})
+g:DSarc({A1, A2}, 1, {style = "dashed", color = "black"})
+g:DSarc({A2, A3}, 1, {style = "dashed", color = "black"})
+g:DSarc({A3, A1}, 1, {style = "dashed", color = "black"})
+
+g:DSfacet({B1,B2,B3}, {color="blue",width=8})
+draw_fields(OO,B1,B2,"red")
+draw_fields(OO,B2,B3,"red")
+draw_fields(OO,B3,B1,"red")
+g:DSlabel(
+    "$r_2$", 1.5 * A1, {pos = "SW",node_options="inner sep=1pt"}, 
+    "$r_1$", 1.5 * A2, {pos = "SE"}, 
+    "$r_3$", 1.5 * A3, {pos = "N"}
+)
+g:Dpolyline3d({{Origin,1.5*A1}, {Origin, 1.5*A2}, {Origin, 1.5*A3}}, "LightGray,-latex")
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

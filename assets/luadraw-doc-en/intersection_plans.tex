@@ -1,0 +1,24 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-5-Dscene3d-Method.tex (demo: First example with Dscene3d: intersection of two planes)
+\begin{luadraw}{name=intersection_plans}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{viewdir={"central",-10,60}, window={-5,6.5,-6.5,6},bg="gray", size={10,10}}
+local P1 = ld.planeEq(1,1,1,-2) -- plane of equation x+y+z-2=0
+local P2 = {Origin, vecK-vecJ} -- plane passing through O and normal to (0,-1,1)
+local D = ld.interPP(P1,P2) -- line of intersection between P1 and P2 (D = {A,u})
+local posD = D[1]+1.85*D[2] -- to place the label
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dotted" -- display of hidden lines as dotted lines
+g:Dscene3d(
+    g:addPlane(P1, {color="Crimson",edge=true,edgecolor="Pink",edgewidth=8}), --addition of plane P1
+    g:addPlane(P2, {color="ForestGreen",edge=true,edgecolor="Pink",edgewidth=8}), --addition of plane P2
+    g:addLine(D, {color="Navy",edgewidth=12}), --addition of line D
+    g:addAxes(Origin, {arrows=1, color="Gold",width=8}), -- addition of arrowed axes
+    g:addLabel( -- adding labels; these could have been added on top of the scene.
+        "$D=P_1\\cap P_2$",posD,{color="Navy"},
+        "$P_2$", M(3,0,0)+3.5*M(0,1,1)+0.2*vecI,{color="white",dir={vecI,vecJ+vecK}},
+        "$P_1$",M(2,0,0)+1.85*M(-1,-1,2)-1.5*M(-1,1,0), {dir={M(-1,1,0),M(-1,-1,2)}} )
+)
+g:Show()
+\end{luadraw}

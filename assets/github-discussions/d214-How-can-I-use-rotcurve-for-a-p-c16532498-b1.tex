@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/214#discussioncomment-16532498 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=rot_curve}
+local g = graph3d:new{
+    window={-4.5,5,-1.5,4},
+    viewdir={20,72},
+    size={10,10}
+}
+
+local p = function(t) -- in the yz-plane
+    if t<=2 then
+        return M(0,t,2+math.sqrt(4-t^2))
+    else
+        return M(0,t,math.sqrt(4-(t-2)^2))
+    end
+end
+local F = rotcurve(p, 0,4, {Origin, vecK}, 0, 360, {grid={60,72}})
+g:Dfacet(F,  {color="Orange", backcull=true, contrast=0.6})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,45 @@
+% source: https://tex.stackexchange.com/a/763306 (question 268159, score 2, block 1)
+% Source - https://tex.stackexchange.com/a/763304
+% Posted by Explorer
+% Retrieved 2026-06-02, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw*}{name=surface}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M,Origin,vecI,vecJ,vecK = pt3d.M,pt3d.Origin,pt3d.vecI,pt3d.vecJ,pt3d.vecK
+local sin,sqrt,pi = math.sin,math.sqrt,math.pi
+local Z = ld.cpx.Z
+local g = ld.graph3d:new{
+    window3d={-2,2,-2,2,-1.5,3},
+    window = {-1.5,1.5,-1,1.5},
+    viewdir={45,60},size={10,10}
+}
+
+g:Dpolyline3d({{Origin,1.5*vecI},{Origin,1.5*vecJ},{Origin,1.5*vecK}},"-Stealth")
+g:Dlabel3d("$x_1$",1.65*vecI,{},"$x_2$",1.65*vecJ,{},"$x_3$",1.65*vecK,{})
+
+g:Dfacet(
+    {vecI,vecJ,vecK},
+    {mode=ld.mFlat,color="cyan",opacity=0.35,edgecolor="red"}
+)
+
+local A, u, v = M(0,0,1), M(1,0,-1), M(0,1,-1)
+g:Setmatrix({ g:Proj3d(A), g:Proj3dV(u), g:Proj3dV(v) })
+--With this matrix, the complex Z(x,y) will correspond to the 3D point A+x*u+y*v, 
+-- that is to say, to the point M(x, y, 1-x-y)
+
+g:Beginclip( {0,1,Z(0,1),"l","cl"} ) -- clip with the triangle
+    -- first example with the implicit curve x^2+y^2=1/2 on the simplex x+y+z=1
+    g:Dcircle(0,1/sqrt(2), "blue,thick")
+    -- Another example with y=0.25*sin(2pi*x)+0.25 on the simplex x+y+z=1.
+    g:Dcartesian( function(x) return 0.25*sin(2*pi*x)+0.25 end, {x={0,1}, draw_options="teal, thick"})
+g:Endclip()
+g:IDmatrix()
+
+g:Show()
+\end{luadraw*}
+\end{document}

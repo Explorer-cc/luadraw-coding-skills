@@ -1,0 +1,18 @@
+% source: https://tex.stackexchange.com/a/762778 (question 122590, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/122590/more-on-cylinder-shading-with-pgf-tikz
+\begin{document}
+\begin{luadraw}{name=cylinders_examples}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{window={-7,7,-6,6}}
+ld.Hiddenlinestyle = "dashed"
+g:Dcylinder(M(-5,-5,-5),1.5, M(-5,-5,1), {color="SteelBlue"})
+g:Dcylinder(M(7,-2,0),1.5, M(7,6,0), {color="Crimson"}) 
+g:Dcylinder(M(0,3,0),1.5, M(0,0,1), M(0,5,5), {color="ForestGreen"}) --inclined cylinder
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,20 @@
+% source: https://github.com/pfradin/luadraw/discussions/83#discussioncomment-14389824 (pfradin, block 1)
+\begin{luadraw}{name=tetra}
+local g = graph3d:new{window={-5,7,-6,7},viewdir={-30,100},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local ab,ac,ad,bc,bd,cd =3,4,6,5,7,8
+local A,B,C,N = tetra_len(ab,ac,ad,bc,bd,cd) 
+local P = plane(A,B,C)
+local S = sym3d(N,P)
+local T = tetra(A,B-A,C-A,N-A)
+local T1 = tetra(A,B-A,C-A,S-A)
+local F = getfacet(T1,{2,3,4}) -- remove face 1 of T1
+Hiddenlines = true
+g:Dscene3d(
+ g:addPoly(T,{edge=true, edgewidth=4,color="LightBlue"}),
+ g:addFacet(F,{edge=true,edgewidth=4,color="Orange"})
+    )
+g:Ddots3d({A,B,C,S,N})
+g:Dlabel3d( "$A$",A,{pos="W"}, "$B$",B,{pos="E"}, "$C$",C,{pos="E"},"$S$",S,{pos="S"},"$N$",N,{pos="N"})
+g:Show()
+\end{luadraw} 

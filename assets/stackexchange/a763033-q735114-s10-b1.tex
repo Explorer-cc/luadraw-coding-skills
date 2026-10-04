@@ -1,0 +1,113 @@
+% source: https://tex.stackexchange.com/a/763033 (question 735114, score 10, block 1)
+\documentclass[]{standalone} % compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\usepackage{animate}
+%https://tex.stackexchange.com/q/735114
+\directlua{luadraw.nbimages = 61}%
+% images creation
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local C = ld.parallelep(M(-2,-2,-2), 4*M(1,0,0), 4*M(0,1,0), 4*M(0,0,1) )
+local S = ld.concat(C.vertices, {M(0,-1,4), M(0,1,4)})
+local P = ld.facet2poly( ld.cvx_hull3d(S) )
+
+local g = ld.graph3d:new{window={-5.5,5.5,-4,5.5}}
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"; g:Linewidth(6)
+-- declarations
+local C = ld.parallelep(M(-2,-2,-2), 4*M(1,0,0), 4*M(0,1,0), 4*M(0,0,1) )
+local S = ld.concat(C.vertices, {M(0,-1,4), M(0,1,4)})
+local poly = ld.facet2poly( ld.cvx_hull3d(S) ) -- polyhedron
+local P = {M(0,0,3), M(0,0,-1)} -- first plane
+local F = g:Plane2facet(P, 0.75 ) 
+local F1, poly2
+
+local draw = function()
+    g:Dscene3d( g:addFacet(F1, {edge=true, color="Crimson", opacity=0.8}) ,
+        g:addPoly(poly, {color="cyan", edge=true}),
+        g:addPoly(poly2, {color="cyan", edge=true}) )
+end
+
+-- create the image number k, this function must be global
+function ld.makeframe(k) -- do not modify this line
+    if k == 1 then draw()
+    elseif k <= 4 then
+        F1 = ld.shift3d(F, (4-k)*5*M(0,1,0))
+        draw()
+        if k == 4 then
+            poly, poly2 = ld.cutpoly(poly, P, true)
+        end
+    elseif k <= 7 then
+        F1 = ld.shift3d(F, (k-4)*M(0,0,2.25)); 
+        poly2.vertices = ld.shift3d(poly2.vertices, M(0,0,2.25))
+        draw()
+        if k == 7 then
+            P = {M(1,0,-1), M(-1,0,2)} -- second plane
+            F = g:Plane2facet(P, 0.75 ) 
+        end
+    elseif k <= 10 then
+        F1 = ld.shift3d(F, (10-k)*5*M(0,-1,0))
+        draw()
+        if k == 10 then
+            poly, poly2 = ld.cutpoly(poly, P, true)
+        end
+    elseif k <= 13 then
+        F1 = ld.shift3d(F, (k-10)*M(0,0,-2)); 
+        poly2.vertices = ld.shift3d(poly2.vertices, M(0,0,-2))
+        draw()
+        if k == 13 then
+            P = {M(1,1,0), M(-1,-1,0)} -- third plane
+            F = g:Plane2facet(P, 0.75 ) 
+        end  
+    elseif k <= 16 then
+        F1 = ld.shift3d(F, (16-k)*5*M(0,0,1))
+        draw()
+        if k == 16 then
+            poly, poly2 = ld.cutpoly(poly, P, true)
+        end
+    elseif k <= 19 then
+        F1 = ld.shift3d(F, (k-16)*M(0,0,-2.5)); 
+        poly2.vertices = ld.shift3d(poly2.vertices, M(0,0,-2.5))
+        draw()  
+        if k == 19 then
+            P = {M(0,1,0), M(0,-1,1)} -- fourth plane
+            F = g:Plane2facet(P, 0.75 ) 
+        end    
+        elseif k <= 22 then
+        F1 = ld.shift3d(F, (22-k)*5*M(-1,0,0))
+        draw()
+        if k == 22 then
+            poly, poly2 = ld.cutpoly(poly, P, true)
+        end
+    elseif k <= 25 then
+        F1 = ld.shift3d(F, (k-22)*M(0,0,-2.5)); 
+        poly2.vertices = ld.shift3d(poly2.vertices, M(0,0,-2.5))
+        draw()  
+        if k == 25 then F1 = nil; poly2 = nil end
+    elseif k <= 43 then
+        g:Rotate3d(20, {M(0,0,0), M(0,0,1)})
+        draw()
+    else
+        g:Rotate3d(20, {M(0,0,0), M(0,1,0)})
+        draw()
+    end
+    
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls]{3}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

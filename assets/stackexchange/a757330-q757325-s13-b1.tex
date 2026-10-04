@@ -1,0 +1,94 @@
+% source: https://tex.stackexchange.com/a/757330 (question 757325, score 13, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/757325/custom-3d-line-plot-in-plain-tikz-and-or-luadraw
+\begin{luacode*}
+function read_CSV(file, ignore_header)
+-- projembc contribution
+  local data = {}
+  for line in io.lines(file) do
+    if ignore_header then
+      ignore_header = false
+    else
+      local result = {}
+------
+-- Usage d'expressions rationnelles pour autoriser de futures
+-- améliorations techniques. Pour le moment les groupes capturés
+-- sont formés de caractères autres que la virgule.
+------
+      for part in string.gmatch(line, "([^,]+)") do
+        table.insert(result, tonumber(part))
+      end
+      table.insert(data, result)
+    end
+  end
+
+  return data
+end
+\end{luacode*}
+
+\begin{luacode*}  -- csv file with random data
+local f = io.open("x_neg_one.csv","w")
+f:write("x,F\n")
+for k = -30, 30, 5 do
+    f:write(k..","..math.random(-4,12).."\n") 
+end
+f:close()
+\end{luacode*}
+
+\begin{document}
+
+\begin{filecontents*}{x_pos_two.csv}
+x,F
+-30,12
+-20,8
+-10,0
+0, 5
+10, 10
+20, 0
+30,-4
+\end{filecontents*}
+
+
+\begin{luadraw}{name=multiple_axes}
+local g = graph3d:new{window3d={-30,30,-65,35,-5,15}, window={-110, 60,-21, 29}, bbox=false,viewdir=perspective("yz",0.65,20), size={12,12,0}}
+g:Labelsize("scriptsize")
+g:Setmatrix3d({Origin,vecI,2.75*vecJ,vecK})
+local u, v = g:Proj3dV(-vecI), g:Proj3dV(vecK)
+defaultlabelshift = 0
+
+g:Dpolyline3d({-40*vecJ, 30*vecJ},"<-"); g:Dlabel3d("$y$",-40*vecJ,{pos="W"})
+
+local draw_plane = function(y,legendX,legendF,data,draw_options)
+    local P = {M(0,-y,0), vecJ}
+    local mat = { g:Proj3d(P[1]),u/1.25,v }
+    g:Setmatrix(mat)
+    g:Daxes( {0,10,4}, { limits={{-30,30},{-4,12}},nbsubdiv={1,1}, legendpos={1,1}, legendsep={0,0}, grid=true, legend={legendX,legendF}, arrows="->"})
+    if type(data) == "string" then -- file
+        data = read_CSV(data..".csv", true)
+        g:Dpolyline( map(function(lg) return Z(lg[1],lg[2]) end, data), false, draw_options)
+    elseif type(data) == "function" then -- cartesian 
+        g:Dcartesian( data, {x={-30,30}, clip={-30,30,-4,12}, discont=true,draw_options=draw_options})
+    end
+    g:IDmatrix()
+    g:Dlabel3d("y="..y,M(0,-y,-6.5),{pos="S"})
+    
+end
+
+draw_plane(30,"$x_2$","$F_2$","x_pos_two","line width=0.8pt,red")
+draw_plane(15,"$x_1$","$F_1$", function(x) return 10/x end, "line width=0.8pt, ForestGreen")
+draw_plane(0,"$x_0$","$F_0$", function(x) return 4*math.sin(x/4) end, "line width=0.6pt, blue")
+draw_plane(-15,"$x_{-1}$","$F_{-1}$","x_neg_one", "line width=0.6pt,Maroon")
+
+--curve in yF-plane
+u = g:Proj3dV(-vecJ)
+mat = {Z(0,0),u,v}
+g:Setmatrix(mat)
+g:Dcartesian( function(x) return 4*math.cos(x/4) end, {x={-15,30}, draw_options="line width=0.8pt, gray"})
+g:IDmatrix()
+
+g:Show()
+\end{luadraw}
+\end{document}

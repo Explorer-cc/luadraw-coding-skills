@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/750962 (question 612735, score 2, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/612735/how-to-draw-insphere-of-a-pyramid
+\begin{document}
+\begin{luadraw}{name=insphere}
+local g = graph3d:new{window={-4,7,-2,9},bbox=false,viewdir={-30,110},size={10,10}}
+g:Linewidth(4); g:Labelsize("footnotesize")
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a = 3
+local D,B, C, A = Origin, M(a,0,0), M(0,2*a,0), M(0,0,3*a)
+local T = tetra(D,A-D,B-D,C-D)
+local I, R = insphere(A,B,C,D)
+local Vi, Hi = g:Classifyfacet(T)
+local S = map(function(p) return {proj3d(I,p),p[2]} end, facet2plane(Vi) )
+g:Dfacet(Hi, {color="LightBlue",edgewidth=4})
+g:Dsphere(I,R,{mode=mBorder,color="red"})
+g:Ddots3d(I)
+g:Dfacet(Vi, {color="LightBlue",edgewidth=4, opacity=0.6})
+for _,D in ipairs(S) do -- segments connecting the center of the sphere to the projections on the faces.
+    g:Dpolyline3d( {I,D[1]},"dashed,gray")
+end
+g:Dcrossdots3d(S,nil,0.5)
+g:Ddots3d({A,B,C,D})
+g:Dlabel3d( "$A$",A,{pos="N"}, "$B$",B,{pos="E"}, "$C$",C,{pos="S"}, "$D$",D,{})
+g:Show()
+\end{luadraw}
+\end{document} 

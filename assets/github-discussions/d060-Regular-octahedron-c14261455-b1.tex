@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/60#discussioncomment-14261455 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/356121/how-to-draw-these-polyhedrons
+\begin{luadraw}{name=regular_octahedron}
+local g = graph3d:new{window={-5,5,-5,5},viewdir={30,70},size={10,10}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed";g:Linewidth(4)
+
+local diamon = function(center,vertice,normal,nb)
+    local r = pt3d.abs(vertice-center)
+    normal = pt3d.normalize(normal)
+    local S = center + r*normal
+    local L = {S, vertice,2*center-S}
+    local P = rotline(L,{center,normal},0,360,{nbdots=nb+1}) -- vertices are on the sphere S(center,r)
+    return facet2poly(P)
+end
+Hiddenlines = true
+g:Dpoly( diamon(M(-4,-4,0), M(-2,-2,0),vecK,4), {mode=4, color="orange"})
+
+g:Dpoly( diamon(M(3,3,0), M(3,3,3) ,vecJ,6), {mode=3, color="LightBlue"})
+g:Show()
+\end{luadraw}
+\end{document} 

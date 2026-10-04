@@ -1,0 +1,68 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16860726 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+
+\begin{luacode*}
+local ld = luadraw
+local Z = ld.cpx.Z
+function ld.graph:Dinequalities(constraints, args)
+    -- constrants = { f1, sg1, f2, sg2, ...} where fi are functions (x->fi(x) real) and sgi = '>' or'<'
+    -- draw the outline of the region satisfying the conditions: y>fi(x) or y<fi(x)
+    args = args or {}
+    local f, sg, C
+    local win = args.view or {self:Xinf(), self:Xsup(), self:Yinf(), self:Ysup()}
+    local draw_options = args.draw_options or ""
+    local x1,x2,y1,y2 =table.unpack(win)
+    local P = {Z(x1,y1), Z(x2,y1), Z(x2,y2), Z(x1,y2),Z(x1,y1)}
+    local n = #constraints  -- number of arguments
+    for i = 1, n-1, 2 do   -- step = 2
+        f, sg = constraints[i], constraints[i+1]  -- 2 args
+        C = ld.clippolyline(ld.cartesian(f, x1, x2), self:Xinf(), self:Xsup(),self:Yinf(), self:Ysup())[1]
+        table.insert(C,1, Z(x1, C[1].im))
+        table.insert(C, Z(x2, C[#C].im))
+        if sg == ">" then
+            ld.insert(C, {Z(x2,y2),Z(x1,y2),C[1]})
+        else
+            ld.insert(C, {Z(x2,y1),Z(x1,y1),C[1]})
+        end
+        self:Beginclip( ld.polyline2path(C) )
+    end
+    self:Dpolyline(P, true, draw_options)
+    for i = 1, n-1, 2 do   -- step = 2
+        self:Endclip()
+    end
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=case4}
+local ld = luadraw
+local Z = ld.cpx.Z
+
+local g = ld.graph:new{window={-3,3,-5,2}, size={10,10}}
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = function(x) return x^3 - 3*x-2 end
+local h = function(x) return x - 2 end
+g:Dinequalities({f,'>', h,'<'}, {view={0,2,-5,2},draw_options="draw=none,fill=pink,fill opacity=0.6"})
+g:Dinequalities({f,'<', h,'>'}, {view={-2,0,-5,2},draw_options="draw=none,fill=cyan,fill opacity=0.6"})
+g:Dcartesian(h, {draw_options="blue, line width=0.8pt"}); g:Dlabel("$C_h$",Z(-2.5,-3.75),{node_options="blue"})
+g:Dcartesian(f, {draw_options="red, line width=0.8pt"}); g:Dlabel("$C_f$",Z(2,-2),{pos="E",node_options="red"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=case5}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-2,4,-2,6}, size={10,10}}
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = function(x) return x^2-2*x end
+local h = function(x) return 0 end
+g:Dinequalities({f,'<', h,'>'}, {view={1,2,-1,6},draw_options="draw=none,fill=cyan,fill opacity=0.6"})
+g:Dinequalities({f,'>', h,'<'}, {view={2,3,-1,6},draw_options="draw=none,fill=cyan,fill opacity=0.6"})
+g:Dcartesian(h, {draw_options="blue, line width=0.8pt"}); 
+g:Dcartesian(f, {draw_options="red, line width=0.8pt"}); 
+g:Show()
+\end{luadraw}
+\end{document} 

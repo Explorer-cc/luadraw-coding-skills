@@ -1,0 +1,9 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Mask of Nefertiti)
+\begin{luadraw}{name=lecture_obj}
+local ld = luadraw
+local P,bbox = ld.read_obj_file("obj/nefertiti.obj")
+local g = ld.graph3d:new{window3d=bbox,window={-6,5,-7,7},viewdir={"central",35,65,20},
+margin={0,0,0,0}, size={10,10}, bg="LightGray"}
+g:Dpoly(P, {usepalette={ld.palAutumn,"z"},mode=ld.mShadedOnly})
+g:Show()
+\end{luadraw}

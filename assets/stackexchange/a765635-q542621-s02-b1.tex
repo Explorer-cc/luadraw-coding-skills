@@ -1,0 +1,74 @@
+% source: https://tex.stackexchange.com/a/765635 (question 542621, score 2, block 1)
+\documentclass[border=5pt,tikz]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/542621/drawing-western-hemisphere-in-tikz-3d?rq=1
+\begin{document}
+\begin{luadraw}{name=half_sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+-------------------
+function ld.graph3d:Dcut_sphere(C,R,P, options)
+    local T = self:Sphere_tangency(C,R,P)
+    local W
+    local O, R1, N = table.unpack( self:Sphere_outline(C,R).data )
+    local c, r, n = ld.interPS(P, {C,R})
+    if #T == 0 then
+        local B = ld.proj3d(C,P)
+        if pt3d.abs(B-C) > R then -- no intersection
+            if pt3d.dot(B-C,P[2]) > 0 then self:Dsphere(C,R,options) end
+            return 
+        elseif pt3d.dot(B-C,P[2]) > 0 then 
+            W = ld.circle3db(c, r, n)
+        else 
+            W = ld.concat( ld.circle3db(O,R1,N), ld.circle3db(c, r, n) )
+        end
+    else
+        local A, B = table.unpack( T )
+        c, r, n = ld.interPS(P, {C,R})
+        if pt3d.det(A-c, N, P[2]) < 0 then A, B = B, A end
+        local sens = 1
+        if pt3d.det(B-O,P[2],N) < 0 then sens = -1 end
+        W = {A,"m",c,B,r,1,n,"ca",O,A,R1,sens,N,"ca"}
+    end
+    self:Beginclip( W )
+        self:Dsphere(C,R,options)
+    self:Endclip(options.trace)
+end
+-------------------
+local g = ld.graph3d:new{ viewdir={5,65}, window={-3,3,-3,3}, size={12,12} }
+g:Linewidth(8)
+local a = 4
+local R, r = 0.75, 0.25
+local A, B, C, D, E, F, O = M(-a,-a,a)/2, M(a,a,a)/2, M(a,a,-a)/2, M(-a,-a,-a)/2, M(a,-a,-a)/2, M(-a,a,-a)/2, Origin
+local f, P = {A, B, C, D}, ld.plane(A,B,C)
+local options = {color="gray", mode=ld.mBorder, edgestyle="noline"}
+g:Dpolyline3d({{F,F+a*vecK,A},{F+a*vecK,B},{O,F}})
+g:Dcut_sphere(A,r,P, options)
+g:Dcut_sphere(B,r,P,options)
+g:Dcut_sphere(O,R,P,options)
+
+g:Dfacet(f, {color="blue", opacity=0.8})
+g:Dpolyline3d({{A,O,B}})
+P[2] = -P[2]
+g:Dseg3d({D,F})
+g:Dcut_sphere(A,r,P,options)
+g:Dcut_sphere(B,r,P,options)
+g:Dcut_sphere(O,R,P,options)
+local v = pt3d.normalize(E-O)
+g:Dpolyline3d({E,O+R*v})
+g:Dsphere(F,r,options)
+g:Dpolyline3d({{D,E,C,F+r*vecI},{A+r*vecI,A+a*vecI,B-r*vecJ}, {E, E+a*vecK}})
+g:Dsphere(E,r,options)
+local u = pt3d.normalize(vecI-vecJ)
+g:Dseg3d({O+R*u, O+3*R*u},"red,line width=0.8, -stealth")
+g:Dlabel3d(
+    "$h_2$", A, {pos="W",dist=0.5},
+    "$h_1$", B, {pos="Eq"},
+    "$h_3$", E, {pos="W"},
+    "$h_4$", F, {pos="E"})
+g:Show()
+\end{luadraw}
+\end{document}

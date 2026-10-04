@@ -1,0 +1,18 @@
+% Minimal Luadraw v3.5 smoke example for skill installation.
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage{fourier-otf}
+
+\begin{document}
+\begin{luadraw}{name=skill-minimal-2d}
+local ld = luadraw
+local g = ld.graph:new{window={-1.2,1.2,-1.2,1.2},size={6,6},bbox=false}
+local O = ld.cpx.Z(0,0)
+local P = ld.cpx.Z(1,0)
+g:Dcircle(O,1,"Crimson")
+g:Dseg({O,P},"Navy,thick")
+g:Dlabel("$O$",O,{pos="SW"})
+g:Show()
+\end{luadraw}
+\end{document}

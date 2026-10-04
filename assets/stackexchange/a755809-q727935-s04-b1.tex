@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/755809 (question 727935, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/727935/given-a-normal-vector-is-it-possible-to-re-orient-tikz-arrows-and-node-letters
+\begin{document}
+\begin{luadraw}{name=write_on_planes}
+local g = graph3d:new{ window={-8,8,-8,8},bbox=false, viewdir={-10,60} }
+local O1, n = vecK, vecK+vecJ
+local P1 = {O1,n} -- a plane
+local U1, V1 = vecI, pt3d.prod(n,vecI) -- two directions in plane P1
+local A1, B1, C1 = O1-3*U1+2*V1, O1-3*U1, O1+3*U1
+
+local O2 =  -4*vecK
+local P2 = {O2,vecK} -- a second plane
+local U2, V2 = -vecI, -vecJ -- two directions in plane P2
+local A2, B2, C2 = O2-3*U2+2*V2,O2-3*U2,O2+3*U2
+
+g:Labelsize("Large")
+g:Dscene3d( 
+    g:addPlane(P1,{edge=true, color="LightBlue",contrast=0,scale=1.25,opacity=0.8}),
+    g:addPlane(P2,{edge=true,color="Beige",contrast=0,scale=1.25,opacity=0.8}),
+    g:addPolyline({{A1,B1,C1},{A2,B2,C2}}, {arrows=2}) )
+g:Dlabel3d("$e^{i\\pi}=-1$", B1, {pos="NE", dir={U1,V1}}, "dir[1]",C1,{pos="E"}, "dir[2]",A1,{pos="N"}) -- on P1
+g:Dlabel3d("$e^{i\\pi}=-1$", B2, {pos="NE", dir={U2,V2}}, "dir[1]",C2,{pos="E"}, "dir[2]",A2,{pos="N"}) -- on P2
+g:Show()
+\end{luadraw}
+\end{document}

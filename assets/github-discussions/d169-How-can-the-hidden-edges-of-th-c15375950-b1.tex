@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/169#discussioncomment-15375950 (pfradin, block 1)
+\documentclass[12pt,border=2mm]{standalone}
+\usepackage{fouriernc}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=tho_huynh}
+local g = graph3d:new{window={-2,2,-1,6}, size={12,12}, viewdir={150,70}, bbox=false}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local h, r = 4.5, 2
+local con = cone(h*vecK, -h*vecK, r, 100, true)
+local P = {M(5,0,0), vecI+vecJ+3*vecK}
+local inter = g:Intersection3d(con, P)
+inter.visible = shift3d(inter.visible, 1.5*vecK)
+inter.hidden = shift3d(inter.hidden, 1.5*vecK)
+local T1, T2, inter3 = cutpoly(con, P)
+
+g:Dpoly(shift3d(T1, 1.5*vecK), {mode=5, color="Crimson"})
+g:Dedges(inter, {color="blue", width=5})
+g:Dpoly(T2, {mode=5, color="Crimson"})
+g:Dpolyline3d(inter3, true, "blue, line width=0.5pt")
+g:Show()
+\end{luadraw}
+\end{document} 

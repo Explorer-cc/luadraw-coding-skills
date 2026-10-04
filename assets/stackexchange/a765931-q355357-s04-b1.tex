@@ -1,0 +1,19 @@
+% source: https://tex.stackexchange.com/a/765931 (question 355357, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/355357/how-to-plot-the-following-graph-on-latex
+\begin{document}
+\begin{luadraw}{name=inequalities}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{ window={-5,5,-5,5}, size={12,12} }
+local f1 = function(x,y) return x*(y-2)-1 end -- f1 <= 0
+local f2 = function(x,y) return x*(y-2)+1 end -- f2 >= 0
+g:Daxes({0,1,1})
+g:Dimplicit_inequalities({f1,"<",f2,'>'}, {draw_options='draw=none,fill=pink, fill opacity=0.6'})
+g:Dlabel("$|x(y-2)|\\leqslant 1$",Z(0,1.5),{})
+g:Show()
+\end{luadraw}
+\end{document}

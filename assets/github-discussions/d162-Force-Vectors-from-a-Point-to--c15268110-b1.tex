@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/162#discussioncomment-15268110 (pfradin, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+%\usepackage{fouriernc}
+\usepackage{esvect}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/755959/drawing-arc-using-intersection-with-triangle
+\begin{document}
+\begin{luadraw}{name=triangle2}
+local g = graph3d:new{window={-8,8,-6,6},viewdir={60,70},size={10,10}}
+require 'luadraw_spherical'
+-- g:Linewidth(4); -- 4 is the default value
+Hiddenlinestyle = "dashed"
+local R,h = 5,3
+local sqrt, cos, sin = math.sqrt, math.cos, math.sin
+local r = sqrt(R^2-h^2)
+local O, I, T, A, B, C, D = Origin, M(0,0,-h), M(0,0,R), M(r/sqrt(2),r/sqrt(2),-h), M(-r/sqrt(2),r/sqrt(2),-h), M(-r/sqrt(2),-r/sqrt(2),-h), M(r/sqrt(2),-r/sqrt(2),-h)
+g:Define_sphere({center=O,radius=R})
+local J, tangent_points = M(0,0,-h), {}
+g:DScircle({J,vecK},{out=tangent_points})
+local J1, J2 = table.unpack(tangent_points)
+g:Dpath3d({J1,J,J2,r,-1,vecK,"ca",O,J1,R,1,"ca"}, "ball color=gray") -- spherical cap
+g:Dcircle3d(M(0,0,-h), r,vecK,"left color=gray, right color=white") 
+g:Writeln("\\tikzset{->-/.style={decoration={markings, mark=at position #1with {\\arrow{Stealth}}},postaction={decorate}}}")
+    g:Dpolyline3d({{T,A},{T,B},{T,C},{T,D}},false,"->-=0.5") -- << replace falTe with false
+    g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{},  "$D$",D,{pos="W"}, "$\\vv{F_1}$",(T+A)/2,{pos="E"}, "$\\vv{F_3}$",(T+C)/2,{pos="E"}, "$\\vv{F_2}$",(T+B)/2,{}, "$\\vv{F_4}$",(T+D)/2,{pos="W"},"$T$",T,{pos="N"}) 
+g:Ddots3d({T,I,A,B,C,D})
+g:Show()
+\end{luadraw}
+\end{document} 

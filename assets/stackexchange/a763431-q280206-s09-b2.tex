@@ -1,0 +1,90 @@
+% source: https://tex.stackexchange.com/a/763431 (question 280206, score 9, block 2)
+\documentclass[]{standalone} % compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+% images creation
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local L, l = 8, 5
+local g = ld.graph:new{ window={0,L,0,l}, size={12,12}, margin=0.2 }
+
+local polygon1 = {0, L/2, Z(L/4,l)}
+local polygon2 = ld.shift( ld.polyreg(0,L/4,6), Z(3*L/4,math.sqrt(3)*L/8) )
+local polygon3 = ld.shift(ld.parallelogram( Z(0,l),L/2,Z(l/4,-l/4) ) , L/3 )
+local diameter = math.sqrt(L^2+l^2)
+local A1, v1 = cpx.isobar(polygon1), Z(1,math.sqrt(2))
+local A2, v2 = cpx.isobar(polygon2), Z(1,math.sqrt(2))
+local A3, v3 = cpx.isobar(polygon3), Z(1,math.sqrt(2))
+
+local function test_side(A,v,a,b)
+    local u = cpx.normalize(v)
+    local A1= A+0.1*u
+    local B = A + diameter*u
+    local I = ld.interL({A1,B},{a,b})
+    if I == nil then return end
+    return I[1], ld.sym(v,{0,b-a})
+end
+
+local function calc(A,v,nb,polygon)
+    local tx, ty, B
+    local dl = 0.5
+    local curve = {A}
+    local n = #polygon
+    for k = 1, nb do
+        local ok = false
+        local b, k, a = polygon[1], 2
+        while (not ok)  and (k <= n+1) do
+            a = b; b = polygon[1+(k-1)%n]; k = k+1
+            local I, w = test_side(A,v,a,b)
+            if I ~= nil then
+                ok = true; B = I; v = w
+                local len = cpx.abs(B-A)
+                local n = math.ceil(len/dl)
+                local dl = len/n*cpx.normalize(B-A)
+                for k = 1, n do
+                    table.insert(curve, A+k*dl)
+                end
+                A = B
+                table.insert(curve, A)
+            end
+        end
+    end
+    return curve
+end
+
+local nb = 30
+local curve1 = calc(A1,v1,nb,polygon1)
+local curve2 = calc(A2,v2,nb,polygon2)
+local curve3 = calc(A3,v3,nb,polygon3)
+local C1, C2, C3 = {}, {}, {}, {}
+ld.nbimages = math.min(#curve1, #curve2, #curve3)
+
+-- create the image number k, this function must be global
+function ld.makeframe(k) -- do not modify this line
+    g:Dpolyline({polygon1,polygon2, polygon3},true,"thick,color=Brown,fill=green!50")
+    local a1,a2, a3 = curve1[k], curve2[k], curve3[k]
+    table.insert(C1, a1); table.insert(C2, a2); table.insert(C3, a3)
+    g:Dpolyline({C1,C2,C3},"gray")
+    g:Dcircle(a1,0.075,"ball color=red"); g:Dcircle(a2,0.075,"ball color=red")
+    g:Dcircle(a3,0.075,"ball color=red")
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

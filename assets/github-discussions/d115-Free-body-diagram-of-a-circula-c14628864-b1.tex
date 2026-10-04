@@ -1,0 +1,60 @@
+% source: https://github.com/pfradin/luadraw/discussions/115#discussioncomment-14628864 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{esvect}
+
+\begin{luacode*}
+function chain(a,b,h)
+-- a and b are two 2d points (complex numbers)
+-- h = height  of wave
+-- returns a path
+    h = h or 0.0625
+    local n = math.floor(cpx.abs(b-a)/(1.5*h)) -- number of zigzag
+    local up,down = {a}, {"b"} -- to build path
+    local pas = (b-a)/n
+    local v = cpx.I*(b-a)
+    v = h*v/cpx.abs(v)
+    local x1, x2, c, d = a, a+pas
+    for k = 1, n do
+        c, d = (x1+x2)/2, (x1+x2)/2
+        insert(up,{c+v,d-v,x2,"b"})
+        down = concat({"b",d+v,c-v,x1},down)
+        x1 = x2; x2 = x2+pas
+    end
+    table.remove(down,1)
+    return concat(up,down)
+end
+
+function graph:Dchain3d(seg,h,draw_options)
+    if type(h) == "string" then draw_options = h; h = 0.0625 end
+    if type(seg[1]) ~= "table" then seg = {seg} end
+    for _, s in ipairs(seg) do
+        local a,b = table.unpack(self:Proj3d(s))
+        self:Dpath(chain(a,b,h), draw_options)
+    end
+end
+\end{luacode*}
+
+\begin{document}
+
+ \begin{luadraw}{name=regular_pyramid_01}
+local g = graph3d:new{window={-2,2,-1,3},viewdir={70,70},size={10,10}}
+g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a, n, h = 2, 4, 3
+local O = Origin
+local P = regular_pyramid(n,a,h,false,O) -- n,side,height,open,center,axe
+local A,B,C,D,S = table.unpack(P.vertices)
+local T = M(0,0,-0.2)
+local I,r,N = circumcircle3d(A,B,C)
+g:Dcylinder(I,T,r,{color="gray"})
+g:Dpolyline3d({{C,A},{D,B},{S,O}})
+g:Writeln("\\tikzset{->-/.style={decoration={markings, mark=at position #1with {\\arrow{Stealth[scale=2.5]}}},postaction={decorate}}}")
+g:Dpolyline3d({{S,A},{S,B},{S,C},{S,D}},"line width=0.1pt,dotted,->-=0.5")
+g:Dchain3d({{S,A},{S,B},{S,C},{S,D}})
+
+g:Ddots3d(P.vertices)
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$O$",O,{}, "$D$",D,{}, "$\\vv{F_1}$",(S+A)/2,{pos="E"}, "$\\vv{F_3}$",(S+C)/2,{pos="E"}, "$\\vv{F_2}$",(S+B)/2,{pos="W"},"$\\vv{F_4}$",(S+D)/2,{pos="W"},"$S$",S,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document} 

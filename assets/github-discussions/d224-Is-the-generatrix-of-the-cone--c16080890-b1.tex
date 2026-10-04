@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/224#discussioncomment-16080890 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=light_cone_2D}
+    local g = graph3d:new{
+        window3d = {-5, 5, -5, 5, -5, 5},
+        window = {-5,5,-1,5},
+        viewdir = {0, 75},
+        size = {10, 10}
+    }
+    local R, H, pi = 3, 4, math.pi
+    local A = g:Proj3d(Origin) -- projection of the apex of the cone
+    local p = function(t) return g:Proj3d( Mc(R,t,H) ) end -- parametrization of the projection of the circular base on the screen
+    local T = tangent_from(A, p, -pi, pi)
+    -- 3D version of the cone
+    g:Linewidth(12)
+    g:Dcone(Origin, H*vecK, R, {mode=mWireframe, edgecolor="black",color="Pink"})
+    -- 2D version of the cone
+    g:Linewidth(4)
+    g:Dparametric(p, {t={-pi,pi}, draw_options="red"}) -- base
+    g:Dpolyline({T[1], A,T[2]},"red") -- sides
+    g:Show()
+\end{luadraw}
+\end{document}

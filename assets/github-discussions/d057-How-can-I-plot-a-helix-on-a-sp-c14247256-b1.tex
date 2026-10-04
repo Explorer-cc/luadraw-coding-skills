@@ -1,0 +1,65 @@
+% source: https://github.com/pfradin/luadraw/discussions/57#discussioncomment-14247256 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/557526/drawing-a-conic-section-ellipse?noredirect=1&lq=1
+\begin{luadraw}{name=curve_on_cylinder}
+local g = graph3d:new{window3d={-5,5,-5,5,-5,5},adjust2d=true,viewdir={30,60}, size={10,10}};
+g:Linejoin("round"); g:Labelsize("footnotesize")
+Hiddenlines = true
+Hiddenlinestyle = "dashed"
+-- the function
+local cyl_curve = function(L,center,V) -- L = curve
+    local Visible, Hidden = {},{}
+    local visible, hidden, state, Avisible = {}, {}
+    if L == nil then return end
+    if isPoint3d(L[1]) then L = {L} end
+    for _, cp in ipairs(L) do
+        visible, hidden = {}, {}
+        state = 0
+        for _, A in ipairs(cp) do
+            Avisible = (pt3d.dot(A-dproj3d(A,{center,V}),g.Normal) >= 0)
+            if Avisible then -- A is visible
+                table.insert(visible,A)
+                if state == 2 then-- previous dot was not visible
+                    table.insert(Hidden, hidden); hidden = {}
+                end
+                state = 1
+            else -- A not visible
+                table.insert(hidden,A)
+                if state == 1 then -- previous dot was visible
+                    table.insert(Visible, visible); visible = {}
+                end
+                state = 2
+            end
+        end
+        if #visible > 1 then table.insert(Visible, visible) end
+        if #hidden > 1 then  table.insert(Hidden, hidden) end
+    end
+    Visible = merge3d(Visible); Hidden = merge3d(Hidden)
+    return Visible, Hidden
+end
+-- test
+local A, V, R = -5*vecK, 10*vecK, 4 -- cylinder
+local p = function(t) return Mc(R,t,t/3) end
+local Curve = parametric3d(p,-4*math.pi,4*math.pi)
+local Vi, Hi = cyl_curve(Curve,A,V,R)
+local curve_color = "DarkGreen"
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray"})
+if Hiddenlines == false then
+    g:Dpolyline3d(Hi,curve_color)
+    g:Dcylinder(A,V,R,{color="orange",opacity=0.7})
+    g:Dpolyline3d(Vi,curve_color)
+else
+    g:Dcylinder(A,V,R,{color="orange"})
+    g:Dpolyline3d(Vi,curve_color)
+    if Hiddenlinestyle ~= "noline" then 
+        g:Dpolyline3d(Hi,curve_color..","..Hiddenlinestyle)
+    end
+end
+g:Dlabel("Hiddenlines=true",-9*cpx.I,{})
+g:Show()
+\end{luadraw}
+\end{document} 

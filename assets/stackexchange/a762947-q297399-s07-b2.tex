@@ -1,0 +1,33 @@
+% source: https://tex.stackexchange.com/a/762947 (question 297399, score 7, block 2)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=ribbon_cylinder2}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, pi = pt3d.M, pt3d.Mc, math.pi
+local g = ld.graph3d:new{window={-3,3,-5,5},viewdir="central",size={10,10}}
+ld.Hiddenlinestyle = "noline"
+local color = "red"
+local h, R, delta = 4, 2, 0.25
+
+local p = function(u,v)
+    return Mc(R, u, v+u/(1.15*pi))
+end
+
+local C = ld.surface(p, -4.25*pi, 5*pi, -delta,delta, {300,2})
+C = ld.cutfacet(C, {M(0,0,h), M(0,0,-1)}) -- cut ribbon on top
+C = ld.cutfacet(C, {M(0,0,-h), M(0,0,1)}) -- cut ribbon on bottom
+local V, H = g:Classifyfacet(C) -- visible facets only
+local P, B
+-- drawing
+g:Dcylinder(M(0,0,-h),R, M(0,0,h), {color="cyan"})
+g:Dpolyline3d( ld.border(V),
+        "left color="..color.."!25, right color="..color) --..", middle color="..color.."!30")
+g:Dpolyline3d( ld.border(H), "dotted")
+g:Dcircle3d(M(0,0,-h),R,M(0,0,1),"dotted")
+g:Show()
+\end{luadraw}
+\end{document}

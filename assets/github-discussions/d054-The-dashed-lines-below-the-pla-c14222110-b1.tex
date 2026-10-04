@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222110 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=pyramid_parallep}
+local g = graph3d:new{window={-5,5,-5,6},viewdir={70,70},size={12,12}}
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines=true; Hiddenlinestyle = "dotted"
+local a, H = 3, 6
+local N = 9 -- number of floors
+local A, B, C, D = M(a,-a,-a), M(a,a,-a), M(-a,a,-a), M(-a,-a,-a) -- base of the pyramid
+local S = H*vecK -- top of the pyramid
+local P = pyramid({A,B,C,D}, S)
+local facet = {} -- to contain the list of facets
+local t, dt = 0, 1/(N+1) -- to calculate N regularly distributed points
+local h = dt*(H-A.z) -- height of a floor
+for k = 1, N do
+    t = t+dt -- next floor
+    local A1, B1, C1, D1 = table.unpack( scale3d( {A,B,C,D}, 1-t, S) ) -- the top of a floor
+    insert(facet, poly2facet( parallelep(A1,D1-A1,B1-A1,-h*vecK)) ) -- insertion of the facets of the parallelepiped
+end
+g:Dscene3d( g:addFacet( facet, {contrast=0,edge=true,edgecolor="red"} ) )
+g:Dpoly(P, {mode=0}) -- draw the pyramid
+g:Show()
+\end{luadraw}
+\end{document} 

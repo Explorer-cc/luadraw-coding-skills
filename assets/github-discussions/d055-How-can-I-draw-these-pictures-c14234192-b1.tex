@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/55#discussioncomment-14234192 (pfradin, block 1)
+\documentclass[border = 3pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name = stairway}
+local g = graph3d:new{size={10,10},window={-5,5,-5,5}, viewdir={50,65}, margin={0,0,0,0}}
+g:Linejoin("round")
+local n, m = 8, 8
+local large = 5/math.max(n,m)
+local hmax = 5
+local height = function(x,y) return hmax*(1 - 0.85*(x^2+y^2)/(m^2+n^2)) end
+local facet_list = {}
+for j = 1, n do
+    for k = 1, m do
+        local P = parallelep(Origin,large*vecI,large*vecJ,height(j,k)*vecK)
+        P = g:Classifyfacet(P)
+        insert( facet_list, shift3d(P,(j-1)*large*vecI+(k-1)*large*vecJ))
+    end
+end
+g:Dfacet(facet_list, {color="LightBlue"})
+g:Show()
+\end{luadraw}
+\end{document}

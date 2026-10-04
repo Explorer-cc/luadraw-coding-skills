@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/762928 (question 733977, score 3, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/733977/how-can-the-edges-be-made-3d
+\begin{document}
+
+\begin{luadraw}{name=3D-molecule-povray}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{size={10,10}, viewdir={40,60}}
+require 'luadraw_povray'
+local L = {M(0,3,-3), M(0,3,-1), M(0,3,1), M(0,3,3)}
+L = ld.rotline(L, {M(0,0,0), M(0,0,1)}, 0, 360, {nbdots=8} )
+g:Pov_new()
+g:Pov_polyline(ld.facetedges(L),{width=12, color=ld.Brown})
+g:Pov_dots(ld.facetvertices(L), {dotscale=3, color=ld.Gray})
+g:Pov_exec(); g:Pov_show()
+g:Show() 
+\end{luadraw}
+\end{document}

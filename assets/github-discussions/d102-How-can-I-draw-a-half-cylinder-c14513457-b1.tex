@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/102#discussioncomment-14513457 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/648965/how-to-draw-semi-cyclinder-with-tikz
+\begin{document}
+\begin{luadraw}{name=half_cylinder}
+local g = graph3d:new{size={10,10},viewdir={140,60}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local l, r = 3,2
+local A,B,C,D = M(r,-l,0), M(r,l,0),M(-r,l,0),M(-r,-l,0)
+local Cyl = cylinder(-l*vecJ,r,l*vecJ,200)
+Cyl = cutpoly(Cyl, {Origin,-vecK})
+local L = g:Outline(Cyl)
+g:Dscene3d(
+    g:addPoly(Cyl, {color="orange"}),
+    g:addPolyline( concat(L.visible,L.hidden)),
+    g:addArc(A,-l*vecJ,D,r,1,vecJ),
+    g:addArc(B,l*vecJ,C,r,1,vecJ)
+    )
+g:Show()
+\end{luadraw}
+\end{document} 

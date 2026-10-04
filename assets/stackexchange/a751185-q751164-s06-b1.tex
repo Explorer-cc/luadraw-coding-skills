@@ -1,0 +1,26 @@
+% source: https://tex.stackexchange.com/a/751185 (question 751164, score 6, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/751164/vertical-dashed-lines-in-tikz-figure-from-proofs-without-words
+\begin{document}
+\begin{luadraw}{name=proof_without_words}
+local n = 8
+local d,O, i = (n+1)*n/2,0, cpx.I
+local g = graph:new{window={0,d,-n,0}, size={18,18*n/d}}
+local rect1, rect2,seg = {}, {}, {}
+for k = 1, n do
+    for l = 1, k, 2 do 
+        local a = O-(l-1)*i
+        table.insert(rect1,rectangle(a,a+k,a-i))
+        if l < k then table.insert(rect2,rectangle(a-i,a+k-i,a-2*i)) end
+    end
+    for l = 1, k-1 do table.insert(seg,{O+l,O+l-k*i}) end
+    O = O+k
+end
+g:Dpolyline(rect1,true,"fill=Bisque")
+g:Dpolyline(rect2,true,"fill=SkyBlue")
+g:Linestyle("{1.5pt}{1.5pt}"); g:Dpolyline(seg)
+g:Show()
+\end{luadraw}
+\end{document}

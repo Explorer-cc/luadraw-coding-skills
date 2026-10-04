@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/180#discussioncomment-15599080 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=answer2}
+local a = 2
+local A,B,C,D,S = M(0,0,0),M(a,0,0),M(a,a,0),M(0,2*a,0),M(0,0,2*a)
+local G = (A+B+S)/3
+local P = pyramid( {A,B,C,D}, S)
+local x1,x2,y1,y2,z1,z2 = getbounds3d( {A,B,C,D,S} ) -- 3d bounding box
+local dl = math.max(x2-x1,y2-y1,z2-z1) + 1 -- the greatest length, plus one
+
+local g = graph3d:new{window3d={x1,x2+1,y1,y2+1,z1,z2+1}, adjust2d=true, viewdir={20,70},size={10,10}}
+Hiddenlinestyle = "dashed";Hiddenlines = true;
+
+g:Dpolyline3d({{x1*vecI,(x1+dl)*vecI},{y1*vecJ,(y1+dl)*vecJ},{z1*vecK,(z1+dl)*vecK}}, "arrows={-Stealth[scale=1.5]}") -- axes
+g:Dpoly(P, {color="orange", mode=mShadedHidden})
+ g:Dlabel3d("$S$",S,{pos="W"},"$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{pos="S"}, "$G$",G,{},"$x$",(x1+dl)*vecI,{pos="S"},"$y$",(y1+dl)*vecJ,{pos="S"},"$z$",(z1+dl)*vecK,{pos="E"})
+g:Ddots3d({A,B,C,D,S,G})
+g:Show()
+\end{luadraw}
+\end{document}

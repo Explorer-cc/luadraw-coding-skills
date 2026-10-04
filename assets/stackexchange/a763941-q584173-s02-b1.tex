@@ -1,0 +1,46 @@
+% source: https://tex.stackexchange.com/a/763941 (question 584173, score 2, block 1)
+% Source - https://tex.stackexchange.com/a/763936
+% Posted by Explorer
+% Retrieved 2026-06-17, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=quadratic_surface}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sin, cos, pi = math.sin, math.cos, math.pi
+local g = ld.graph3d:new{
+    window3d={-1.25,1.25,-0.25,2.25,0,6,1,1,0.5}, 
+    adjust2d=true,size={10,10},
+    viewdir={"central",45,60}
+}
+
+-- f(x,y) = 14*x^2 + 20*x*y - 22*x + 11*y^2 - 24*y + 14
+-- f(x,y) = 14*(x+x0)^2 + 20*(x+x0)*(y+y0) + 11*(y+y0)^2 + 49/54, with x0=1/54 and y0=28/27
+-- f(x,y) = 14*X^2 + 20*X*Y + 11*Y^2 + 49/54, with X=x+x0 and Y=y+y0 (translation)
+-- f(x,y) = 14*[ (X+5/7*Y)^2 + (3*sqrt(6)/14*Y)^2 ] + 49/54
+-- This suggests a new parametrization p  of the surface.
+
+local a, b, c = 7*math.sqrt(6)/9, 5/7, 49/54
+local p = function(r,t)
+    local y = r*sin(t)*a
+    local x = r*cos(t)-b*y
+    local z = 14*r^2+c
+    return M(x,y,z)
+end
+
+local x0, y0 = 1/54, 28/27
+local T = M(x0,y0,0) -- translation vector
+local S = ld.surface(p,0,1,pi,-pi,{30,50})
+g:Labelsize("footnotesize")
+g:Dboxaxes3d({drawbox=true, grid=true, gridcolor="LightGray", xgradlimits={-1,1},
+    ygradlimits={0,2}, xstep=0.5, ystep=0.5, fillcolor="WhiteSmoke", xlegend="$s$", ylegend="$t$"})
+g:Dfacet( ld.shift3d(S,T),  {clip=true, edgecolor="gray", edgewidth=1,
+    usepalette={ld.palGasFlame,"z"}})
+g:Show()
+\end{luadraw}
+\end{document}

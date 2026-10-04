@@ -1,0 +1,12 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Path example)
+\begin{luadraw}{name=path_example}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-4,4,-0.5,3}, size={10,10}}
+local L = { Z(-3,2),"m",-3,-2,"l",0,2,2,-1,"ca",3,Z(3,3),0.5,"la",1,Z(-1,5),Z(-3,2),"b" }
+g:Dpath(L, "line width=0.8pt, blue")
+g:Ddots({Z(-3,2),-3,-2,0,2,3,Z(3,3)})
+g:Dlabel("$Z(-3,2)$",Z(-3,2),{pos="W"}, "$-3$",-3,{pos="S"}, "$-2$",-2,{},
+"$0$",0,{}, "$2$",2,{}, "$3$",3,{}, "$Z(3,3)$",Z(3,3),{pos="E"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,18 @@
+% source: https://github.com/pfradin/luadraw/discussions/133#discussioncomment-14835314 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=chop}
+local g = graph3d:new{window={-2,4,-6,5},bbox=false,size={10,10},viewdir={30,70}}
+Hiddenlinestyle = "dashed";Hiddenlines = true
+local a, b, h = 3,4,5
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local centers = map(isobar3d,getfacet(P)) -- list of centers of each face
+local P1 = cvx_hull3d(centers)
+g:Dpoly(P , {color="cyan",mode=mShadedHidden})
+g:Dpolyline3d( facetedges(P1) , "dashed")
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,71 @@
+% source: https://github.com/pfradin/luadraw/discussions/140#discussioncomment-15065080 (pfradin, block 1)
+\documentclass[boder=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+
+\begin{luadraw}{name=tubes}
+local g = graph3d:new{window={-6,6,-4,9},bg="lightgray" }
+Hiddenlines = false; Hiddenlinestyle = "noline"
+local r = 0.5
+local color = "orange"
+g:Linewidth(2); g:Linecolor(color)
+
+local Dcrossing = function(center)
+    local Dcorner = function(A) -- A=M(+/-r, +/-r,+/-r)
+        local c1, c2, c3 = px(A),py(A),pz(A)
+        local a, b, c = pxz(A), pyz(A), pxy(A)
+        g:Dpath3d( {a,c1,c,r,1,"ca",c2,b,r,1,"ca",c3,a,r,1,"ca"}, "color="..color..",fill="..color.."!30")
+    end
+    g:Savematrix(); g:Shift3d(center)
+    for x = -1,1,2 do
+        for y = -1,1,2 do
+            for z = -1,1,2 do
+                local A = M(x*r,y*r,z*r)
+                if pt3d.dot(A,g.Normal) > 0 then Dcorner(A) end -- if A is visible
+            end
+        end
+    end
+    g:Restorematrix()
+end
+
+local Shift = function(L,u)
+    local f = function(A)
+        if isPoint3d(A) then return A+u else return A end
+    end
+    return ftransform3d(L,f)
+end
+
+local grid_base = {} -- list of {center, "type"}
+for y = -4, 4  do
+    local A = y*2*r*vecJ
+    if y%3 == 0 then
+        table.insert(grid_base, {A,"c"})
+        table.insert(grid_base, {A+2*r*vecI,"x"})
+        table.insert(grid_base, {A-2*r*vecI,"x"})
+        table.insert(grid_base, {A+2*r*vecK,"z"})
+        table.insert(grid_base, {A-2*r*vecK,"z"})
+    else
+        table.insert(grid_base, {A,"y"})
+    end
+end
+
+local k = 6*r
+local grid = concat(grid_base, Shift(grid_base,k*vecI), Shift(grid_base,-k*vecI))
+grid = concat(grid, Shift(grid,k*vecK), Shift(grid,2*k*vecK))
+table.sort(grid, function(e1,e2) return pt3d.dot(e1[1],g.Normal) < pt3d.dot(e2[1],g.Normal) end)
+-- drawing
+for _,elt in ipairs(grid) do
+    local A, mode = table.unpack(elt)
+    local U = nil
+    if mode == "c" then Dcrossing(A)
+    elseif mode == "x" then U = vecI
+    elseif mode == "y" then U = vecJ
+    elseif mode == "z" then U = vecK
+    end
+    if U ~= nil then g:Dcylinder(A-r*U,r,A+r*U, {color=color}) end
+end 
+g:Show()
+\end{luadraw}
+\end{document} 

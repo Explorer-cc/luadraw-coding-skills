@@ -1,0 +1,14 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Path and Spline)
+\begin{luadraw}{name=path_spline}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5},size={10,10},bg="Beige"}
+local i = ld.cpx.I
+local p = {-3+2*i,"m",-3,-2,"l",0,2,2,1,"ca",3,3+3*i,0.5,"la",1,-1+5*i,-3+2*i,"b",-1,"m",0,"c"}
+g:Daxes( {0,1,1} )
+g:Filloptions("full","blue!30",1,true); g:Dpath(p,"line width=0.8pt")
+g:Filloptions("none")
+local A,B,C,D,E = -4-i,-3*i,4,3+4*i,-4+2*i
+g:Lineoptions(nil,"ForestGreen",12); g:Dspline({A,B,C,D,E},nil,-5*i) -- constraint in E
+g:Ddots({A,B,C,D,E},"fill=white,scale=1.25")
+g:Show()
+\end{luadraw}

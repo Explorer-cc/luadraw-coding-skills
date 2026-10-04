@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/132#discussioncomment-14824850 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=Rupert_cube}
+local g = graph3d:new{window={-5,5,-5,5.5}, bbox=false,size={10,10}, viewdir={30,70}}
+local C1 = parallelep(Origin,vecI,vecJ,vecK)
+local a = (math.sqrt(3)-1)/2
+local C2 = parallelep(-a*vecJ,vecI,(2*a+1)*vecJ,vecK)
+C2 = rotate3d(C2,45,{M(0.5,0.5,0.5),vecK})
+local u = vecI+vecK-vecJ
+local alpha = angle3d(vecJ-vecI,u)
+C2 = rotate3d(C2,alpha*rad,{M(0.5,0.5,0.5),vecI+vecJ})
+local C4 = clip3d(C1,C2,true) -- we clip C1 with C2, true means that we keep what is outside
+g:Shift3d(4*vecK)
+local dep = 1.125
+for k = 1, 5 do
+    g:Dscene3d(
+        g:addPoly(shift3d(C2,dep*(k-3)/2*u),{color="green",opacity=1}),
+        g:addFacet(C4,{color="orange"}), 
+        g:addPolyline( facetedges(C1) )
+        )
+    g:Shift3d(-2*vecK)
+end
+g:Show()
+\end{luadraw}
+\end{document} 

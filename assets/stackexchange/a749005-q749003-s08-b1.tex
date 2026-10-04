@@ -1,0 +1,22 @@
+% source: https://tex.stackexchange.com/a/749005 (question 749003, score 8, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[]{luadraw}
+\begin{document}
+\begin{luadraw}{name=fill_area}
+local g = graph:new{window={-5,5,-5,5}, size={12,12}}
+local i = cpx.I
+g:Linejoin("round")
+local A, B = -3, 2
+local C = proj(A,{B,-0.5+i})
+local ab, ac, bc = cpx.abs(B-A), cpx.abs(C-A), cpx.abs(B-C)
+local D = proj(C,{A,B-A})
+
+g:Dpolyline({A,B,C},true)
+g:Dpath( {C,(B+C)/2,B,bc/2,1,"ca",(A+B)/2,A,ab/2,-1,"ca",(A+C)/2,C,ac/2,1,"ca"}, "fill=orange, fill opacity=0.6")
+g:Dangle(B,C,A,0.25)
+g:Filloptions("full","white"); g:Ddots({A,B,C,D})
+g:Dlabel( "$A$",A,{pos="W"},"$B$",B,{pos="E"},"$C$",C,{pos="N"},"$D$",D,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

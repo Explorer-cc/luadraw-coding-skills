@@ -1,0 +1,67 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-8-More-Advanced-Examples.tex (demo: Stack of Cubes)
+\begin{luadraw}{name=cubes_empiles}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window3d={-6,6,-6,6,-6,6},size={10,10}}
+ld.Hiddenlines = false
+local Lg, lg, ht, a = 5, 5, 5, 2 -- length, width, height of the space to fill, size of a cube
+local positions = {} -- 3-dimensional matrix initialized with 0s
+for L = 1, Lg do
+    local X = {}
+    for l = 1, lg do
+        local Y = {}
+        for h = 1, ht do table.insert(Y,0) end
+        table.insert(X,Y)
+    end
+    table.insert(positions,X)
+end
+for x = 1, Lg do  -- random positioning of cubes
+    for y = 1, lg do
+        local nb = math.random(0,ht) -- we put number of cubes in the column (x,y,*) starting from the bottom
+        for z = 1, nb do positions[x][y][z] = 1 end
+    end
+end
+local dessus,gauche,devant = {},{},{} -- to memorize the facets
+for x = 1, Lg do -- loop over the positions matrix to determine the facets to draw
+    for y = 1, lg do
+        for z = 1, ht do
+            if positions[x][y][z] == 1 then -- there is a cube in  (x,y,z)
+                if (z == ht) or (positions[x][y][z+1] == 0) then -- no cube above, top face visible
+                    table.insert(dessus,{M(x,y,z),M(x-1,y,z),M(x-1,y-1,z),M(x,y-1,z)}) -- insert top face
+                end
+                if (y == lg) or (positions[x][y+1][z] == 0) then -- right face visible
+                    table.insert(gauche,{M(x,y,z),M(x,y,z-1),M(x-1,y,z-1),M(x-1,y,z)}) -- insert right face
+                end
+                if (y == 1) or (positions[x][y-1][z] == 0) then -- left face visible
+                    table.insert(gauche,{M(x,y-1,z),M(x-1,y-1,z),M(x-1,y-1,z-1),M(x,y-1,z-1)}) -- insert left face
+                end                    
+                if (x == Lg) or (positions[x+1][y][z] == 0) then -- front face visible
+                    table.insert(devant,{M(x,y,z),M(x,y-1,z),M(x,y-1,z-1),M(x,y,z-1)}) -- insert front face
+                end
+                if (x == 1) or (positions[x-1][y][z] == 0) then -- no cube behind so back face visible
+                    table.insert(devant,{M(x-1,y,z),M(x-1,y,z-1),M(x-1,y-1,z-1),M(x-1,y-1,z)}) -- back face
+                end
+            end
+        end
+    end
+end
+g:Setmatrix3d({M(-a*Lg/2,-a*lg/2,-a*ht/2),a*vecI,a*vecJ,a*vecK}) -- to center the figure and have cubes of side a
+local dessin = function()
+    g:Dscene3d(
+        g:addFacet(dessus, {backcull=true,color="Crimson"}), g:addFacet(gauche, {backcull=true,color="DarkGreen"}),
+        g:addFacet(devant, {backcull=true,color="SteelBlue"}),
+        g:addPolyline(ld.facetedges(ld.concat(dessus,gauche,devant))), -- drawing edges
+        g:addAxes(Origin,{arrows=1}))
+end
+g:Saveattr(); g:Viewport(-5,0,0,5); g:Coordsystem(-11,11,-11,11); g:Setviewdir(45,60) -- top left
+ dessin(); g:Restoreattr()
+g:Saveattr(); g:Viewport(0,5,0,5);g:Coordsystem(-11,11,-11,11); g:Setviewdir(-45,60) -- top right
+dessin(); g:Restoreattr()
+g:Saveattr(); g:Viewport(-5,0,-5,0);g:Coordsystem(-11,11,-11,11); g:Setviewdir(-135,60) -- bottom left
+dessin(); g:Restoreattr()
+g:Saveattr(); g:Viewport(0,5,-5,0);g:Coordsystem(-11,11,-11,11); g:Setviewdir(135,60) -- bottom right
+dessin(); g:Restoreattr()
+g:Show()
+\end{luadraw}

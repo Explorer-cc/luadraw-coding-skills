@@ -1,0 +1,17 @@
+% source: https://github.com/pfradin/luadraw/discussions/134#discussioncomment-14849993 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=cvx_hull3d}
+local g = graph3d:new{window={-2,9,-6,7},bbox=false,size={10,10}}
+Hiddenlinestyle = "dashed";Hiddenlines = true
+local a, b, h = 4,4,5
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+g:Dpoly(P , {color="Green",mode=mShadedHidden})
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",F,{}, "$G$",G,{}, "$H$",H,{})
+g:Show()
+\end{luadraw}
+\end{document}

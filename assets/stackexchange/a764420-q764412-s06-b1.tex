@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/764420 (question 764412, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/764412/can-anyone-help-me-adjusting-a-tikz-picture
+\begin{document}
+\begin{luadraw}{name=surface}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local O, I, J, K = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window={-3,3,-2,4},viewdir={"central",30,60},size={10,10}}
+local N = g.Normal -- Normal vector to the projection plane (screen)
+local h = 3.5
+local function f(t) -- Parametrization of the apparent contour of the surface
+    local y = (N.z - 2*N.x*t)/(2*N.y)
+    return M(t,y,t^2+y^2)
+end
+local outline = ld.parametric3d(f,-2, 2)
+outline = ld.cutpolyline3d(outline, {h*K,-K}) -- We cut the curve with the plane z=h.
+g:Dpolyline3d({{-4*I,3*I}, {-3*J,3*J}, {-2*K, 4*K}}, "-stealth") -- axes
+g:Dpolyline3d(outline, "line width=0.8")
+g:Dcircle3d(h*K, math.sqrt(h), K, "line width=0.8")
+g:Dlabel3d("$x$",3*I,{pos="SW"}, "$y$",3*J,{pos="S"}, "$z$", 4*K,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

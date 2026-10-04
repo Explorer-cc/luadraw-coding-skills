@@ -1,0 +1,46 @@
+% source: https://github.com/pfradin/luadraw/discussions/228#discussioncomment-16122879 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage{fourier}
+\begin{document}
+
+\begin{luadraw}{name=cosine_graph}
+    local pi, i = math.pi, cpx.I
+    local g = graph:new{
+        window={-2.5, 7, -7, 4.5}, size={12, 9, 8/pi},
+        pictureoptions = "every node/.append style={fill=white,inner sep=1.75pt}"
+    }
+    defaultlabelshift = 0 -- this value is used to shift the labels when grid = true
+    g:Linewidth(8) -- for axes thickness
+    g:Daxes(
+        {0, pi/2, 1}, 
+        {
+            limits = {{-2, 7}, {-5.5, 4.3}},
+            gradlimits = {{-1.85, 6.5}, {-5.75, 3.5}},
+            grid = true, gridcolor="black", 
+            nbsubdiv={ 3, 0 }, subgridcolor="black",
+            arrows = "-latex",
+            xyticks = { 0, 0 },
+            labeltext = {"\\pi",""},
+            labelden = { 2, 1 },
+            legend = {"$x$", "$y$"},
+            legendpos = { 1, 1 },
+            -- legendstyle={"E","N"}, -- not necessary
+            legendsep = { 0, 0 },
+            labelshift = { 0 , -0.1875 }, -- when labelshift=0 and grid=true the defaultlabelshift is used
+            myylabels={-5, "$-5$", -3, "$-3$", -1, "$-1$", 1, "$1$", 3, "$3$"}, -- no choice here...
+            originpos = {"none", "none"},
+        }
+    )
+
+    local f = function(x) return -3*math.cos(2*x)-1 end
+    g:Dcartesian(f, {
+        x = {-pi/2 - 0.2, 2*pi + 0.15},
+        nbdots = 100, draw_options = "line width=1.2pt"
+    })
+    g:Dlabel("$O$", 0, {pos="SW",node_options = "fill=none"})
+    g:Dlabel("Graph of $f$", Z(2.35, -6.5), {})
+    g:Show()
+\end{luadraw}
+
+\end{document}

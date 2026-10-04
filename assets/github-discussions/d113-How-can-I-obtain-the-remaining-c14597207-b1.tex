@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/113#discussioncomment-14597207 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/569954/3d-intersections
+   
+\begin{luadraw}{name=sphere_pyramid}
+local g = graph3d:new{window={-1,9,-2,6},viewdir={30,75},size={10,10}}
+g:Linewidth(4); Hiddenlinestyle = "dashed";Hiddenlines = true
+local a, b, h = 2,4,6
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local X = planeEqn(1,1,1,-5)
+local I1, section = g:Intersection3d(P,X) -- section is the list of 
+g:Dpoly(P,{mode=5,color="LightBlue"})  -- draw P without edges
+g:Filloptions("fdiag","red")
+g:Dpolyline3d(section,"draw=none") -- fill section without edges
+g:Dpoly(P,{mode=0,edgewidth=4})  -- draw edges of P, they must be above red hatches
+g:Filloptions("none","black")
+g:Dedges(I1,{hidden=true,color="blue"})
+local P2,P3 = cutpoly(P,X,true) --P3 is then second part
+g:Dpoly( shift3d(P3,6*vecJ), {color="Crimson",mode=mShadedHidden} )
+g:Dpoly( shift3d(P2,6*vecJ+vecK), {color="Green",mode=mShadedHidden} )
+g:Show()
+\end{luadraw}
+\end{document}     

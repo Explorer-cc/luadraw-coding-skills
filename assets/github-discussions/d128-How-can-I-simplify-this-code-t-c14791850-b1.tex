@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/128#discussioncomment-14791850 (pfradin, block 1)
+% !TEX TS-program = lualatex
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name = for-stacked-cubes}
+local amax = 7
+local xysup = amax + 1
+local zsup  = amax*(amax + 1) / 2 + 1 --<-- +1 not -1
+local g = graph3d:new{
+  bbox     = false,
+  window3d = {0, xysup, 0, xysup, 0, zsup}, --<-- there are no negative coordinates
+  --adjust2d = true, --<-- uncomment this to see the calculated 2D window in the terminal
+  window   = {-13, 1, -8, 31}, --<-- window choose after using adjust2d=true, its size is 14 cm x 39 cm !
+  size = {8,24},  --<-- maximum size (real size smaller if bbox=false)
+  viewdir  = {155,70}
+}
+g:Linewidth(6)
+Hiddenlines     = true
+Hiddenlinestyle = "dashed"
+local pal = {"Teal", "LightBlue"}
+local zpos = 0
+local icol = 1
+for a = amax, 1, -1 do 
+  g:Dpoly(
+    parallelep(
+      M(0,0,zpos),
+      a*vecI, a*vecJ, a*vecK
+    ),
+    {
+     mode = mShadedHidden, --<-- to see hidden lines
+      color = pal[icol]
+    }
+  )
+  
+  zpos = zpos + a
+  icol = icol % 2 + 1
+end
+g:Show()
+\end{luadraw}
+\end{document} 

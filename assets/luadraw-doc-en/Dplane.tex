@@ -1,0 +1,24 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: Dplane, example with mode = left+bottom)
+\begin{luadraw}{name=Dplane}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{size={8,8},window={-5.25,3,-2.5,2.5},margin={0,0,0,0},border=true}
+local i = cpx.I
+g:Labelsize("footnotesize")
+local A = Origin
+local P = {A, vecK}
+g:Dplane(P, vecJ, 6, 6, ld.left + ld.bottom)
+g:Dcrossdots3d({A,vecK},nil,0.75)
+g:Dseg3d({A,A+2*vecK},"->")
+g:Dangle3d(-vecJ,A,vecK,0.25)
+g:Dpolyline3d({{M(3.5,-3,0),M(3.5,3,0)},{M(3,-3.5,0), M(-3,-3.5,0)}}, "->,line width=0.8pt")
+g:Dlabel3d("$A$",A,{pos="E"},
+    "$u$",2*vecK,{},
+    "$P$", M(3,-3,0),{pos="NE", dir={vecJ,-vecI}},
+    "$L_1\\frac{V}{\\|V\\|}$ (bottom)", M(3.5,0,0), {pos="S"},
+    "$L_2\\frac{W}{\\|W\\|}$ (left)", M(0,-3.5,0), {pos="N",dir={-vecI,-vecJ}}
+)
+g:Show()
+\end{luadraw}

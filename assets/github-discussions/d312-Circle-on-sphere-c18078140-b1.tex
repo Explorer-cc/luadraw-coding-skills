@@ -1,0 +1,45 @@
+% source: https://github.com/pfradin/luadraw/discussions/312#discussioncomment-18078140 (pfradin, block 1)
+% Source - https://tex.stackexchange.com/a/765576
+% Posted by Explorer
+% Retrieved 2026-08-19, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=3dobjects}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin,vecI,vecJ,vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window = {-2,2,-2,2}, viewdir = {10,65}}
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+g:Dsphere(vecK,1,{color="violet!50"})
+--g:Dpath3d({2*vecK,vecK,Origin,1,1,0.2*vecI+vecJ,"ca"}) -- wrong
+--g:Dpath3d({2*vecK,vecK,Origin,1,-1,0.2*vecI+vecJ,"ca"},"dashed") -- wrong
+local N = vecJ
+local A, B = table.unpack( g:Sphere_tangency(vecK,1,{vecK, N}) )
+g:Dpath3d({A,vecK,B,1,-1,N,"ca"}) -- correct
+g:Dpath3d({A,vecK,B,1,1,N,"ca"},"dashed") -- correct
+g:Dlabel("$r$",g:Proj3d(vecK+0.5*vecJ)+yy,{})
+
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecK,vecI,vecJ = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK,pt3d.I,pt3d.vecJ
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local g = ld.graph3d:new{window = {-2,2,-2,2}, viewdir = {10,65}}
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+require 'luadraw_spherical'
+local R = 1
+g:Define_sphere({center=vecK, radius=R}) 
+g:DScircle({vecK,vecJ},{color="blue"})
+g:DScircle({vecK,vecK},{color="red"})
+g:Dspherical()
+g:Show()
+\end{luadraw} 
+\end{document}

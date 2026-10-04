@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/298#discussioncomment-18114456 (pfradin, block 1)
+\begin{luadraw}{name=linear_prog4}
+local ld = luadraw
+local cpx, Z = ld.cpx, ld.cpx.Z 
+local g = ld.graph:new{window={-40,120,-40,140}, size={15,15},margin=0.5}
+
+g:Daxes({0,20,20},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+local function coord(A)
+    return "("..ld.strReal(A.re,2)..","..ld.strReal(A.im,2)..")"
+end
+local sol = {}
+g:Dconstraints(
+    'x>0', {color="gray",pattern=ld.mypattern(30), label=""},
+    'y>0', {color="orange", ld.mypattern(-60),label=""},
+    '2*x + y< 120', {color="blue", pattern=ld.mypattern(-45),label="$2x+y=120$",anchor1d=0.6},
+    'x + y  < 100', {color="red", anchor1d=0.15, pattern=ld.mypattern(50)},
+    sol
+)
+g:Ddots(sol) 
+g:Dpolyline(sol,true, {draw_options='draw=none,fill=cyan,fill opacity=0.5'})
+
+local pts = sol[1] 
+local A, B, C, D = pts[1], pts[2], pts[3], pts[4]
+g:Dcoord2d(
+    "A", A, {pos="SW"},
+    "C", C, {pos="NE"},
+    "D", D, {pos="NE"}
+)
+
+local function f(pt)
+    return 5 * pt.re + 7 * pt.im
+end
+
+local min_val, max_val = math.huge, -math.huge
+for _, z in ipairs(sol[1]) do
+    local v = f(z)
+    if v < min_val then min_val = v end
+    if v > max_val then max_val = v end
+end
+local txt_max = "\\xintTeXsignedFrac {"..ld.frac(max_val).."}"
+local txt_min = "\\xintTeXsignedFrac {"..ld.frac(min_val).."}"
+g:Dlabel("$f(x,y) = 5x + 7y$", Z(60, 110), {pos="E"})
+g:Dlabel("$\\max f(x,y) = " .. txt_max .. "$", Z(60, 100), {pos="E"})
+g:Dlabel("$\\min f(x,y) = " .. txt_min .. "$", Z(60, 90), {pos="E"})
+
+g:Show()
+\end{luadraw}

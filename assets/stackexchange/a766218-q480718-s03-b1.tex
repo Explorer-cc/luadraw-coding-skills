@@ -1,0 +1,50 @@
+% source: https://tex.stackexchange.com/a/766218 (question 480718, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+\begin{document}
+%https://tex.stackexchange.com/questions/480718/how-can-i-draw-this-cylinder-with-3d?rq=1
+\begin{luadraw}{name=cylinder_intersection}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Mc, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{ size={12,12}, viewdir={30,70} }
+ld.Hiddenlinestyle = "dashed"
+local pi = math.pi
+local A, r, S = -4*vecK, 3, 3*vecK
+local cyl = ld.cylinder(A,r,S, 100)
+local P = {2*vecJ, vecJ} -- plane
+local points = {A, S}
+local I = g:Intersection3d(cyl, P)
+local section = ld.merge3d( ld.concat(I.visible, I.hidden))
+--Calculation of intersection points with the circular faces of the cylinder
+local function f(J,t)
+    return pt3d.dot(J+Mc(r,t,0)-P[1], P[2])
+end
+local t1, t2, uA, vA, uS, vS
+local tA = ld.solve(function(t) return f(A,t) end, -pi, pi)
+local tS = ld.solve(function(t) return f(S,t) end, -pi, pi)
+if tA ~= nil then
+        t1, t2 = table.unpack( tA )
+        uA, vA = A+Mc(r,t1,0), A+Mc(r,t2,0)
+        table.append(points, {uA, vA})
+end
+if tS ~= nil then
+    t1, t2 = table.unpack( tS )
+    uS, vS = S+Mc(r,t1,0), S+Mc(r,t2,0)
+    table.append(points, {uS, vS})
+end 
+-- drawing   
+g:Dpolyline3d( section, true, "draw=none, pattern=north west lines") -- section
+g:Dcylinder(A,r,S, {color="blue", opacity=0.6})
+g:Dedges(I, {hidden=true}) -- intersection
+g:Dseg3d({A,S}, 'dashed')
+g:Ddots3d(points)
+g:Dlabel3d( "$O$", A, {pos="W",dist=0.1}, "$O'$", S, {pos="N"}, "$B'$",uS, {}, "$A'$",vS,{pos="NE"},
+    "$B$", uA, {pos="S"}, "$A$",vA, {pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

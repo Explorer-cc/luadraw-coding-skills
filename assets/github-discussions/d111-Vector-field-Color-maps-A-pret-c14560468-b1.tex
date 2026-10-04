@@ -1,0 +1,52 @@
+% source: https://github.com/pfradin/luadraw/discussions/111#discussioncomment-14560468 (pfradin, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/139114/differential-equation-direction-plot-with-pgfplots
+\begin{document}
+\begin{luadraw}{name=champ}
+local x1,x2,y1,y2 = -3,3,-3,3
+local g = graph:new{window={x1-0.5,x2+0.5,y1-0.5,y2+0.5},bg="",size={10,10}}
+
+local f = function(x,y) -- éq. diff. y'= x^2+y^2-1=f(x,y)
+    return x^2+y^2-1
+end
+
+local A = Z(0,1/2) -- initial condition
+local n = 20
+local deltaX, deltaY, long = (x2-x1)/n, (y2-y1)/n
+local long = math.min(deltaX,deltaY)-0.1
+local values, key = {}
+local vectors, v = {}
+local Min, Max = math.huge, -math.huge
+for i = 1, n do
+    local x = x1+deltaX*(i-0.5)
+    for j = 1, n do
+        local y = y1+deltaX*(j-0.5)
+        key = i.."/"..j
+        local img = f(x,y)
+        if img < Min then Min = img end
+        if img > Max then Max = img end
+        values[key] = img
+        v = Z(1,img)
+        v = v/cpx.abs(v)*long -- normalization of v
+        table.insert(vectors, {Z(x,y), Z(x,y)+v} )
+    end
+end
+local pal = {Purple,Indigo,Blue,Green,Yellow,Orange,Red}
+-- paint
+for i = 1, n do
+    local x = x1+deltaX*(i-1)
+    for j = 1, n do
+        local y, color = y1+deltaX*(j-1), palette(pal,(values[key]-Min)/(Max-Min))
+        key = i.."/"..j
+        g:Dpolyline({Z(x,y),Z(x+deltaX,y),Z(x+deltaX,y+deltaY),Z(x,y+deltaY)}, "fill opacity=0.5,draw=none,fill="..color)
+    end
+end
+g:Dgradbox({Z(x1,y1),Z(x2,y2),1,1} ,{originloc=0,originnum={0,0},nbsubdiv={3,3}})
+g:Dpolyline(vectors, "-latex,darkgray")
+g:Dodesolve(f, A.re, A.im, {t={x1,x2},draw_options="red,line width=0.8pt",nbdots=150,clip={-2.5,2.25,y1,y2}})
+g:Dlabeldot("$A$", A, {pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,63 @@
+% source: https://tex.stackexchange.com/a/749713 (question 749696, score 8, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749696/drawing-a-3d-vector-field-with-vortices-and-perspective-axis-labels
+% functions declarations
+\begin{luacode}
+function field(f,x1,x2,y1,y2,grid,length)  -- fonction mathématique, indépendante du graphique
+-- calcule un champ de vecteurs dans le pavé [x1,x2]x[y1,y2]
+-- f fonction de deux variables à valeurs dans R^2
+-- grid = {nbx, nby} : nombre de vecteurs suivant x et suivant y
+-- length = longueur d'un vecteur
+    if grid == nil then grid = {25,25} end
+    local deltax, deltay = (x2-x1)/(grid[1]-1), (y2-y1)/(grid[2]-1) -- pas suivant x et y
+    if length == nil then length = math.min(deltax,deltay) end -- longueur par défaut
+    local vectors = {} -- contiendra la liste des vecteurs
+    local x, y, v = x1 
+    for _ = 1, grid[1] do -- parcours suivant x
+        y = y1
+        for _ = 1, grid[2] do -- parcours suivant y
+            v = f(x,y) -- on suppose que v est bien défini
+            v = Z(v[1],v[2]) -- passage en complexe
+            if not cpx.isNul(v) then
+                v = v/cpx.abs(v)*length -- normalisation de v
+                table.insert(vectors, {Z(x,y), Z(x,y)+v} ) -- on ajoute le vecteur
+            end
+            y = y+deltay
+        end
+        x = x+deltax
+    end
+    return vectors -- list of segments with complex numbers
+end
+
+function graph:Dvectorfield(f,args) -- add a method to graph
+-- dessine un champ de vecteurs
+-- f fonction de deux variables à valeurs dans R^2
+-- args table à 4 champs :
+-- { view={x1,x2,y1,y2}, grid={nbx,nby}, length=, draw_options=""}
+    args = args or {}
+    local view = args.view or {self:Xinf(),self:Xsup(),self:Yinf(),self:Ysup()} -- repère utilisateur par défaut
+    local vectors = field(f,view[1],view[2],view[3],view[4],args.grid,args.length) -- calcul du champ
+    self:Dpolyline(vectors,false,args.draw_options) -- le dessin (ligne polygonale non fermée)
+end
+\end{luacode}
+
+\begin{document}
+\begin{luadraw}{name=vectors_field}
+local g = graph3d:new{window3d={-5,5,-5,5,-1,1},window={-8.5,8,-5,5},viewdir={30,60},size={12,6,0}}
+g:Linejoin("round"); g:Labelsize("tiny"); g:Linewidth(4)
+-- example with Volterra
+local V = function(x,y) return {x-x*y,-y+x*y} end -- function: R^2 -> R^2
+local H = function(t,Y) return V(Y[1],Y[2]) end -- associated differential equation Y'=H(t,Y)=V(Y)
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray",drawbox=true})
+g:Savematrix()
+g:Setmatrix( g:Proj3d({Origin,vecI,vecJ}) ) -- to draw in xy-plane instead of screen plane
+g:Dvectorfield(V,{view={-4.5,4.5,-4.5,4.5},length=0.35,draw_options="line width=0.2pt,blue,-Stealth"})
+g:Dodesolve(H,0,{2,3},{t={0,50},out={2,3},nbdots=250,draw_options="red,line width=0.8pt"})
+g:Dodesolve(H,0,{-1,4},{t={0,4},out={2,3},nbdots=50,draw_options="green,line width=0.8pt"})
+g:Restorematrix()
+g:Show()
+\end{luadraw}
+\end{document}

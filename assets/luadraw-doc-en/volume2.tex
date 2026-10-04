@@ -1,0 +1,29 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-8-More-Advanced-Examples.tex (demo: Volume : $0\leqslant x\leqslant1;\ 0\leqslant y \leqslant x^2;\ 0\leqslant z\leqslant y^2$)
+\begin{luadraw}{name=volume2}
+local ld = luadraw
+local M = ld.pt3d.M
+local pi, sin, cos = math.pi, math.sin, math.cos
+
+local g = ld.graph3d:new{window3d={0,1,0,1,0,1}, margin={0,0,0,0},adjust2d=true,viewdir={170,40}, size={10,10}}
+g:Labelsize("scriptsize")
+local f = function(t) return M(t,t^2,0) end
+local h = function(t) return M(1,t,t^2) end
+local C = ld.parametric3d(f,0,1,25,false,0)[1] -- curve y=x^2 in the plane z=0 (first connected component)
+local D = ld.parametric3d(h,1,0,25,false,0)[1] -- curve z=y^2 in the plane x=1, in the opposite direction
+local dessous = ld.concat({M(1,0,0)},C) -- forms the underside
+local arriere = ld.concat({M(1,1,0)},D) -- forms the back face
+local  avant, dessus, A, B = {}, {}, nil, C[1]
+for k = 2, #C do --We construct the front and top faces facet by facet, starting from the points of C
+    A = B; B = C[k]
+    table.insert(avant, {B,A,M(A.x,A.y,A.y^2),M(B.x,B.y,B.y^2)})
+    table.insert(dessus, {M(B.x,B.y,B.y^2),M(A.x,A.y,A.y^2),M(1,A.y,A.y^2),M(1,B.y,B.y^2)})
+end
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="LightGray", drawbox=false, 
+    xyzstep=0.25, zlabelstyle="W",zlabelsep=0})
+g:Lineoptions(nil,"Navy",8)  
+g:Dpolyline3d(arriere,true,"fill=Crimson, fill opacity=0.6") -- rear face (flat)
+g:Filloptions("fdiag","black"); g:Dpolyline3d(dessous,true) -- below
+g:Dmixfacet(avant,{color="Crimson",opacity=0.7,mode=ld.mShadedOnly}, dessus,{color="cyan",opacity=1})
+g:Filloptions("none"); g:Dpolyline3d(ld.concat(ld.border(avant),ld.border(dessus)))
+g:Show() 
+\end{luadraw}

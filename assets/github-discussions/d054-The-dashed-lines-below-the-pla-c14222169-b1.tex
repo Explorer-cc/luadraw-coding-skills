@@ -1,0 +1,34 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222169 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/436302/how-to-draw-differently-visible-and-hidden-part-of-arbitrary-circle-on-a-sphere
+%https://tex.stackexchange.com/questions/481283/intersection-of-a-sphere-and-a-plane-knowing-equations/748710#748710
+\begin{luadraw}{name=sherical_drawing}
+local g = graph3d:new{window={-5,5,-5,5},viewdir={30,70}, size={12,12},margin={0,0,0,0}}
+g:Linejoin("round"); g:Linewidth(6)
+
+require 'luadraw_spherical'  -- to load the file luadraw_spherical.lua
+
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+
+-- first  we define the sphere
+g:Define_sphere({opacity=1, mode=1, color="LightBlue", edgewidth=2, hiddenstyle="noline", show=true} )
+
+-- now we can add different elements, for example:
+g:DSpolyline({{-5*vecI,5*vecI},{-5*vecJ,5*vecJ},{-5*vecK,5*vecK}},{arrows=1}) -- add the 3 axis
+g:DSbigcircle( {vecI,vecJ},{color="ForestGreen"}) -- add a big circle through two points
+g:DSarc(-vecI,vecI,1,{color="blue",arrows=1,normal=vecJ}) -- add a arc of big circle
+g:DScircle( {M(0,2,0),vecJ},{color="red"}) -- add a circle on the sphere (intersection with a plane)
+g:DSfacet({sM(-110,80),sM(-20,80),sM(-60,20)}, {fill="brown"}) -- add a spherical facet
+g:DSplane({M(0,0,-2),-vecK},{scale=0.75})  -- add a plane and its trace on the sphere
+g:DSlabel("$O$",Origin,{pos="W"}) -- add labels
+g:DScurve( parametric3d(function(t) return Ms(3,t-math.pi/2,t) end,0,360*deg,50,false,2), {color="Gold"}) -- spherical curve (Viviani curve)
+-- at the end we draw the sphere and the different elements defined previously.
+g:Dspherical()
+
+g:Show()
+\end{luadraw}
+\end{document} 

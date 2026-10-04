@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222172 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luacode}
+function SSStriangle3d(ab,bc,ac)  -- triangle through A, B and C
+    local A, B = Origin, ab*vecI
+    local alpha = math.acos((ab^2+ac^2-bc^2)/(ab*ac)/2)
+    local c = ac*cpx.exp(cpx.I*alpha)
+    local C = M(c.re, c.im,0)
+    return A,B,C -- returns 3 vertices
+end
+\end{luacode}
+\begin{luadraw}{name=SSStriangle_11_08_2025}
+local g = graph3d:new{window={-0.5,12,-2,5},viewdir={320,60},size={12,12}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local ab,bc,ac,h =4,5,6,4
+local A,B,C = SSStriangle3d(ab,bc,ac)
+local S = M(ab/3,ac/2,h)
+local M = (S+A)/2
+local N = (B+A)/2
+local G = (S+A+B)/3
+local Q = scale3d(C,2/3,B)
+local P1 = {M, pt3d.prod(Q-M,N-M)}
+local P = interDP({S,S-C},P1)
+local X = interDP({A,C-A},P1)
+local I = interDD({M,M-Q},{N,P-N})
+local pyr = pyramid( {A,B,C}, S)
+g:Dscene3d(
+    g:addPoly(pyr,{edge=true,color="LightBlue",edgewidth=4}),
+    g:addFacet({M,N,X},{edge=true,color="LightBlue"}),
+    g:addPolyline({{C,X},{S,N},{B,M},{M,Q,P},{P,N},{C,G}})
+    )
+g:Ddots3d({A,B,C,S,M,N,Q,P,G,X,I})
+g:Dlabel3d( "$A$",A,{pos="S"}, "$B$",B,{pos="S"}, "$C$",C,{pos="N"}, "$S$",S,{pos="N"},"$M$",M,{pos="N"},"$N$",N,{pos="S"},"$Q$",Q,{pos="S"},"$P$",P,{pos="N"},"$X$",X,{pos="S"},"$G$",G,{pos="S"},"$I$",I,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document} 

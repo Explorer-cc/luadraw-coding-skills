@@ -1,0 +1,25 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-4-Computations-on-Lists.tex (demo: Illustrate a linear programming exercise)
+\begin{luadraw}{name=cutpolyline}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5}, size={10,10},margin={0,0,0,0}}
+g:Linewidth(6)
+local i = ld.cpx.I
+local P = g:Box2d() -- polygon representing the 2D window
+local D1 = ld.lineEq(1,-1,0,'<')    -- x-y < 0
+local D2 = ld.lineEq(1,0,-2.5,'>')  -- x-2 > 0
+local D3 = ld.lineEq(-1/4,1,3,'<')  -- x/4+y+3 < 0
+local P1 = ld.cutpolyline(P,D1,true)
+local P2 = ld.cutpolyline(P,D2,true)
+local P3 = ld.cutpolyline(P,D3,true)
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+g:Filloptions("horizontal","blue"); g:Dpolyline(P1,true,"draw=none")
+g:Filloptions("fdiag","red"); g:Dpolyline(P2,true,"draw=none")
+g:Filloptions("bdiag","green"); g:Dpolyline(P3,true,"draw=none")
+g:Filloptions("none","black",1); g:Linewidth(8)
+g:Dline(D1,"blue"); g:Dline(D2,"red"); g:Dline(D3,"green")
+g:Dlabel(
+  "$x-y\\leqslant 0$",-3-3*i,{pos="N",dir={1+i,-1+i},dist=0.1,node_options="fill=white,fill opacity=0.8"},
+  "$x-2.5\\geqslant0$", 2.5+i,{dir={-i,1}},
+  "$-\\frac{x}{4}+y+3\\leqslant0$", -3-15/4*i,{pos="S",dir={1+i/4,i-1/4}})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,116 @@
+% source: https://github.com/pfradin/luadraw/discussions/298#discussioncomment-17934295 (pfradin, block 1)
+\documentclass[]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usetikzlibrary {patterns,patterns.meta}
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+local function compile(expr)
+-- returns the function defined by the string expr
+    return assert(load(
+        "return function(x,y,z) return " .. expr .. " end",
+        "expression",
+        "t" -- text only
+    ))()
+end
+
+local ld = luadraw
+function ld.constraint(expr) 
+-- expr = "a*x+b*y<c" or "a*x+b*y>c"
+-- returns a line
+    local pos = string.find(expr,"<")
+    local sg = ">"
+    if pos == nil then 
+        pos = string.find(expr,">")
+        if pos == nil then return end
+        sg = "<"
+    end
+    local pre = string.sub(expr,1,pos-1)
+    local post = string.sub(expr,pos+1,#expr)
+    local f = compile(pre.."-z*("..post..")")
+    local a, b, c = f(1,0,0), f(0,1,0), f(0,0,1)
+    return ld.lineEq(a,b,c,sg)
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=linear_prog}
+local ld = luadraw
+local cpx = ld.cpx
+local g = ld.graph:new{window={-20,70,-30,70}, size={12,12},margin=0.5}
+require 'luadraw_decorations'
+
+local mypattern = function(angle, distance)
+    angle = angle or 0
+    distance = distance or 0.25 -- distance in centimeter
+    return "{Lines[angle="..angle..",distance="..distance.."cm]}"
+end
+
+function ld.graph:Dconstraints(...)
+-- g:Dconstraints(constraint1, options1, constraint2, options2, etc)
+-- constraint = string as 'a*x+b*y<c' or 'a*x+b*y>c'
+-- options = {pattern="", opacity=0.3, color=<default>, width=<default>, style=<default>,
+--      label=, pos=, dir=, dist=, node_options= } ( decorations options )
+    local constaint, options = "", {}
+    local pattern, fill, label, color, width, style = "", "", "", self.param.linecolor, self.param.linewidth, self.param.linestyle 
+    local box = self:Box2d()
+    
+    local function aconstraint()
+        local D = ld.constraint(constraint)
+        pattern = options.pattern or pattern
+        color = options.color or color
+        width = options.width or width
+        style = options.style or style
+        opacity = options.opacity or 0.3
+        options.dir = options.dir or D[2]
+        options.pos = options.pos or "N"
+        if math.abs(cpx.arg(options.dir)) > math.pi/2 then 
+            options.dir = -options.dir
+            options.pos = "S" 
+        end
+        options.anchor1d = options.anchor1d or 0.5
+        options.node_options = options.node_options or color..",fill=white,fill opacity=0.8"
+        options.dist = options.dist or 0.05
+        local pos = string.find(constraint,"<")
+        if pos == nil then 
+            pos = string.find(constraint,">")
+        end
+        if pos ~= nil then
+            local pre = string.sub(constraint,1,pos-1)
+            local post = string.sub(constraint,pos+1,#constraint)
+            label = "$"..pre.."="..post.."$"  -- automatic label
+        else label = ""
+        end
+        options.label = options.label or label
+        local P = ld.cutpolyline(box,D,true)
+        if pattern ~= "" then
+            self:Dpolyline(P,true, 'draw=none, pattern='..pattern..', pattern color='..color..'!50')
+        else
+            self:Dpolyline(P,true, 'draw=none, fill='..color..', fill opacity='..opacity)
+        end
+        options.draw_options = color..","..style..",line width=".. width/10
+        self:Dline(D,options)
+    end
+
+    local n = select("#", ...)  -- number of arguments
+    for i = 1, n-1, 2 do   -- 
+        constraint, options = select(i, ...)  -- 2 args
+        options = options or {}
+        aconstraint() 
+    end
+end
+
+g:Daxes({0,10,10},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+g:Dconstraints(
+    'x+y<50', {color="orange", pattern=mypattern(-45)},
+    'x>0', {color="gray",pattern=mypattern(), anchor1d=0.7, dir=1, pos="W"},
+    'x<50', {dir=1, pos="E"},
+    'y>0',{color="magenta", pattern=mypattern(90), anchor1d=0.3},
+    'y<50',{},
+    'x+1.5*y>30', {color="green", label="$x+1.5y=30$", anchor1d=0.2},
+    'x+y>25', {color="red", pattern=mypattern(45), anchor1d=0.3}
+    )
+g:Show()
+\end{luadraw}
+\end{document}

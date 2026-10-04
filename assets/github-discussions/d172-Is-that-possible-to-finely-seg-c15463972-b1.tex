@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/172#discussioncomment-15463972 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=clip3d}
+    local g = graph3d:new{
+        window={-5,5,-5,5},
+        size={10,10},
+        viewdir={10,80},
+    }
+    Hiddenlines = true; Hiddenlinestyle = "dashed"; g:Linewidth(8)
+    local S = sphere(Origin,5,50,25) -- We slightly increase the number of facets for a more precise outline
+    local C = parallelep(M(-4,-4,-4),8*vecI,8*vecJ,8*vecK)
+    local C1 = clip3d(S,C) 
+    local outline = border(g:Classifyfacet(C1))  -- outline of the visible part of the sphere clipped by the cube
+    g:Dpath3d( polyline2path3d(outline), "ball color=Chocolate, even odd rule")
+    -- now we draw the visible circular facets
+    g:Dcircle3d(4*vecK,3,vecK,"fill=Chocolate!50!black"); 
+    g:Dcircle3d(4*vecJ,3,vecJ,"fill=Chocolate!50!black")
+    g:Dcircle3d(4*vecI,3,vecI,"left color=Chocolate!70!black, right color=Chocolate!50!black") 
+    g:Linewidth(6)
+    g:Dcircle3d(-4*vecJ,3,vecJ,Hiddenlinestyle); g:Dcircle3d(-4*vecK,3,vecK,Hiddenlinestyle) 
+    g:Show()
+\end{luadraw}
+\end{document}

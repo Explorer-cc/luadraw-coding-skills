@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/758597 (question 758581, score 5, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+\usepackage[]{siunitx}
+\sisetup{exponent-mode = engineering}%
+%https://tex.stackexchange.com/questions/758581/plotting-a-rational-function-in-tikz
+\begin{document}
+\begin{luadraw}{name=rational_function}
+local f = function(x) return x*(10125000+x*(-135000+x*(600-x))) / (2109375*(30000-200*x)) end
+local C = cartesian(f,0,160)
+local x1,x2,y1,y2 = getbounds(C)
+local dx, dy = (x2-x1)/15, (y2-y1)/15
+local g = graph:new{window={x1-dx,x2+dx,y1-dy,y2+dy}, bbox=true, margin={0,0,0.5,1.5}, size = {12,12,0}}
+siunitx = true; defaultlabelshift = 0; g:Labelsize("small")
+g:Daxes({0,20,(y2-y1)/10}, {limits={{0,x2+dx},{0,y2+dy}}, nbsubdiv={3,1},grid=true, arrows="-stealth"})
+g:Dpolyline(C, "line width=0.8pt, Navy")
+g:Show()
+\end{luadraw}
+\end{document}

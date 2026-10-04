@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/114#discussioncomment-14601285 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/734005/tikz-3d-graphic-background-foreground-intersections
+\begin{document}
+ \begin{luadraw}{name=answer}
+local g = graph3d:new{window={-2,8,-3,7},viewdir={20,70},size={10,10}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"; Hiddenlines = true;g:Linewidth(4);
+local a, b, h,k = 4,8,5,8
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+local F1 = getfacet(P,{1,3,4,6}) -- remove back and top faces of P
+local K, L = M(a/2,b/4,k),M(a/2,3*b/4,k) 
+g:Dscene3d(
+    g:addFacet(F1,{edge=true,color="Orange",edgewidth=4}),
+    g:addFacet({{K,E,F},{K,F,G,L},{L,G,H},{K,L,H,E}},{edge=true,color="Green",edgewidth=4})
+    )
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,34 @@
+% source: https://github.com/pfradin/luadraw/discussions/203#discussioncomment-15858811 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+
+\begin{luadraw}{name=csg_cylinder}
+local g = graph3d:new{viewdir={20,60},window3d={-5,5,-5,5,-4,4}, adjust2d=true, size={12,12}}
+g:Labelsize("small")
+require 'luadraw_povray'
+local P1 = {Origin, -vecI+vecJ}
+local P2 = {Origin, vecI+vecJ}
+local C = cylinder(-5*vecI,4,5*vecI,50,true)
+local I1 = g:Intersection3d(C,P1)
+local I2 = g:Intersection3d(C,P2)
+-- using povray
+g:Pov_new(); g:Pov_include("textures.inc")
+g:Pov_cylinder(-5*vecI,4,5*vecI,{ name="c1", render=false })
+g:Pov_cylinder(-5*vecI, 3, 5*vecI, {name="c2", render=false})
+g:Pov_difference( {"c1","c2"},{name="d1",render=false})
+g:Pov_cylinder(-5*vecJ,4,5*vecJ,{ name="c3", render=false })
+g:Pov_cylinder(-5*vecJ, 3, 5*vecJ, {name="c4", render=false})
+g:Pov_difference( {"c3","c4"},{name="d2",render=false})
+g:Pov_intersection({"d1","d2"}, {mytexture="texture{Silver_Metal}"})
+g:Pov_exec()
+-- drawing
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", drawbox=true})
+g:Pov_show() -- povray  image
+g:Dcylinder(-5*vecI,4,5*vecI, {color="teal", opacity=0.2})
+g:Dedges(I1, {hidden=true, color="red", width=8}); g:Dedges(I2, {hidden=true, color="red", width=8})
+g:Show()
+\end{luadraw}
+\end{document}

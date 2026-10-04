@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/751129 (question 745976, score 8, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/745976/plotting-a-cylinder-and-a-plane-and-their-intersection
+\begin{document}
+\begin{luadraw}{name=plane_cylinder}
+local g = graph3d:new{window3d={-5,5,-5,5,-1,7},window={-5.5,4.5,-3,7.5},viewdir={70,60},size={12,12}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local P = planeEq(1,0,1,-4)
+local C = cylinder(-vecK,math.sqrt(2),6*vecK,100,true)
+local I = g:Intersection3d(C,P)
+local I2 = g:Outline(C) -- Just to see the outline of the cylinder.
+g:Dscene3d(
+    g:addPlane(P,{edge=true,color="LightGray"}),
+    g:addPoly(C,{color="orange",contrast=.5}),
+    g:addPolyline( concat(I2.visible,I2.hidden) ), -- comment me if you don't want to see the outline of the cylinder.
+    g:addAxes(Origin,{arrows=1})
+)  
+g:Dedges(I,{color="ForestGreen",width=8})
+g:Show() 
+\end{luadraw}
+\end{document}

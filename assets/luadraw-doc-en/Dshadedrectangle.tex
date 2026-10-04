@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-shadedforms.tex (demo: Shaded rectangle)
+\begin{luadraw}{name=Dshadedrectangle}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{window={-4,6,-5.5,5.5}, size={10,10}, bbox=false}
+require 'luadraw_shadedforms'
+require 'luadraw_fields'
+local pal = require 'luadraw_palettes'
+g:Labelsize("small")
+local f = function(x,y) return {math.cos(x+y), x} end -- vector field
+local Nf = function(x,y) local A = f(x,y); return cpx.abs(Z(A[1],A[2])) end -- modulus of f(x,y)
+g:Dshadedrectangle(-4,4,-5,5, pal.Picnic, {values=Nf, bar="right", baroptions={addvalues={0.5,1.5,2.5,3.5}}})
+g:Dvectorfield(f,{view={-4,4,-5,5},draw_options="-stealth"})
+g:Dgradbox({Z(-4,-5),Z(4,5),1,1}, {title="vector field $f(x,y)=(\\cos(x+y),x)$"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/748551 (question 600976, score 4, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=cut_cone_Dscene3d}
+local h = 5
+local R = 3
+local myline = 6
+local g = graph3d:new{window={-R-5.5,R+5.5,-h-1,h+1}, viewdir={120,60}, size={12,12}}
+g:Linejoin("round"); g:Linewidth(myline)
+Hiddenlinestyle = "dashed"
+local C1 = cone(Origin,h*vecI,R,100,false) 
+local C2 = cone(Origin, -h*vecI,R,100,false)
+local P1 = {M(0,0,.5),vecK} -- plan de coupe
+local I1 = g:Intersection3d(C1,P1)
+local I2 = g:Intersection3d(C2,P1) 
+Hiddenlines = true
+g:Dscene3d(
+    g:addWall({Origin,vecI}), -- to separate the two cones and avoid to much facet cutting
+    g:addPlane(P1, {color="WhiteSmoke", scale=1.25,opacity=0.5,edgecolor="Navy",edgewidth=12, edge=true}),    
+    g:addPoly(C1, {color="lightgray", backcull=true}),
+    g:addPoly(C2, {color="lightgray", backcull=true}),
+    g:addCircle(h*vecI,R,vecI,{width=8}), g:addCircle(-h*vecI,R,vecI,{width=8})
+    )
+g:Lineoptions("solid","Navy",myline)
+g:Dedges(I1,{hidden=true})
+g:Dedges(I2,{hidden=true})
+
+g:Show()
+\end{luadraw}
+\end{document} 

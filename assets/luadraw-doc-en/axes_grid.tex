@@ -1,0 +1,11 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Example with axes with grid)
+\begin{luadraw}{name=axes_grid}
+local ld = luadraw
+local g = ld.graph:new{window={-6.5,6.5,-3.5,3.5}, size={10,10,0}}
+local i, pi, a = ld.cpx.I, math.pi, math.sqrt(2)
+local f = function(x) return 2*a*math.sin(x) end
+g:Labelsize("footnotesize"); g:Linewidth(8)
+g:Daxes({0,pi/2,a},{labeltext={"\\pi","\\sqrt{2}"}, labelden={2,1},nbsubdiv={1,1},grid=true,arrows="->"})
+g:Lineoptions("solid","Crimson",12); g:Dcartesian(f, {x={-2*pi,2*pi}})
+g:Show()
+\end{luadraw}

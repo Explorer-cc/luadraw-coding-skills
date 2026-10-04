@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/246#discussioncomment-16865194 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+\documentclass[border = 3pt]{standalone}
+
+\usepackage{luadraw}
+
+\begin{document}
+
+\begin{luadraw*}{}
+local ld = luadraw
+
+local graphview = ld.graph:new{
+  window = {-7, 7, -5, 5},
+  bbox   = false
+}
+
+graphview:Daxes(
+  {0, 1, 1},
+  {
+    arrows = "->",
+    grid   = true
+  }
+)  -- < No more allowed!
+
+graphview:Show()
+\end{luadraw*}
+
+\end{document}

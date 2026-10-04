@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/763919 (question 518235, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/518235/truncated-icosahedron-in-tikz-3dplot
+\begin{document}
+\begin{luadraw}{name=truncated_icosahedron }
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+
+local g = ld.graph3d:new{viewdir={30,60}, size={10,10}}
+local poly = require 'luadraw_polyhedrons'
+local P, V, E, F1, F2 = poly.truncatedicosahedron(M(0,0,0), M(0,0,4), true)
+-- P = polyhedron, V = vertices, E = edges, F1 = facets type 1, F2 = facets type 2
+g:Dscene3d(
+    g:addFacet(F1, {color="Crimson", opacity=0.7}),
+    g:addFacet(F2, {color="darkgray", opacity=0.7}),
+    g:addPolyline(E, {color="Gold", width=8})
+    )
+g:Show() 
+\end{luadraw}
+\end{document}

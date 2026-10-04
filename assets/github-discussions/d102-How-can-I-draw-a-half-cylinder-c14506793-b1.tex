@@ -1,0 +1,20 @@
+% source: https://github.com/pfradin/luadraw/discussions/102#discussioncomment-14506793 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=half_cylinder}
+local g = graph3d:new{size={10,10},viewdir={40,60}}
+Hiddenlinestyle = "dashed"
+local l, r, h = 3,2, 4
+local A,B,C,D,S = M(r,-l,0), M(r,l,0),M(-r,l,0),M(-r,-l,0), M(0,0,h)
+local Cyl = cylinder(-l*vecJ,r,l*vecJ,50)
+Cyl = cutpoly(Cyl, {Origin,-vecK})
+g:Dpoly(Cyl, {mode=mShadedOnly, color="cyan", backcull=true}) -- half cylinder without edges
+g:Dpolyline3d( g:Outline(Cyl).visible) 
+g:Dpoly(pyramid({A,B,C,D},S,true), {mode=mShadedHidden,color="cyan"})
+g:Darc3d(B,l*vecJ,C,r,1,vecJ)
+g:Darc3d(A,-l*vecJ,D,r,1,vecJ,Hiddenlinestyle)
+g:Show()
+\end{luadraw}
+\end{document}

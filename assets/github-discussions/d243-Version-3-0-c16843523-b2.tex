@@ -1,0 +1,80 @@
+% source: https://github.com/pfradin/luadraw/discussions/243#discussioncomment-16843523 (pfradin, block 2)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+
+\newcommand*{\shortcuts}{%definition of shortcuts
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+}%
+
+\begin{document}
+\begin{luadraw}{name=cut_cylinder_and_move_one}
+-- we call the shortcuts:
+\shortcuts
+
+local h = 4
+local R = 2.5
+local g = ld.graph3d:new{ -- graph3d is in luadraw spacename
+    window={-R, R+1, -2, 5},
+    viewdir={100, 60},
+    size={12, 12}
+}
+
+ld.Hiddenlinestyle = "dashed"
+local C = ld.cylinder(Origin, h*vecK, R, 500, false)
+local P = {M(0,0,2), vecI + vecK} 
+local I = g:Intersection3d(C, P)
+local Left, Right = ld.cutpoly(C, P)
+local vector = -1*vecI
+local I_combined = ld.concat(I.visible, I.hidden) 
+local I_shifted = ld.shift3d(I_combined, vector)
+g:Dscene3d(
+    g:addWall(P),
+    g:addPoly(Left, {color="Orange", backcull=true}),
+    g:addPoly(ld.shift3d(Right, vector), {color="Orange"}),
+    g:addPolyline(ld.concat(I_combined, I_shifted), {width=4, hidden=true, color="Navy"})
+)
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=cut_cone_renamed}
+-- we call the shortcuts:
+\shortcuts
+
+local h = 5
+local R = 4
+local g = ld.graph3d:new{
+    window={-1,R+3,-h-3,h-2},
+    viewdir={120, 60},
+    size={12, 12}
+}
+ld.Hiddenlinestyle = "dashed"
+
+local C1 = ld.cone(Origin, -h*vecI, R, 300, false)
+local P1 = {M(0,0,R/2), vecK} 
+
+local I1 = g:Intersection3d(C1,P1)
+local Bottom, Above, section = ld.cutpoly(C1, P1)
+local vector = -3*vecK
+
+local A = M(-h, 0, 0) 
+local y_val = math.sqrt(R*R - (R/2)*(R/2))
+local B = M(-h, y_val, R/2)  
+local C = M(-h, -y_val, R/2) 
+local I_combined = ld.concat(I1.visible, I1.hidden)
+local I_shifted = ld.shift3d(I_combined, vector)
+g:Dscene3d(
+    g:addWall(P1), 
+    g:addPoly(Bottom, {color="Orange", backcull=true}),
+    g:addPoly(ld.shift3d(Above, vector), {color="Orange"}),
+    g:addPolyline(ld.concat(I_combined, I_shifted), {width=6, hidden=true, color="Navy"}),
+    g:addArc(B, A, C, R, 1, vecI, {color="Navy", width=6, hidden=true}),
+    g:addArc( ld.shift3d(B, vector), ld.shift3d(A, vector), ld.shift3d(C, vector), R, -1, vecI, {color="Navy", width=6, hidden=true})
+)
+g:Dpolyline3d( ld.shift3d(section,vector),"pattern = north west lines")
+g:Show()
+\end{luadraw}
+\end{document} 

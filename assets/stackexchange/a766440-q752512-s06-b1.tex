@@ -1,0 +1,74 @@
+% source: https://tex.stackexchange.com/a/766440 (question 752512, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/752512/help-with-drawing-stress-tensor-in-cylindrical-coordinates-in-tikz
+\begin{document}
+\begin{luadraw}{name=cylindrical_coordinates}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK, Mc = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.Mc
+local pi = math.pi
+local g = ld.graph3d:new{window={-3,5,-3,4}, viewdir={"central",37,67},size={12,12}}
+require 'luadraw_decorations'
+local z, dz = 2.5, 1
+local t, dt = 50*ld.deg, 22*ld.deg
+local r, dr = 3.25, 1.5
+local A,B,C,D = Mc(r,t,z), Mc(r+dr,t,z), Mc(r+dr,t+dt,z), Mc(r,t+dt,z)
+local E,F,G,H = Mc(r,t,z+dz), Mc(r+dr,t,z+dz), Mc(r+dr,t+dt,z+dz), Mc(r,t+dt,z+dz)
+local Ap,Bp,Cp,Dp = ld.pxy(A), ld.pxy(B), ld.pxy(C), ld.pxy(D)
+local left = {A,B,F,E,"l","cl"}
+local front = {B,z*vecK,C,r+dr,1,"ca",G,"l",(z+dz)*vecK,F,r+dr,1,"ca","cl"}
+local top = {F,(z+dz)*vecK,G,r+dr,1,"ca",H,"l",(z+dz)*vecK,E,r,1,"ca","cl"}
+local bottom = {B,z*vecK,C,r+dr,1,"ca",D,"l",z*vecK,A,r,1,"ca","cl"}
+local C1,C2,C3,C4,C5,C6 = Mc(r,t+dt/2,z+dz/2), (H+G+C+D)/4, (A+B+C+D)/4, (A+B+F+E)/4, Mc(r+dr,t+dt/2,z+dz/2), (E+F+G+H)/4
+local N1,N2,N3,N4,N5,N6 = Mc(1,t+pi,0), Mc(1,t+pi/2,0), -vecK, Mc(1,t-pi/2,0), Mc(1,t,0), vecK
+local d = 0.6
+local Ur,Ut,Uz = Mc(d,t,0), Mc(d,t+pi/2,0), d*vecK
+local edge, base, rcolor, tcolor, zcolor = "gray", "Gold", "DarkBlue", "ForestGreen", "DarkRed"
+-- drawing
+g:Dpolyline3d({{Origin,4*vecK},{Origin,5*vecJ},{Origin,4*vecI}}, "thick,-Latex")
+g:Linewidth(6)
+g:Dpath3d({Origin, Bp,"l",Origin,Cp,r+dr,1,"ca","cl", Ap,"m", Origin, Dp,r,1,"ca"}, edge)
+g:Dpolyline3d({{z*vecK,A,Ap},{z*vecK,D,Dp},{(z+dz)*vecK,E},{(z+dz)*vecK,H},{A,E},{D,H},{Bp,B},{Cp,C}
+}, edge)
+--back
+--g:Dballdots3d({C1,C2,C3},nil,0.5)
+g:Dpolyline3d({{C1,C1-3*Ur/4},{C1-Ut/4,C1+3*Ut/4},{C1+Uz/4,C1-3*Uz/4}}, rcolor..",thick,-stealth")
+g:Dpolyline3d({{C2-Ur/4,C2+3*Ur/4},{C2,C2+3*Ut/4},{C2-Uz/4,C2+3*Uz/4}}, tcolor..",thick,-stealth") 
+g:Dpolyline3d({{C3-Ur/4,C3+3*Ur/4},{C3+Ut/4,C3-3*Ut/4},{C3,C3-3*Uz/4}}, zcolor..",thick,-stealth")
+-- facets
+g:Dpath3d(bottom, edge)
+local color = g:Adjust_color({A,B,F}, base,1,true)
+g:Dpath3d(left, edge..',fill='..color..', fill opacity=0.8')
+color = g:Adjust_color({B,C,G}, base,1,true)
+g:Dpath3d(front, edge..',fill='..color..', fill opacity=0.8')
+color = g:Adjust_color({E,F,G}, base,1,true)
+g:Dpath3d(top, edge..',fill='..color..', fill opacity=0.8')
+-- front
+--g:Dballdots3d({C4,C4,C5},nil,0.5)
+g:Linewidth(8); g:Arrows("-stealth"); g:Labelsize("small")
+g:Linecolor(tcolor); g:Labelcolor(tcolor)
+g:Dseg3d({C4-Ur/4,C4+3*Ur/4}, {label="$\\sigma_{\\theta r}$", anchor1d=1, pos="N"})
+g:Dseg3d({C4,C4-3*Ut/4}, {label="$\\sigma_{\\theta \\theta}$", anchor1d=0.9, pos="W"})
+g:Dseg3d({C4+Uz/4,C4-3*Uz/4}, {label="$\\sigma_{\\theta z}$", anchor1d=1, pos="E"})
+
+g:Linecolor(rcolor); g:Labelcolor(rcolor)
+g:Dseg3d({C5,C5+3*Ur/4}, {label="$\\sigma_{r r}$", anchor1d=0.9, pos="S"})
+g:Dseg3d({C5-Ut/4,C5+3*Ut/4}, {label="$\\sigma_{r \\theta}$", anchor1d=0.9, pos="E"})
+g:Dseg3d({C5-Uz/4,C5+3*Uz/4}, {label="$\\sigma_{r z}$", anchor1d=0.9, pos="E"})
+
+g:Linecolor(zcolor); g:Labelcolor(zcolor)
+g:Dseg3d({C6-Ur/4,C6+3*Ur/4}, {label="$\\sigma_{z r}$", anchor1d=1, pos="W"})
+g:Dseg3d({C6-Ut/4,C6+3*Ut/4}, {label="$\\sigma_{z \\theta}$", anchor1d=0.9, pos="E"})
+g:Dseg3d({C6,C6+3*Uz/4}, {label="$\\sigma_{z z}$", anchor1d=0.9, pos="N"})
+
+g:Linewidth(4); g:Linecolor(edge); g:Labelcolor("black")
+g:Darc3d(vecI,Origin, Ap,1.5,1, {label="$\\theta$", pos="center", dist=1.8})
+g:Darc3d(Ap,Origin, Cp,1.5,1, {label="$d\\theta$", pos="center", dist=1.8})
+g:Dlabel3d( "$z$",z*vecK,{pos="W"}, "$z+dz$",(z+dz)*vecK,{}, "$r$",3*Ap/4,{}, "$dr$",(Ap+Bp)/2,{})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/207#discussioncomment-15868700 (pfradin, block 1)
+\documentclass{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name=angular-gradient2}
+require 'luadraw_palettes'
+local g = graph:new{size={10,10}, margin={0,0,0,0}, bbox=false}
+local R, r = 4,1
+local c, d, n, a, b = -r, -R, 100
+local dtheta = 360/n
+local colors = getpalette(palPicnic,n)
+for k = 1, n do
+    a, b = c, d; 
+    c, d = table.unpack( rotate({c,d},dtheta) )
+    g:Dpolyline({a,b,d,c},true,"color="..colors[k]..",fill="..colors[k])
+end
+g:Show()
+\end{luadraw}
+
+\end{document}

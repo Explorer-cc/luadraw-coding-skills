@@ -1,0 +1,17 @@
+% source: https://github.com/pfradin/luadraw/discussions/219#discussioncomment-16020229 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+
+\begin{luadraw}{name=descartes_curve}
+    local g = graph:new{window={-5, 5, -5, 5}}
+    g:Daxes({0,1,1}, {arrows="-Stealth", legend = {"$x$", "$y$"}})
+    local a = 1
+    local descartes_curve = function(t)
+        return Z(3*a*t/(1+t^3), 3*a*t^2/(1+t^3))
+    end
+    g:Dparametric(descartes_curve, {t={-50, 50}, discont=true, nbdiv=10, draw_options="violet, thick, line cap=round"})
+    g:Show()
+\end{luadraw}
+\end{document}

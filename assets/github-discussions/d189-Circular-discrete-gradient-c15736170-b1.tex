@@ -1,0 +1,39 @@
+% source: https://github.com/pfradin/luadraw/discussions/189#discussioncomment-15736170 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+\documentclass[12pt]{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name = circular-gradient}
+local g = graph:new{
+  window = {-5, 5, -5, 5},
+  bbox   = false
+}
+
+g:Linewidth(1)
+
+local nb_circles = 100
+
+local dr = 5 / nb_circles
+local r  = 5
+
+for k = nb_circles,1,-1 do
+  local color = palette(
+    palRainbow,
+    (k - 1) / (nb_circles - 1)
+  )
+
+ g:Dcircle(0, r, 
+   "color="..color..",fill="..color
+   )
+  r = r - dr
+end
+
+g:Show()
+\end{luadraw}
+
+\end{document}

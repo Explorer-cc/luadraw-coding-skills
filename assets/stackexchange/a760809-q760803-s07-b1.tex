@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/760809 (question 760803, score 7, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/760803/trig-label-issues-on-graph
+\begin{document}
+\begin{luadraw}{name=trig_label}
+local pi, sin = math.pi, math.sin
+local g = graph:new{ window={-9*pi/16,33*pi/16,-5.25,3.5}, 
+    size={12,12,8/pi}, -- ratio = xscale / yscale = 8/pi
+    pictureoptions = "every node/.append style={fill=white,inner sep=1pt}"
+    }
+defaultlabelshift = 0
+defaultlegendsep = 0
+g:Daxes({0,pi/2,1}, {labeltext={"\\pi",""}, labelden={2,1}, nbsubdiv={3,0}, 
+    grid=true, arrows="-latex", gridcolor="lightgray", legend={"$x$","$y$"}, 
+    legendstyle={"E","N"}, legendpos={1,1},  originpos={"none","none"} })
+g:Dcartesian( function(x) return 3*sin(2*x-pi/2) end, 
+    {x={-pi/2,2*pi}, nbdots=80, draw_options="line width=1.2, ForestGreen"})
+g:Dlabel("$O$",0,{pos="NW", node_options="fill=none"})
+g:Show()
+\end{luadraw}
+\end{document}

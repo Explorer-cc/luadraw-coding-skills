@@ -1,0 +1,4 @@
+# source: https://github.com/pfradin/luadraw/discussions/325#discussioncomment-18292587 (pfradin, block 1)
+print(pt3d.angle(B-P,A-P)*ld.rad)
+print(pt3d.angle(B-P,C-P)*ld.rad)
+print(pt3d.angle(C-P,A-P)*ld.rad)

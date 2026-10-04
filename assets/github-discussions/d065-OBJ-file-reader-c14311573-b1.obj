@@ -1,0 +1,5 @@
+# source: https://github.com/pfradin/luadraw/discussions/65#discussioncomment-14311573 (pfradin, block 1)
+v 1 0 0
+v 0 1 0
+v 0 1e-12 1
+f 1 2 3

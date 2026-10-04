@@ -1,0 +1,63 @@
+% source: https://github.com/pfradin/luadraw/discussions/137#discussioncomment-15053276 (pfradin, block 1)
+\documentclass{article}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+function draw(theta,phi)
+    local g = graph3d:new{window={-8,8,-8,8},bbox=false,viewdir={theta,phi},size={8,8},border=true}
+    Hiddenlinestyle = "dashed"; Hiddenlines = true
+    local a,b, h = 6,6,10
+    local A,B,C = M(0,0,0),M(a,a,0) ,M(0,b,0)
+    local P = prism({A,B,C},h*vecK+2*vecJ)
+    local A,B,C,D,E,F = table.unpack(P.vertices)
+    local I,J,M,N = (A+F)/2,(E+C)/2,(A+C)/2,(D+E)/2
+    local P = {A, pt3d.prod(A-F,A-B)}
+    local d={C,N-C}
+    local H =interDP(d,P) 
+    local L = {A,B,C,D,E,F}
+    local G = isobar3d(L)
+    g:Shift3d(-G) -- So that the center of gravity of the figure is at the origin, because when you change viewdir, you rotate around the origin.
+
+    g:Dscene3d(
+        g:addFacet(cvx_hull3d(L), {color="Orange",edge=true}),
+        g:addPolyline({{C,D},{A,F},{C,E},{B,F},{I,J},{C,N}})
+        )
+    g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{pos="N"},"$E$",E,{pos="N"}, "$F$",F,{}, "$I$",I,{pos="S"},"$J$",J,{pos="E"},"$M$",M,{pos="N"},"$N$",N,{pos="N"},"$H$",H,{pos="N"})
+    g:Ddots3d({A,B,C,D,E,F,I,J,M,N,H},"scale=.75")
+    g:Sendtotex()
+end
+\end{luacode*}
+\def\frame#1#2{\directlua{draw(#1,#2)}}%
+
+\begin{document}
+
+\begin{figure}[h]
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\frame{10}{70}
+\caption{Frame 1}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\frame{70}{70}
+\caption{Frame 2}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[h]
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\frame{140}{70}
+\caption{Frame 3}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.45\textwidth}
+\centering
+\frame{240}{70}
+\caption{Frame 4}
+\end{minipage}
+\end{figure}
+
+\end{document} 

@@ -1,0 +1,83 @@
+% source: https://github.com/pfradin/luadraw/discussions/104#discussioncomment-14977791 (pfradin, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usetikzlibrary{shadings}  % use of a particular shading
+%https://tex.stackexchange.com/questions/751568/illustrating-the-complex-gamma-function-in-3d
+\begin{document}
+\begin{luadraw}{name=gamma_3d, exec=true,auto=false}
+local g = graph3d:new{window3d={-5,5,-5,5,0,6}, adjust2d=true,size={10,10},viewdir={-120,60}}
+local colors, arguments, cle = {}, {} -- table for the vertices color and the arguments
+
+local gamma = function(x,y) -- approximation of gamma
+-- $\Gamma(z) = \sum_{k=0}^{+\infty} \frac{(-1)^k}{k!(z+k)} + \int_1^{+\infty} t^{z-1}e^{-t}dt$
+-- $\Gamma(z) = \sum_{k=0}^{+\infty} \frac{2k(z+2k+1)+1}{(2k+1)!(z+2k)(z+2k+1)} + \int_1^{+\infty} t^{z-1}e^{-t}dt$
+    local den, z, p = 1, Z(x,y), 0
+    local f, f1 = z, z+1
+    local S = 1/(f*f1)
+    for k = 1,10 do
+        p = p+2; f = f+2; f1 = f1+2 -- p=2k, f=z+2k, f1=z+2k+1
+        den = den*p*(p+1) -- den=(2k+1)!
+        S = S + (p*f1+1)/(den*f*f1)
+    end
+    return S + int( function(t) return cpx.exp((z-1)*math.log(t)-t) end, 1,10)
+end
+
+local key = function(x,y) -- key calculus for the table arguments
+    return x.."/"..y
+end
+
+local rainbow = {Cyan,DodgerBlue,Magenta,Red,Orange,Gold,LimeGreen}
+
+local  p = function(x,y) -- surface parameterization
+    local z = gamma(x,y)
+    local arg = cpx.arg(z)
+    cle = key(x,y)
+    arguments[cle] = arg -- save argument
+    colors[cle] = palette(rainbow, (arg+math.pi)/(2*math.pi)) -- color of the vertice
+    return M(x,y, cpx.abs(z))
+end
+
+local colorpos3 = function(f)
+  local miniarg = math.huge
+  for _ , A in ipairs(f) do
+    cle = key(A.x, A.y)
+    local arg = arguments[cle]
+    if arg ~= nil then
+      if miniarg > arg then 
+        miniarg = arg
+      end
+    end
+end
+  return (miniarg + math.pi) / (2*math.pi)
+end
+
+local s = surface(p, -4.25,5,-4,4,{50,50})
+s = cutfacet(s,{6*vecK,-vecK})  -- to keep only z <= 6
+s = g:Sortfacet(s)
+   
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="LightGray" })
+g:Lineoptions(nil,"gray",1)
+for _,f in ipairs(s) do
+    local f1 = table.copy(f)
+    table.sort(f1, function(A,B) return (A.x<B.x) or ((A.x==B.x) and (A.y<B.y)) end ) -- we sort the facet vertices
+    color = {}
+    for _,A in ipairs(f1) do
+        cle = key(A.x,A.y)
+        local col = colors[cle]
+        if col == nil then
+            p(A.x,A.y)
+            col = colors[cle]
+            if col == nil then col = palette(rainbow,colorpos3(f)) end
+        end
+        table.insert(color, col)
+    end
+    local options = "upper left="..color[1]
+    if #color > 1 then options = options..",upper right="..color[2] end
+    if #color > 2 then options = options..",lower left="..color[3] end
+    if #color > 3 then options = options..",lower right="..color[4] end
+    g:Dpolyline3d(f,true,options)
+end
+g:Show()
+\end{luadraw}
+\end{document}

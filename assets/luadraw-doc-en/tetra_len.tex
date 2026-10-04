@@ -1,0 +1,20 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-6-Geometric-Constructions.tex (demo: A tetrahedron with fixed edge lengths)
+\begin{luadraw}{name=tetra_len}
+local ld = luadraw
+local g = ld.graph3d:new{window={-4,4,-4,4},margin={0,0,0,0},viewdir={25,65},size={10,10}}
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+require 'luadraw_spherical'
+local R = 4
+local A,B,C,D = ld.tetra_len(R,R,R,R,R,R)
+local T = ld.tetra(A,B-A,C-A,D-A)
+g:Define_sphere({radius=R})
+g:DSpolyline( ld.facetedges(T), {color="DarkGreen"})
+g:DSbigcircle( {B,C},{color="Blue"} )
+g:DSbigcircle( {B,D},{color="Blue"} )
+g:DSbigcircle( {C,D},{color="Blue"}  )
+g:DSlabel("$R$",(2*A+C)/3,{pos="S"})
+g:Dspherical()
+g:Ddots3d({A,B,C,D})
+g:Dlabel3d("$A$",A,{pos="S"},"$B$",B,{pos="SW"},"$C$",C,{},"$D$",D,{pos="N"} )
+g:Show()
+\end{luadraw}

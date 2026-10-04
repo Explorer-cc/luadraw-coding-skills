@@ -1,0 +1,19 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Example with Dcontour)
+\begin{luadraw}{name=Dcontour}
+local ld = luadraw
+local cpx = ld.cpx
+local g = ld.graph:new{window={-1,6.5,-1.5,11},size={10,10,0}}
+local i, sin, cos = cpx.I, math.sin, math.cos
+local f = function(x,y) return (x+y)/(2+cos(x)*sin(y)) end
+local Lz = ld.range(1,10) -- levels to be drawn
+local Colors = ld.getpalette(ld.palRainbow,10) -- 10 evenly distributed colors in the palRainbow palette
+g:Dgradbox({0,5+10*i,1,1},{legend={"$x$","$y$"}, grid=true, title="$z=\\frac{x+y}{2+\\cos(x)\\sin(y)}$"})
+g:Linewidth(12); g:Dcontour(f,Lz,{view={0,5,0,10}, colors=Colors})
+for k = 1, 10 do
+    local y = (2*k+4)/3*i
+    g:Dseg({5.25+y,5.5+y},1,"color="..Colors[k])
+    g:Labelcolor(Colors[k])
+    g:Dlabel("$z="..k.."$",5.5+y,{pos="E"})
+end
+g:Show()
+\end{luadraw}

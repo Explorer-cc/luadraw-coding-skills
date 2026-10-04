@@ -1,0 +1,20 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-fields.tex (demo: On a sphere)
+\begin{luadraw}{name=surface-quiver2}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Ms, Z, sin, cos, pi = pt3d.M, pt3d.Ms, cpx.Z, math.sin, math.cos, math.pi
+require 'luadraw_fields'
+local surface = function(u,v) return Ms(4,u,v) end
+local field = function(u,v) return {cos(v)/(1-cos(u)), sin(v)/(1-cos(u))} end
+local g = ld.graph3d:new{ window={-5, 5.5, -5.5, 5}, viewdir={65, 60}, margin=0, size={10, 10} }
+g:Dsphere( M(0,0,0), 4, {color="orange", mode=ld.mBorder})
+g:Dsurfacefield(surface, field, {
+    domain = {pi, -pi, 0, pi},
+    grid = {37,20},
+    color = "Navy",
+    width = 6,
+    surface_options = {backcull=true, opacity=0}
+    })
+g:Dlabel("$f(u,v)= (\\frac{\\cos(v)}{1-\\cos(u)},\\frac{\\sin(v)}{1-\\cos(u)})$", Z(0,-4.5), {pos="S"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,18 @@
+% source: https://tex.stackexchange.com/a/765929 (question 517760, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/517760/pgfplot-renders-jagged-polynomial
+\begin{document}
+\begin{luadraw}{name=polynom}
+local ld = luadraw
+local g = ld.graph:new{ window={-0.25,4.5,-0.25,1.75}, size={12,12,0} }
+local f = function(x) -- Horner's scheme
+    return x*(1.5 + x*(3.83333 +x*(-15.0104 + x*(22.7454 +x*(-19.2028 + x*(9.37731 +x*(-2.5978 + x*(0.377315 - 0.0222801*x)))))))) 
+end
+g:Daxes({0,1,0.5}, {arrows="-Latex", nbsubdiv={1,0}})
+g:Dcartesian(f, {x={0,4}, draw_options="red, line width=0.8"})
+g:Show()
+\end{luadraw}
+\end{document}

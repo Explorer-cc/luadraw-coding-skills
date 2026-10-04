@@ -1,0 +1,39 @@
+% source: https://github.com/pfradin/luadraw/discussions/319#discussioncomment-18204595 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=two_cylinders_intersection}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, K = pt3d.M, pt3d.Mc, pt3d.Origin, pt3d.vecK
+
+local g = ld.graph3d:new{window={-3.5,3.5,-4,4}, viewdir={-30,60}, size={12,12}, bg="lightgray"}
+local A1, B1, r1 = M(0, 0, -4), M(0, 0, 4), 1
+local A2, B2, r2 = M(-2, -2, -2), M(2, 8/5, 2), 4/5
+local C1 = ld.cylinder(A1,r1,B1,80)
+local C2 = ld.cylinder(A2,r2,B2,80)
+local C3 = ld.border( ld.clip3d(C2,C1) )
+local function curve_on_cylinder(curve)
+    local U2 = B2-A2
+    local U1 = B1-A1
+    local visible_function
+        visible_function = function(N)
+            local I2 = ld.dproj3d(N,{A2,U2})
+            local I1= ld.dproj3d(N,{A1,U1})
+            return (pt3d.dot(N-I2,g.Normal) >= 0) and (pt3d.dot(N-I1,g.Normal) >= 0)
+        end
+    return ld.split_points_by_visibility(curve,visible_function)
+end
+
+local Iv, Ih = curve_on_cylinder(C3) -- visible, hidden
+g:Dscene3d(
+    g:addPoly(C1, {color="LightBlue", contrast=0.5, backcull=true}),
+    g:addPoly(C2, {color="orange", contrast=0.5, backcull=true})
+)
+g:Dpolyline3d(Iv, "Navy,line width=0.8")
+g:Dpolyline3d(Ih, "dashed, Navy,line width=0.6")
+g:Show()
+\end{luadraw}
+\end{document}

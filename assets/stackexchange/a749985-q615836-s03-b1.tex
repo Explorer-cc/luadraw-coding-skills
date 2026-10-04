@@ -1,0 +1,84 @@
+% source: https://tex.stackexchange.com/a/749985 (question 615836, score 3, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/615836/how-to-draw-this-cube-with-holes
+\begin{document}
+\begin{luadraw}{name=Menger}
+local m = 2 -- two iterations
+local d = 3^m
+local g = graph3d:new{window3d={-0.5,d,-0.5,d,-0.5,d},adjust2d=true, viewdir={20,70}, bg="LightGray", size={10,10}}
+g:Linejoin("round"); g:Linewidth(8); Hiddenlines = false; Hiddenlinestyle = "noline"
+local OutDot = function(A) --to test which facets to exclude
+    local ok = true
+    local x,y,z,u,v,w = A.x, A.y, A.z
+    for k = 1, m do
+        u = x%3; v = y%3; w = z%3
+        ok = ok and ((u~=1) or (v~=1)) and ((u~=1) or (w~=1)) and ((v~=1) or (w~=1))
+        if not ok then return true end
+        x = x//3; y = y//3; z = z//3
+    end
+    return not ok
+end
+local A1,A2,A3,A4,A5,A6,A7,A8 = Origin,M(d,0,0),M(d,d,0),M(0,d,0),M(0,0,d),M(d,0,d),M(d,d,d),M(0,d,d)
+local S = {A1,A2,A3,A4,A5,A6,A7,A8,(A1+A2)/2,(A3+A2)/2,(A3+A4)/2,(A1+A4)/2,(A5+A6)/2,(A7+A6)/2,(A7+A8)/2, (A5+A8)/2,(A1+A5)/2,(A2+A6)/2,(A3+A7)/2,(A4+A8)/2} -- Centers of homotheties
+local F, L = {Origin}, {} -- Origin is the base point of the first cube, we calculate the others
+for k = 1, m do
+    L = {}
+    for _,K in ipairs(S) do
+        insert(L,scale3d(F,1/3,K))
+    end
+    F = L
+end
+local Facet,B = {} -- we now calculate the essential facets, to eliminate the superfluous ones
+for _,A in ipairs(F) do
+    B = A-vecI
+    if (A.x==0) or OutDot(B) then
+        table.insert(Facet, {A,A+vecK,A+vecJ+vecK,A+vecJ})
+    end
+    B = A-vecJ
+    if (A.y==0) or OutDot(B) then
+        table.insert(Facet, {A,A+vecI,A+vecI+vecK,A+vecK})
+    end
+    B = A-vecK
+    if (A.z==0) or OutDot(B) then
+        table.insert(Facet, {A,A+vecJ,A+vecI+vecJ,A+vecI})
+    end
+    B = A+vecI
+    if (B.x==d) or OutDot(B) then
+        table.insert(Facet, {B,B+vecJ,B+vecJ+vecK,B+vecK})
+    end
+    B = A+vecK
+    if (B.z==d) or OutDot(B) then
+        table.insert(Facet, {B,B+vecI,B+vecI+vecJ,B+vecJ})
+    end
+    B = A+vecJ
+    if (B.y==d) or OutDot(B) then
+        table.insert(Facet, {B,B+vecK,B+vecI+vecK,B+vecI})
+    end
+end
+local Edges = {}  -- now we determine the edges that need to be drawn.
+for x = 0, 2 do
+    for y = 0, 2 do
+        for z = 0, 2 do
+            if ((x==1) and (y==1)) or ((x==1) and (z==1)) or ((z==1) and (y==1)) then
+                insert(Edges, facetedges( parallelep(M(x,y,z),vecI,vecJ,vecK) ) )
+            end
+        end
+    end
+end
+-- now Edges contains the edges to draw for a single iteration in a cube of side 3.
+Edges = scale3d(Edges,d/3)
+for k = 2,m do
+    L = {}
+    for _,K in ipairs(S) do
+        insert(L,scale3d(Edges,1/3,K))
+    end
+    insert(Edges,L)
+end
+g:Dscene3d( g:addFacet(Facet,{backcull=true, color="Crimson"}), g:addPolyline(Edges,{color="Gold"}) )
+g:Dpoly(parallelep(Origin,d*vecI,d*vecJ,d*vecK),{mode=0,edgecolor="Gold"})
+g:Show()
+\end{luadraw}
+\end{document}

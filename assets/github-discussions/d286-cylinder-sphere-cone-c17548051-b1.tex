@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/286#discussioncomment-17548051 (pfradin, block 1)
+\documentclass[border=3pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=cylinder-sphere-cone_01}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M,O,vecK = pt3d.M, pt3d.Origin,  pt3d.vecK
+local g = ld.graph3d:new{window={-6,2.5,-2,8},viewdir={70,70},size={12,12}}
+ld.Hiddenlinestyle= "dashed"
+require 'luadraw_spherical'
+local R = 2
+local h = 4*R
+local dir, angle = vecK, 30
+local C, A, H = O+R*dir, O+2*R*dir, O+h*dir 
+if angle ~= 0 then g:Rotate3d( angle, {O,g.Normal}) end
+g:Define_sphere({radius=R, center=C, mode=ld.mBorder, color="", 
+    edgecolor="black", edgestyle="dashed"})
+g:DScircle({C,dir},{hidden=true})
+g:Dcylinder(O,R,H,{color="orange"}) -- cylinder
+g:Dcone(H,R,A,{edgestyle="dashed"})
+g:Dline3d(O,H,"dashed")
+g:Dspherical()
+g:Ddots3d({O,C,A,H})
+g:Dlabel3d( "$O$",O,{pos="NE"}, "$C$",C,{}, "$A$",A,{pos="E"}, "$H$",H,{pos="NE"})
+g:Show()
+\end{luadraw}
+\end{document}

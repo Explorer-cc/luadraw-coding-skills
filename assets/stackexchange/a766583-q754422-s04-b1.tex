@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/766583 (question 754422, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/754422/illustrating-a-homeomorphism-with-asymptote
+\begin{document}
+\begin{luadraw}{name=homeomorphism}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, Z, i = pt3d.Origin, ld.cpx.Z, ld.cpx.I
+local g = ld.graph3d:new{}
+ld.Hiddenlinestyle = "dashed"
+local a, b = Z(-1,-1), Z(0.5,-1.2)
+local v1, v2, v3, v4 = (b-a)/8-i/3, (a-b)/4-i/2, (b-a)/8+i/3, (a-b)/6+i/3
+local P = ld.spline({Z(0,3), Z(2,1), b, Z(-0.5,-2.25), Z(-1,-2), a, Z(-2,1), Z(0,3)},3,3)
+g:Shift(-3); g:Dsphere(Origin, 2, {color="LightBlue"})
+g:Shift(6); g:Dpath(P, "ball color=LightBlue")
+g:Dpath({a,a+v1,b+v2,b,"b"}); g:Dpath({a,a+v3,b+v4,b,"b"}, "dashed");
+g:Shift(-3); g:Dellipticarc(Z(-1,2),Z(0,1.5),Z(1,2),1,0.5,-1,'-stealth ')
+g:Dlabel("$f$", Z(0,2), {pos="N"}, "$S_1$", Z(-3,-2),{pos="S"}, "$S_2$", Z(3,-2),{})
+g:Show()
+\end{luadraw}
+\end{document}

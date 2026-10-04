@@ -1,0 +1,60 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222114 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/478822/how-to-draw-dashed-arc-of-a-circle-behind-pyramid
+
+\begin{luadraw}{name=intersection_pyramid1}
+local g = graph3d:new{window={-7,2.5,-1,6},viewdir={120,70},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local sqrt=math.sqrt
+local A, S,  C,B, I  = M(0,0,0), M(7/2,-7*sqrt(3)/6,14/3), M(7,0,0), M(65/14,15*sqrt(3)/14,0),M(7/2,-7*sqrt(3)/6,0)
+local R = pt3d.abs(I-A)
+local P = pyramid( {A,B,C,D}, S)
+local n = pt3d.prod(B-A,C-B)
+Hiddenlines = true 
+g:Dscene3d(
+g:addCircle(I,R,n, {color="blue", hidden=false}),
+g:addPoly(P,{edge=true,color="LightBlue",edgewidth=4}),
+g:addPolyline({{A,I},{B,I},{C,I},{S,I}})
+)
+g:Ddots3d({A, S,  C, B, I}) 
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{},"$S$",S,{pos="N"}, "$C$",C,{pos="W"},"$I$",I,{pos="S"}) 
+-- now we calculate de hidden part of circle that's a 2d problem
+local L = g:Proj3d( circle3d(I,R,n) ) -- projection of the circle on screen
+L = L[1] -- first component of L
+local s, c, a = table.unpack( g:Proj3d({S,C,A}) ) -- projections of S, C and A
+local J = interL( {c,s,a}, L) -- 4 intersection points (c,u,v,a) between the two polylines
+local u, v = J[2], J[3] -- the two endpoints of the red arc
+local L1 = cut(L,u,true) -- cutting L before the point u
+L1 = cut(L1,v) -- cutting L1 after the point v
+g:Dpolyline(L1, "red, dashed") -- part of circle between u and v
+g:Ddots({u,v},"red") -- just to show the ends of the red arc
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=intersection_pyramid2}
+local g = graph3d:new{window={-7,2.5,-1,6},viewdir={120,70},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local sqrt=math.sqrt
+local A, S,  C,B, I  = M(0,0,0), M(7/2,-7*sqrt(3)/6,14/3), M(7,0,0), M(65/14,15*sqrt(3)/14,0),M(7/2,-7*sqrt(3)/6,0)
+local R = pt3d.abs(I-A)
+local P = pyramid( {A,B,C,D}, S)
+local n = pt3d.prod(B-A,C-B)
+Hiddenlines = true 
+g:Dscene3d(g:addCircle(I,R,n, {color="blue", hidden=false}),
+g:addPoly(P,{edge=true,color="LightBlue",edgewidth=4}),
+g:addPolyline({{A,I},{B,I},{C,I},{S,I}})
+)
+g:Ddots3d({A, S,  C, B, I}) 
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{},"$S$",S,{pos="N"}, "$C$",C,{pos="W"},"$I$",I,{pos="S"}) 
+-- now we calculate de hidden part of circle with a clip by tikz
+local s, c, a = table.unpack( g:Proj3d({S,C,A}) ) -- projections of S, C and A
+g:Writeln("\\begin{scope}")
+g:Writeln("\\clip "..g:Coord(c).."--"..g:Coord(s).."--"..g:Coord(a)..";")
+g:Dcircle3d(I,R,n,"red,dashed")
+g:Writeln("\\end{scope}")
+g:Show()
+\end{luadraw}
+\end{document} 

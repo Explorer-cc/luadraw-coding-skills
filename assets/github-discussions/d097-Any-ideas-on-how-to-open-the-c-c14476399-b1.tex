@@ -1,0 +1,55 @@
+% source: https://github.com/pfradin/luadraw/discussions/97#discussioncomment-14476399 (pfradin, block 1)
+% !TEX TS-program = lualatex
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name = opened-surface}
+local pi, sin, cos, tanh = math.pi, math.sin, math.cos, math.tanh
+local graphview = graph3d:new{
+  window3d = {-4, 4, -4, 4, -4, 4},
+  window   = {-7, 7, -7, 7},
+  size     = {12, 12},
+  viewdir  = {60, 60}
+}
+graphview:Dboxaxes3d({
+  grid      = true,
+  gridcolor = "gray",
+  fillcolor = "lightgray"})
+local projplane = surface(
+  function(u, v)
+    return M(
+      2*(1 + cos(v))*cos(u),
+      2*(1 + cos(v))*sin(u),
+      2*sin(v)*tanh(u-pi) - (1+cos(u))^0.5*(1 + cos(v)) -- disturbance on z
+    )
+  end,
+  pi, 0, 0, pi,
+  {25, 15})
+projplane = concat(projplane,reverse_face_orientation( sym3d(projplane,{Origin,vecJ})))
+local projplane2 = surface(
+  function(u, v)
+    return M(
+      2*(1 + cos(v))*cos(u),
+      2*(1 + cos(v))*sin(u),
+      -2*sin(v)*tanh(u-pi) + (1+cos(u))^0.5*(1 + cos(v)) -- disturbance on z
+    )
+  end,
+  0, pi, 0, pi,
+  {25, 15})
+projplane2 = concat(projplane2,reverse_face_orientation( sym3d(projplane2,{Origin,vecJ})))
+graphview:Dmixfacet(
+  projplane,
+  {
+    mode  = mShadedOnly,
+    color = "ForestGreen"
+  },
+  projplane2,
+  {
+    mode  = mShadedOnly,
+    color = "ForestGreen"
+  }  
+  )
+graphview:Show()
+\end{luadraw}
+\end{document}

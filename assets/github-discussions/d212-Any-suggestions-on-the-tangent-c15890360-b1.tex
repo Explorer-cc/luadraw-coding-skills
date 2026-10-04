@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/212#discussioncomment-15890360 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier}
+\begin{document}
+\begin{luadraw}{name=surface_plane}
+    local g = graph3d:new{window3d={-1,6,-1,6,-1,6}, window={-2.5,5,-2.5,5}, viewdir={25,60},size={10,10}}
+    --local f = function(x,y) return 5 - 0.05*x^2 - 0.15*y^2 + 0.1*x*y end
+    local x0,y0,dd = 2,1.5,0.1
+    local f = function(x,y) return 5 - (x-x0)^2/8 - (y-y0)^2/8 end
+    local O,z0 = Origin,f(x0,y0)
+    local P,P0 = M(x0,y0,z0),M(x0,y0,0)
+    local S = cartesian3d(f, 0, 5, 0, 5, {30, 30})
+    local vecX = M(x0+dd, y0, f(x0+dd, y0)) - P
+    local vecY = M(x0, y0+dd, f(x0, y0+dd)) - P
+    local vecNorm = pt3d.prod(vecX,vecY)
+    local TangentPlane = {P, vecNorm}
+    local Tx = g:Intersection3d(S, {P, vecX})
+    local Ty = g:Intersection3d(S, {P, vecY})
+    g:Dpolyline3d( {{O,5*vecI},{O,5*vecJ},{O,5.5*vecK}}, "-latex,semithick")
+    g:Dfacet(S, {usepalette={{LightBlue,Cyan,White},"z"}, opacity=1,mode=mShadedOnly, contrast=0.5})
+    g:Dpolyline3d( {{O,5*vecI},{O,5*vecJ},{O,5.5*vecK}}, "dashed")  -- dahsed axes here
+    g:Dedges(Tx, {color="violet", hidden=true, width=8})
+    g:Dedges(Ty, {color="violet",hidden=true, width=8})
+    g:Ddots3d({P},"fill=magenta,draw=magenta")
+    g:Ddots3d({P0,M(x0,0,0),M(0,y0,0)})
+    g:Dpolyline3d({{P0,P},{P0,M(x0,0,0)},{P0,M(0,y0,0)}},"dashed")
+    g:Dline3d({P,vecX},"draw=magenta",true);g:Dline3d({P,vecY},"draw=magenta",true);
+    g:Dlabel3d( 
+        "$x$",5.5*vecI, {},
+        "$y$",5.5*vecJ, {},
+        "$z$",5.75*vecK, {},
+        "$O$",M(0,-0.3,0), {},
+        "$(a,b,0)$",P0, {pos="SE"},
+        "$P(a,b,c)$",P, {pos="S",dist=0.25,node_options="magenta"}
+     )
+    g:Show()
+\end{luadraw}
+\end{document}

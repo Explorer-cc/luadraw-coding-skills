@@ -1,0 +1,39 @@
+% source: https://github.com/pfradin/luadraw/discussions/135#discussioncomment-14851784 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/448772/sphere-packing-in-a-sphere-diagrams/448829#448829
+%https://tex.stackexchange.com/questions/496046/densest-sphere-packing
+
+\begin{document}
+\begin{luadraw}{name=sphere-packing}
+local g = graph3d:new{window={-5,5,-5,7}, viewdir={0,60}}
+local sqrt = math.sqrt
+local r = 1
+local u,v,w = 2*r*vecJ, 2*r*M(sqrt(3)/2,1/2,0), 2*r*M(sqrt(3)/6,1/2,sqrt(6)/3) -- base of the lattice
+local n = 4 
+
+local spheres = {}
+local add_sphere = function(param) -- to add a sphere in list
+    local coef = pt3d.dot(param[1],g.Normal)
+    table.insert(spheres,{coef,param}) -- param = {center, radius, options}
+end
+local colors = getpalette(palRainbow,n+1)
+for x = 0, n do  -- x, y, and z are the coordinates in the lattice
+    for y = 0, n-x do
+        for z = 0, n-x-y  do
+            add_sphere({x*u+y*v+z*w,r,{color=colors[z+1],mode=mBorder}})
+        end
+    end
+end
+g:Shift3d(-n/3*u-n/3*v) -- to center the figure at the Origin
+-- we sort the list
+table.sort(spheres, function(e1,e2) return e1[1] < e2[1] end)  -- we compare coef to sort spheres list
+-- we can draw
+for _, obj in ipairs(spheres) do
+    g:Dsphere(table.unpack(obj[2]))
+end
+g:Show()
+\end{luadraw}
+\end{document} 

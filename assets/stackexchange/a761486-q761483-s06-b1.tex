@@ -1,0 +1,20 @@
+% source: https://tex.stackexchange.com/a/761486 (question 761483, score 6, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%Source - https://tex.stackexchange.com/q/761483
+\begin{document}
+\begin{luadraw}{name=test}
+local g = graph:new{window={-3,3,-1,9}, size={12,12,0} }
+require 'luadraw_shadedforms'
+local f = function(x) return x^2 end
+g:Daxes()
+local L = cartesian(f,-3,3)
+g:Dshadedpolyline(L,palRainbow,{values="y",width=8})
+local C = {Z(-2,0.5), Z(0,-1), Z(0,7), Z(1,7.8), "b", Z(2,1), Z(2,4), Z(3,3),"b"}
+-- the path(C) instruction transforms the path C into a polygonal line.
+g:Dshadedpolyline(path(C),palRainbow,{values="y",width=8})
+g:Show()
+\end{luadraw}
+\end{document}

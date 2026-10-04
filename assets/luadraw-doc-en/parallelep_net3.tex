@@ -1,0 +1,22 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-cvx-polyhedra-nets.tex (demo: Half unfolded truncated parallelepiped)
+\begin{luadraw}{name=parallelep_net3}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-9,15,-9,9,0.6,0.6},bg="lightgray", viewdir={30,60}, margin={0,0,0,0}} 
+require 'luadraw_cvx_polyhedra_nets'
+P = ld.parallelep(Origin, 4*vecI,5*vecJ,3*vecK)
+local A, B, C = M(4,2.5,3), M(2,5,3), M(4,5,1.5)
+P = ld.cutpoly(P, ld.plane(A,B,C), true) -- P is truncated with the plane
+g:Shift3d(M(0,-4,5))
+g:Dpolynames(P,"facet") -- this function shows facet numbers of P
+-- half unfolded P
+g:Shift3d(M(0,0,-11))
+g:Dpolyhedron_net(P,{opening=0.5, facet_options={color="Crimson", opacity=0.7, edgecolor="Gold", edgewidth=8}})
+-- 2D net
+g:Shift(10)
+g:Dpolyhedron_net(P,{tabs=true, tabs_options="pattern=north west lines, pattern color=gray", 
+ facet_name=true, rotate=90})
+g:Show()
+\end{luadraw}

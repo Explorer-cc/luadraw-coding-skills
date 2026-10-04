@@ -1,0 +1,24 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-1-Introduction.tex (TeXcode block)
+\documentclass{article}
+\usepackage[3d]{luadraw}
+
+\newcommand*{\shortcuts}{%
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Z, M, i = cpx.Z, pt3d.M, cpx.I
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+}%
+
+\begin{document}
+
+\begin{luadraw}{name=test}
+\shortcuts
+local g = ld.graph3d:new{}
+local P = ld.polyreg(0, Z(2,3), 5)
+g:Dpolyline(P, true, "red,line width=1.2pt")
+local Q = ld.map(pt3d.toPoint3d, P)
+P = ld.pyramid(Q, M(0,0,4))
+g:Dpoly(P, {color="blue", opacity=0.6})
+g:Show()
+\end{luadraw}
+\end{document}

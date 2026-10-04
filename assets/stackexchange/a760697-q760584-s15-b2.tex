@@ -1,0 +1,42 @@
+% source: https://tex.stackexchange.com/a/760697 (question 760584, score 15, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/760584/drawing-a-topological-surface-of-genus-three
+\begin{document}
+\begin{luadraw}{name=surface_of_genus_three}
+local g = graph3d:new{viewdir={130,60},adjust2d=true}
+local function f(x,y,z)
+    return (x^2-4)^2 + (y^2-4)^2 + (z^2-4)^2 + 3*(x^2*y^2 + x^2*z^2 + y^2*z^2) + 6*x*y*z - 10*(x^2+y^2+z^2) + 22
+end
+-- L1 = intersection with the plane z=3.5-x-y
+local h1 = function(x,y) return f(x,y,3.5-x-y) end 
+local L1 = implicit(h1,-4,4,-4,4,{50,50}) 
+local to3D1 = function(z)
+    return M(z.re,z.im,3.5-z.re-z.im)
+end
+L1 = ftransform(L1,to3D1)
+
+-- L2 = intersection with the plane z=1.5-x+y 
+local h2 = function(x,y) return f(x,y,1.5+y-x) end 
+local L2 = implicit(h2,-4,4,-4,4,{50,50}) 
+local to3D2 = function(z)
+    return M(z.re,z.im,1.5+z.im-z.re)
+end
+L2 = ftransform(L2,to3D2)
+
+require 'luadraw_povray' -- requires Pov-Ray command-line interface
+g:Pov_new( {pov_cmd="/usr/bin/povray"} ) -- to be adapted according to your system
+g:Pov_implicit("pow(x*x-4,2) + pow(y*y-4,2) + pow(z*z-4,2) + 3*(pow(x*y,2) + pow(x*z,2) + pow(y*z,2)) + 6*x*y*z - 10*(x*x+y*y+z*z)+22", f, {color=Orange, containded_by={M(-4,-4,-4),M(4,4,4)} })
+g:Pov_polyline(L1, {width=8,color=ForestGreen})
+g:Pov_polyline(L2, {width=8,color=Crimson})
+g:Pov_axes(Origin, {arrows=1, width=8})
+g:Pov_exec() -- compile with -shell-escape to execute povray the first time
+g:Dboxaxes3d( {grid=true, gridcolor="gray", fillcolor="lightgray", drawbox=true})
+g:Pov_show() -- load the povray picture
+g:Dpolyline3d({{-5*vecI,5*vecI},{-5*vecJ,5*vecJ},{-5*vecK,5*vecK}},"dotted") -- we add dotted axes
+g:Dpolyline3d(L2,"Crimson, dotted"); g:Dpolyline3d(L1,"ForestGreen, dotted") -- we add dotted curves
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/762766 (question 699986, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/699986/draw-shaded-region-using-tikz-and-pgfplots
+\begin{document}
+\begin{luadraw}{name=inequalities}
+local ld = luadraw
+local g = ld.graph:new{window={-1,2,-0.5,2},size={10,10}}
+local f1 = function(x) return x^2 end
+local f2 = function(x) return 2*x^2 end
+local h1 = function(x) return 1/x end
+local h2 = function(x)  return 1/(2*x) end
+g:Daxes({0,0.5,0.5}, {grid=true, arrows="-Stealth", nbsubdiv={1,1}, legend={"$x$","$y$"}})
+g:Dinequalities({f1,'>',f2,'<',h1,'<', h2,'>'}, {view={0.1,2,-0.5,2},
+     draw_options="draw=none,fill=blue,fill opacity=0.6"})
+g:Linewidth(8)
+g:Dcartesian(f1, {draw_options="DarkBlue"})
+g:Dcartesian(f2, {draw_options="DarkBlue"})
+g:Dcartesian(h1, {x={0,2}, draw_options="Crimson"})
+g:Dcartesian(h2, {x={0,2}, draw_options="Crimson"})
+g:Show()
+\end{luadraw}
+\end{document}

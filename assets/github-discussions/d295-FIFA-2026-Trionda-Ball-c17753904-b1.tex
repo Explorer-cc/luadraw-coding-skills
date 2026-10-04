@@ -1,0 +1,127 @@
+% source: https://github.com/pfradin/luadraw/discussions/295#discussioncomment-17753904 (pfradin, block 1)
+\documentclass[border=2pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+
+\begin{document}
+\begin{luadraw}{name=tetra_len}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Ms, O = pt3d.Ms, pt3d.Origin
+
+local g = ld.graph3d:new{window={-4,4,-4,4},margin={0,0,0,0},viewdir={30,65},size={10,10}}
+ld.Hiddenlines = false
+ld.Hiddenlinestyle = "dashed"
+g:Linewidth(8)
+require 'luadraw_spherical'
+local poly = require 'luadraw_polyhedrons'
+
+local C = O
+local R = 3
+
+function ld.graph3d:DSregion(L,options)
+-- L est une liste de points 3d représentant une courbe fermée tracée sur la sphère courante
+    if (L == nil) or (type(L) ~= "table") then return end
+    options = options or {}
+    local style = options.style or self.param.linestyle
+    local color = options.color or self.param.linecolor
+    local width = options.width or self.param.linewidth
+    local opacity = options.opacity or self.param.lineopacity
+    local fillopacity = options.fillopacity or 0.3
+    local fill = options.fill or ""
+    local dir = options.dir or {1,1}
+    if type(dir) == "number" then dir = {dir, dir} end
+    local hiddenlines = options.hidden
+    if hiddenlines == nil then hiddenlines = ld.Hiddenlines end
+    local I,r,n = O, R, self.Normal
+    if ld.projection_mode == "central" then
+        I,r,n = ld.interSS( {C,R}, { (ld.camera+C)/2, pt3d.abs(ld.camera-C)/2} )
+    end
+    local Visible, Hidden = {},{}
+    local visible_function = function(A)
+        return pt3d.dot(A-I,n) >= 0
+    end
+    Visible, Hidden =  ld.split_points_by_visibility(L,visible_function)
+    local rep, first = {}, true
+    for _, visible in ipairs(Visible) do
+        if #visible > 1 then
+            if not first then 
+                table.append(rep,{I,visible[1],r,dir[1],"ca"})
+                table.remove(visible,1); table.insert(visible,"l")
+                table.append(rep, visible)
+            else
+                table.insert(visible,2,"m"); 
+                table.insert(visible,"l")
+                table.append(rep,visible)
+                first = false; 
+            end
+        end
+    end
+    if rep[#rep-1] ~= rep[1] then
+        table.append(rep,{I,rep[1],r,dir[1],"ca"})
+    end
+    local draw_options = style..",color="..color..",line width="..width/10
+    if fill ~= "" then
+        draw_options = draw_options..",fill="..fill..",fill opacity="..fillopacity
+    end
+    self:DSaddfront(rep, draw_options)
+
+    rep, first = {}, true
+    for _, hide in ipairs(Hidden) do
+       if #hide > 1 then
+            if not first then 
+                table.append(rep,{I,hide[1],r,dir[2],"ca"})
+                table.remove(hide,1); table.insert(hide,"l")
+                table.append(rep, hide)
+            else
+                table.insert(hide,2,"m"); 
+                table.insert(hide,"l")
+                table.append(rep,hide)
+                first = false; 
+            end
+        end
+    end
+    if rep[#rep-1] ~= rep[1] then
+        table.append(rep,{I,rep[1],r,dir[2],"ca"})
+    end
+    self:DSaddback(rep, draw_options)
+end
+
+local T = poly.tetrahedron(O, Ms(R,30*ld.deg,20*ld.deg))
+local A, B, C, D = table.unpack(T.vertices)
+local function edge(A,B,cut) -- to remove the first point
+    cut = cut or false
+    local m = (A+B)/2
+    local  P = {A,m}
+    local u = pt3d.normalize(B-A)
+    local v = ld.rotate3d(u,90,{O,m})
+    local L = ld.path3d( {A,"m",A+2*v+u/2, m+2*v+u/2,m,"b",m-2*v-u/2,B-2*v-u/2,B,"b"},100 )[1]
+    if cut then table.remove(L,1) end
+    return ld.map(ld.toSphere, L)
+end
+
+local ABD, ABC, ADC, BCD = {}, {}, {}, {}
+table.append(ABD,edge(A,B))
+table.append(ABD,edge(B,D,true))
+table.append(ABD,edge(D,A,true))
+table.append(ABC,edge(A,B))
+table.append(ABC,edge(B,C,true))
+table.append(ABC,edge(C,A,true))
+table.append(ADC,edge(A,D))
+table.append(ADC,edge(D,C,true))
+table.append(ADC,edge(C,A,true))
+table.append(BCD,edge(B,C))
+table.append(BCD,edge(C,D,true))
+table.append(BCD,edge(D,B,true))
+
+g:Define_sphere({radius=R, color="SlateGray", opacity=0.7})
+g:DSregion(ABD,{fill="red"})
+g:DSregion(ABC,{fill="green"})
+g:DSregion(ADC,{fill="blue"})
+g:DSregion(BCD,{fill="yellow"})
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

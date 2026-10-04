@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222074 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=plane_intersection}
+local g = graph3d:new{window={-6,6,-6,6},viewdir={30,60},size={10,10}}
+g:Linejoin("round"); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local P1 = {M(0,0,2.5), vecK}
+local P2 = {M(0,0,-1), vecK-0.25*vecJ}
+local P3 = {M(0,0,0), 1.25*vecJ+vecK}
+local D = {M(1,2,0),vecK}
+local I, J, K = interDP(D,P1), interDP(D,P2), interDP(D,P3)
+
+g:Dscene3d(
+    g:addPlane(P1, {edge=true, color="LightBlue"}),
+    g:addPlane(P2, {edge=true, color="Crimson"}),
+    g:addPlane(P3, {edge=true, color="ForestGreen"}),
+    g:addLine( D, {color="Navy",width=8,scale=1.5})
+)
+g:Dlabel3d("$I$",I,{pos="W"}, "$J$",J,{}, "$K$",K, {})
+g:Ddots3d({I,J,K})
+g:Show()
+\end{luadraw}
+\end{document}

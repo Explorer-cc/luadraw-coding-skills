@@ -1,0 +1,16 @@
+% source: https://tex.stackexchange.com/a/754607 (question 754600, score 10, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/754600/tikz-how-to-draw-a-3d-shape-by-defining-its-2d-cross-section-and-3d-path
+\begin{document}
+\begin{luadraw}{name=line2tube}
+local g = graph3d:new{window={-6,6,-5,7},margin={0,0,0,0},bbox=false, size={10,10}, viewdir={30,60}}
+local L1 = {M(-3,4,2), M(-3,4,4), M(2,4,4), M(2,4,-2), M(-3,4,-2), M(-3,4,0)} -- polygonal line
+local L2 = path3d( {M(2,-2,3),M(0,-2,0),M(2,-2,-3),3,-1,"ca"} ) -- circle arc
+local tube1 = line2tube(L1, 0.75, {nbfacet=20})
+local tube2 = line2tube(L2, 1, {nbfacet=5})
+g:Dmixfacet(tube1,{color="SteelBlue",mode=mShadedOnly, opacity=0.8}, tube2, {color="Crimson"})
+g:Show()
+\end{luadraw}
+\end{document}

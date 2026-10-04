@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/765839 (question 544402, score 5, block 1)
+\documentclass{standalone}
+\usepackage{fourier-otf}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/544402/tikz-plotting-3d
+\begin{luadraw}{name=shaded_boundary}
+local ld = luadraw
+local M, vecI, vecJ = ld.pt3d.M, ld.pt3d.vecI, ld.pt3d.vecJ
+local g = ld.graph3d:new{ window3d={-4,4,-4,4,-4,4}, adjust2d=true, 
+    viewdir={"central",110,65,20}, size={10,10} }
+
+local f = function(u,v)
+    return M(ld.nth_root(3,u^2*v), u, v)
+end
+local umesh = ld.linspace(-4,4,25)
+local L = ld.cartesian( function(x) return x^3/16 end, -4, 4)[1]
+local vmesh = ld.map( function(z) return z.im end, L) --Numbers from -4 to 4 distributed according to the function x^3/16.
+local S = ld.surface(f,{umesh, vmesh})
+
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", drawbox=true})
+g:Dseg3d({M(0,0,0),M(0,0,-4)}, "white, line width=1") --segment excluded from the surface
+g:Dfacet(S, {usepalette={ld.palRainbow,"z"}, 
+    twoside=false, clip=true, opacity=0.9, mode=ld.mShadedOnly})
+g:Dseg3d({M(0,0,0),M(0,0,4)}, "white, line width=1") --segment excluded from the surface
+g:Show()
+\end{luadraw}
+\end{document}

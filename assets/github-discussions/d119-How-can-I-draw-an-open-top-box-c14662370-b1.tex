@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/119#discussioncomment-14662370 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\usepackage{siunitx}
+\begin{document}
+ \begin{luadraw}{name=parallelep_13_09_2025}
+local g = graph3d:new{window={-4,6,-4.5,3},viewdir={30,60},size={10,10}}
+Hiddenlines = true; g:Labelsize("footnotesize")
+Hiddenlinestyle = "dashed"
+local a, b, h, dep = 6,6,3, 0.25
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local A,B,C,D =table.unpack(P.vertices)
+table.remove(P.facets,2) -- to remove the top
+
+g:Dpoly(P,{edge=true,color="LightBlue",mode =4})
+-- draw the segments at the end of the arrows
+g:Dpolyline3d({ {B-dep*vecK, B-2*dep*vecK}, {C-dep*vecK, C-2*dep*vecK},
+{C+dep*vecJ, C+2*dep*vecJ}, {D+dep*vecJ, D+2*dep*vecJ}, {D+h*vecK+dep*vecJ, D+h*vecK+2*dep*vecJ} })
+--draw the segments with the arrows
+g:Dpolyline3d({{B-3*dep/2*vecK, C-3*dep/2*vecK}, {C+3*dep/2*vecJ, D+3*dep/2*vecJ},{D+3*dep/2*vecJ,D+h*vecK+3*dep/2*vecJ} }, "stealth-stealth")
+g:Dlabel3d(
+    " $x$ \\si{m}",M(a,b/2,-3*dep/2),{dir={vecJ,vecK},node_options="fill=white"},
+   " $x$ \\si{m}",M(a/2,b+3*dep/2,0),{dir={-vecI,-vecJ}},
+    "$h$ \\si{m}",M(0,b+3*dep/2,h/2),{dir={vecK,-vecJ}}
+    ) 
+g:Show()
+\end{luadraw}
+ \end{document} 

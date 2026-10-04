@@ -1,0 +1,26 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-6-Geometric-Constructions.tex (demo: Faces of a cube with holes in it and a regular hexagon)
+\begin{luadraw}{name=plans}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-3,3,-3.25,3.25}, margin={0,0,0,0},
+    viewdir={"central",20,60}, bg="LightGray", size={10,10}}
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+local p = ld.polyreg(0,1,6)
+local P = ld.parallelep(M(-2,-2,-2),4*vecI,4*vecJ,4*vecK)
+local V = g:Sortpolyfacet(P)
+local list = {}
+g:Filloptions("full","Crimson",1,true); -- true for even odd rule
+g:Lineoptions("solid","Gold",8)
+for _, F in ipairs(V) do
+    local P1 = ld.plane(pt3d.isobar3d(F),F[1],F[2]) -- plane of facet F
+    local A, u, v = ld.orthoframe(P1) -- orthonormal coordinate system on the facet with center of gravity as the origin
+    local p1 = ld.map(function(z) return A+z.re*u+z.im*v end,p) -- hexagon reproduced on the facet
+    table.insert(p1,2,"m")
+    local color = "Crimson"
+    if not g:Isvisible(F) then color = "Crimson!60!black" end
+    g:Dpath3d( ld.concat(F,{"l"},p1,{"l","cl"}),"fill="..color ) -- drawing of the "perforated" facet with the hexagon
+end
+g:Show()
+\end{luadraw}

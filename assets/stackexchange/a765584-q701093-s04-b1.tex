@@ -1,0 +1,20 @@
+% source: https://tex.stackexchange.com/a/765584 (question 701093, score 4, block 1)
+\documentclass{standalone} %compile with lualatex only
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+%https://tex.stackexchange.com/questions/701093/pgf-cone-drawing
+\begin{luadraw}{}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{window3d={-1,1,-1,1,0,1}, size={12,12}, 
+    viewdir={"central",25,60}, window={-2,2,-1,2.5} }
+g:Setmatrix3d({M(0,0,0), M(1,0,0), M(0,1,0), M(0,0,2)}) --factor 2 on the z-axis
+local cone = g:Cone_outline(M(0,0,0), 1, M(0,0,1))
+g:Dboxaxes3d{grid=true,gridcolor="gray",fillcolor="LightGray", xyzstep=0.5}
+g:Dpath3d(cone.side, "bottom color=blue, top color=red")
+g:Dpath3d(cone.hidden, "dashed")
+g:Show()
+\end{luadraw}
+\end{document}

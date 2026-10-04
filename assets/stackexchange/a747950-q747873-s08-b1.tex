@@ -1,0 +1,22 @@
+% source: https://tex.stackexchange.com/a/747950 (question 747873, score 8, block 1)
+\documentclass[12pt]{standalone} % compile with lualatex
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}% https://github.com/pfradin/luadraw
+\begin{document}
+
+\begin{luadraw}{name=parametric3d_proj}
+local sin, cos, pi = math.sin, math.cos, math.pi
+local g = graph3d:new{window3d={-4,4,0,3,0,3}, adjust2d=true,size={10,10}}
+g:Linejoin("round"); g:Linewidth(8); Hiddenlinestyle = "dashed"
+local p = function(t) return M(t,1.5+math.sin(2*t),1.5+math.cos(t)) end -- parametric 3d curve
+local f = function(u,v) -- surface parametrization
+    local A = p(u) 
+    return M(A.x,A.y,v*A.z)
+end 
+local S = surface(f,pi,-pi,0,1,{50,2}) -- build surface (facets)
+g:Dboxaxes3d( {grid=true, fillcolor="LightGray"} )
+g:Dfacet(S,{color="cyan", opacity=0.6})
+g:Show()
+\end{luadraw}
+
+\end{document}

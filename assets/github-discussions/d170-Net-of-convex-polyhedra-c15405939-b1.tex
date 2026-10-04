@@ -1,0 +1,10 @@
+% source: https://github.com/pfradin/luadraw/discussions/170#discussioncomment-15405939 (pfradin, block 1)
+\begin{luadraw}{name=choose_net}
+local g = graph3d:new{window={-10,10,-5,5}}
+require 'luadraw_cvx_polyhedra_nets'
+P = parallelep(Origin, 4*vecI,5*vecJ,3*vecK)
+local A, B, C = M(4,2.5,3), M(2,5,3), M(4,5,1.5)
+P = cutpoly(P, plane(A,B,C), true) -- on tronque P et ajoute une nouvelle facette
+g:Dnamedpoly_net(P,"both") -- on visualise P et le patron par défaut
+g:Show()
+\end{luadraw}

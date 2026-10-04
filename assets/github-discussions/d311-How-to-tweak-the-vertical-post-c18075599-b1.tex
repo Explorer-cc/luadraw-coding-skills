@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/311#discussioncomment-18075599 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=3dobjects}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin,vecI,vecJ,vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{window = {-8,8,-2,3}, viewdir = {15,75}}
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+
+g:Dplane({Origin, vecK}, vecJ, 15, 6, "fill=gray!30")
+g:Dline3d({Origin,vecJ})
+g:Shift3d(-6*vecJ)
+g:Dcone(Origin,1,2*vecK,{color="blue"})
+g:Dpolyline3d({{Origin,vecJ},{Origin,2*vecK}},"dashed")
+
+g:Shift3d(3*vecJ)
+g:Dfrustum(Origin,1,0.5,vecK,2*vecK,{color="teal"})
+g:Dpolyline3d({{Origin,vecJ},{Origin,2*vecK},{2*vecK,2*vecK+0.5*vecJ}},"dashed")
+
+g:Shift3d(3*vecJ)
+g:Dcylinder(Origin,0.75,2*vecK,{color="orange"})
+g:Dpolyline3d({2*vecK,2*vecK+0.75*vecJ},"dashed")
+
+g:Shift3d(3*vecJ)
+g:Dsphere(vecK,1,{color="violet!50"})
+g:Dpath3d({2*vecK,vecK,Origin,1,1,0.2*vecI+vecJ,"ca"})
+g:Dpath3d({2*vecK,vecK,Origin,1,-1,0.2*vecI+vecJ,"ca"},"dashed")
+g:Dpolyline3d({vecK,vecK+vecJ},"dashed")
+
+g:Shift3d(4*vecJ)
+P = ld.prism({2*vecK,Origin,-2*vecJ},-vecI)
+g:Dpoly( ld.rotate3d(P,30,{Origin,vecK}),{color="LightGray",mode=ld.mShadedHidden} )
+g:Dline3d({2*vecK,vecJ})
+g:Show()
+\end{luadraw}
+\end{document}

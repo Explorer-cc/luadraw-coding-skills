@@ -1,0 +1,49 @@
+% source: https://github.com/pfradin/luadraw/discussions/229#discussioncomment-16129511 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=earth_tilted_system}
+local g = graph3d:new{
+    window3d={-8,8,-8,8,-6,6}, 
+    window = {-8,8,-6,6},
+    size={10,10}, 
+    viewdir={0,78},
+}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+require 'luadraw_spherical'
+-- first half plane
+g:Dpolyline3d({M(0,-7,0),M(-8,-6,0), M(-8,8,0), M(0,7,0)},"fill=yellow, fill opacity=1, draw=none, line width=0.5pt")
+-- disque and sphere
+g:Define_sphere({radius=4, color="WhiteSmoke", edgecolor="cyan", edgewidth=10})
+g:DSbigcircle({vecI, sM(-90,90-23.26)}, {color="orange", width=8, hidden=false})
+g:DSseg({-1.5 * sM(90,23.26), 1.5 * sM(90,23.26)}, {width=8, hidden=false})
+g:DSseg({Origin, 2 * sM(90,90+23.26)}, {color="teal",width=8, hidden=false})
+g:DSseg({Origin, 8 * vecJ}, {color="magenta", width=8})
+g:DSpolyline({M(0,-7,0),M(-8,-6,0), M(-8,8,0), M(0,7,0)}, {color="orange", width=5})
+g:DSbigcircle({vecI,vecJ}, {color="teal", width=5})
+g:Dspherical()
+-- second half plane
+g:Dpath3d({M(0,-7,0),M(8,-8,0), M(8,6,0), M(0,7,0),"l", 4*vecJ, "m", Origin, -4*vecJ, 4, -1, vecK, "ca"},
+    "fill=yellow, fill opacity=1, draw=orange, line width=0.5pt")
+g:Darc3d(4*vecJ, Origin, -4*vecJ, 4, -1, vecK, "teal,line width=0.5pt")
+-- hidden lines
+g:Dcircle3d(Origin, 4, g.Normal, "dashed,cyan,line width=0.5pt")
+g:Dcircle3d( Origin, 4, Ms(4,90*deg,23.26*deg), "orange,dashed,line width=0.5pt")
+g:Dseg3d({Origin, 2 * sM(90,90+23.26)}, "teal,dashed,line width=0.5pt")
+g:Dseg3d({-1.5 * sM(90,23.26), 1.5 * sM(90,23.26)}, "dashed,line width =0.8pt")
+-- arc3d
+g:Darc3d(5 * vecJ, Origin, Ms(4,90*deg,23.26*deg),5,1, "red,latex-latex") -- 90*deg = pi/2 (radians)
+g:Darc3d(7.5*vecJ, Origin, Ms(4,90*deg,(90+23.26)*deg),7.5,1, "red,latex-latex")
+g:Darc3d(Ms(4.25,0,90*deg), Origin, Ms(4.5,20*deg,90*deg), 4.5, 1, "red, -latex")
+g:Darc3d(Ms(4.25,140*deg,90*deg), Origin, Ms(4.5,160*deg,90*deg), 4.5, 1, "dashed, red, -latex")
+g:Labelsize("tiny")
+g:Dlabel3d("$66^\\circ 34'$", Ms(5,90*deg,(45+23.26/2)*deg), 
+    {node_options="fill=white,inner sep=0.75pt", dir={Ms(1,90*deg,(135+23.26/2)*deg), Ms(1,90*deg,(45+23.26/2)*deg)}},
+    "$23^\\circ 26'$", Ms(7.5,90*deg,(90+23.26/2)*deg), 
+    {node_options="fill=white,inner sep=0.75pt", dir={Ms(1,90*deg,(180+23.26/2)*deg), Ms(1,90*deg,(90+23.26/2)*deg)}}
+    )
+g:Show()
+\end{luadraw}
+\end{document}

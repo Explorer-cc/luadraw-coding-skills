@@ -1,0 +1,23 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: The five default palettes)
+\begin{luadraw}{name=palettes}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-5,5,-5,5},bbox=false, border=true}
+g:Linewidth(1)
+local Dpalette = function(pal,A,h,L,N,name)
+    local dl = L/N
+    for k = 1, N do
+        local color = ld.palette(pal,(k-1)/(N-1))
+        g:Drectangle(A,A+h,A+h+dl,"color="..color..",fill="..color)
+        A = A+dl
+    end
+    g:Drectangle(A,A+h,A+h-L); g:Dlabel(name,A+h/2,{pos="E"})
+end
+local A, h, dh, L, N = Z(-5,4), Z(0,-1), Z(0,-1.1), 5, 100
+Dpalette(ld.rainbow,A,h,L,N,"ld.rainbow"); A = A+dh
+Dpalette(ld.palAutumn,A,h,L,N,"ld.palAutumn"); A = A+dh
+Dpalette(ld.palGistGray,A,h,L,N,"ld.palGistGray"); A = A+dh
+Dpalette(ld.palGasFlame,A,h,L,N,"ld.palGasFlame"); A = A+dh
+Dpalette(ld.palRainbow,A,h,L,N,"ld.palRainbow")
+g:Show()
+\end{luadraw}

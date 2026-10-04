@@ -1,0 +1,59 @@
+% source: https://tex.stackexchange.com/a/749115 (question 749100, score 11, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749100/hilbert-curve-in-tikz
+\begin{document}
+\begin{luadraw}{name=Hilbert, exec=true}
+local n = 4
+local N = 2^n
+local g = graph:new{window={0,N,0,N}, size={12,12}}
+g:Setmatrix( matrixof( function(z) return z.re+cpx.I*(N-z.im) end) )
+g:Linejoin("round"); g:Linewidth(1)
+-- Calculating the color matrix
+local M, L = {} 
+for i = 1, N do
+    L = {}
+    for j = 1, N do table.insert(L,"") end
+    table.insert(M,L)
+end
+M[1][1] = "G"; M[1][2] = "B"; M[2][1] = "R"; M[2][2] = "W"  -- initial matrix
+local m, m2 = 1, 2
+for p = 1, n-1 do
+    -- complete the rows and columns from 1+2^p to 2^{p+1}
+    m = m2; m2 = 2*m2
+    for i = 1+m, m2 do
+        for j = 1, m do
+            M[i][j] = M[m+1-j][m2+1-i]
+        end
+    end
+    for j = 1+m, m2 do
+        for i = 1, m2 do
+            M[i][j] = M[i][m2+1-j]
+        end
+    end
+end
+local colors = { ["G"]="green!50",  ["W"]="white", ["B"]="blue!50", ["R"]="red!50"}
+for i = 1, N do
+    for j = 1, N do
+        g:Dsquare( Z(j-1,i-1), Z(j-1,i),-1,"draw=gray,fill="..colors[M[i][j]])
+    end
+end
+-- end of matrix colors
+-- Calculation of the curve
+local curve = { {Z(0.5,2), Z(0.5,1.5), Z(0.5,0.5), Z(1.5,0.5), Z(1.5,1.5), Z(2,1.5)} } --initial curve
+m, m2 = 1, 2
+for k  = 2, n do
+    local br = rotate(curve,-90,Z(m,m))
+    br = shift(br,Z(m2,m2))
+    local l = sym(curve,{m2,cpx.I})
+    local bl = sym(br,{m2,cpx.I}) 
+    bl[1][1] = rotate(bl[1][1],-90,bl[1][2])
+    curve = concat(bl,br,l,curve)
+    m = m2; m2 = 2*m2
+end
+g:Dpolyline(curve, "line width=1.2pt")
+g:Show()
+\end{luadraw}
+\end{document}

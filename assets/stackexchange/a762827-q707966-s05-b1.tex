@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/762827 (question 707966, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/707966/creating-a-tri-cylinder-intersection-surface-with-pgfplots
+\begin{document}
+\begin{luadraw}{name=cylinders_instersection}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{window={-6,6,-6,6}, viewdir={"central",30,60,20}, bbox=false}
+local nb = 100
+local C1 = ld.cylinder( M(-5,0,0),2,M(5,0,0), nb )
+local C2 = ld.cylinder( M(0,-5,0),2,M(0,5,0), nb )
+local C3 = ld.cylinder( M(0,0,-5),2,M(0,0,5), nb )
+local I12 = ld.concat( ld.clip3d(C1,C2), ld.clip3d(C2,C1) )
+local I = ld.concat( ld.clip3d(I12, C3), ld.clip3d(C3, I12) )
+g:Dfacet( I, {usepalette={ld.palAutumn,"z"}, edgecolor="lightgray", egdewidth=1} )
+g:Linecolor("gray")
+g:Dcylinder( M(-5,0,0),2,M(6,0,0) )
+g:Dcylinder( M(0,-5,0),2,M(0,5,0) )
+g:Dcylinder( M(0,0,-5),2,M(0,0,5) )
+g:Show()
+\end{luadraw}
+\end{document}

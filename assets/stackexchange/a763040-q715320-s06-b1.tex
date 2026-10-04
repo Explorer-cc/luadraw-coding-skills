@@ -1,0 +1,89 @@
+% source: https://tex.stackexchange.com/a/763040 (question 715320, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/715320/how-to-draw-3d-blocks-stacked-to-grow-on-each-other-without-caring-about-the-ord
+
+\begin{luacode*}
+local M = luadraw.pt3d.M
+
+function luadraw.create_stacks(xlen, ylen, zlen)
+    -- length, width, height of the space to fill
+    local positions = {} -- 3-dimensional matrix initialized with 0s
+    for L = 1, xlen do
+        local X = {}
+        for l = 1, ylen do
+            local Y = {}
+            for h = 1, zlen do table.insert(Y,0) end
+            table.insert(X,Y)
+        end
+        table.insert(positions,X)
+    end
+    for x = 1, xlen do  -- random positioning of cubes
+        for y = 1, ylen do
+            local nb = math.random(0,zlen)
+            -- we put number of cubes in the column (x,y,*) starting from the bottom
+            for z = 1, nb do positions[x][y][z] = 1 end
+        end
+    end
+    local top,side,back_front = {},{},{} -- to memorize the facets
+    for x = 1, xlen do -- loop over the positions matrix to determine the facets to draw
+        for y = 1, ylen do
+            for z = 1, zlen do
+                if positions[x][y][z] == 1 then -- there is a cube in  (x,y,z)
+                    if (z == zlen) or (positions[x][y][z+1] == 0) then -- no cube above so face up
+                        table.insert(top,{M(x,y,z),M(x-1,y,z),M(x-1,y-1,z),M(x,y-1,z)}) -- insert top face
+                    end
+                    if (y == ylen) or (positions[x][y+1][z] == 0) then -- no cube on the right so face up
+                        table.insert(side,{M(x,y,z),M(x,y,z-1),M(x-1,y,z-1),M(x-1,y,z)}) -- insert right face
+                    end
+                    if (y == 1) or (positions[x][y-1][z] == 0) then -- no cube on the side so face up
+                        table.insert(side,{M(x,y-1,z),M(x-1,y-1,z),M(x-1,y-1,z-1),M(x,y-1,z-1)}) -- insert side face
+                    end                    
+                    if (x == xlen) or (positions[x+1][y][z] == 0) then -- no cube in back_front so face up
+                        table.insert(back_front,{M(x,y,z),M(x,y-1,z),M(x,y-1,z-1),M(x,y,z-1)}) -- insert back_front face
+                    end
+                    if (x == 1) or (positions[x-1][y][z] == 0) then -- no cube behind so back face visible
+                        table.insert(back_front,{M(x-1,y,z),M(x-1,y,z-1),M(x-1,y-1,z-1),M(x-1,y-1,z)}) -- back face
+                    end
+                end
+            end
+        end
+    end
+    return top, side, back_front
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=cubes_stacks}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window3d={-2,6,-2,6,-2,6},size={10,10}}
+ld.Hiddenlines = false
+
+local win = {-7,7,-5,8}
+local top, side, back_front = ld.create_stacks(5,5,5)
+
+local draw = function()
+    g:Dscene3d(
+        g:addFacet(top, {backcull=true,color="Crimson"}), 
+        g:addFacet(side, {backcull=true,color="DarkGreen"}),
+        g:addFacet(back_front, {backcull=true,color="SteelBlue"}),
+        g:addPolyline(ld.facetedges(ld.concat(top,side,back_front))), -- drawing edges
+        g:addAxes(Origin,{arrows=1}))
+end
+
+g:Saveattr(); g:Viewport(-5,0,0,5); g:Coordsystem(table.unpack(win)); g:Setviewdir(45,60) -- top left
+draw(); g:Restoreattr()
+g:Saveattr(); g:Viewport(0,5,0,5); g:Coordsystem(table.unpack(win)); g:Setviewdir(-45,60) -- top right
+draw(); g:Restoreattr()
+g:Saveattr(); g:Viewport(-5,0,-5,0); g:Coordsystem(table.unpack(win)); g:Setviewdir(-135,60) -- bottom left
+draw(); g:Restoreattr()
+g:Saveattr(); g:Viewport(0,5,-5,0); g:Coordsystem(table.unpack(win)); g:Setviewdir(135,60) -- bottom right
+draw(); g:Restoreattr()
+g:Show()
+\end{luadraw}
+\end{document}

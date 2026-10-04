@@ -1,0 +1,35 @@
+% source: https://tex.stackexchange.com/a/763156 (question 763153, score 8, block 1)
+% Source - https://tex.stackexchange.com/q/763153
+% Posted by Jasper
+% Retrieved 2026-05-28, License - CC BY-SA 4.0
+
+\documentclass[tikz,border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/755458/how-can-you-draw-more-than-three-intersecting-planes-which-are-bounded-by-a-cube
+\begin{document}
+
+\begin{luacode*}
+local ld = luadraw --version 3.0
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+for i = 1, 24 do
+    local g = ld.graph3d:new{ adjust2d=true,bbox=false, viewdir={30,70+i*360/24} }
+    g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="lightgray", drawbox=true})
+    local style = function(color)
+        return {color=color, scale=1,opacity=0.8}
+    end
+    g:Dscene3d(
+        g:addPlane({Origin,vecK}, style("LightBlue")),
+        g:addPlane({-vecI,vecI+vecK-vecJ/2}, style("Yellow")),
+        g:addPlane({vecJ,vecJ+vecK-vecI/2}, style("Crimson")),
+        g:addPlane({vecI-vecJ,-vecJ}, style("ForestGreen")),
+        g:addPlane({vecK,-vecJ/3+vecK}, style("Navy")),
+        g:addPlane({3*vecI,vecI}, style("Beige"))
+    )
+    g:Sendtotex()
+end
+\end{luacode*}
+\end{document}

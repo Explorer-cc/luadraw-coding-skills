@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222166 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/436302/how-to-draw-differently-visible-and-hidden-part-of-arbitrary-circle-on-a-sphere
+%https://tex.stackexchange.com/questions/481283/intersection-of-a-sphere-and-a-plane-knowing-equations/748710#748710
+\begin{luadraw}{name=arc_on_sphere}
+local g = graph3d:new{window={-7,4,-3,7.5},viewdir={80,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local P = planeEqn(2,-2,1,-15)
+local C = M(1,-1,2)
+local H = proj3d(C,P)
+local R = 5
+local r = math.sqrt(R^2 - pt3d.abs(C-H)^2)
+local S = sphere(C,R,200,200) 
+local I = g:Intersection3d(S, P) 
+local V = I.visible[1]
+local A, B =  V[#V], V[1] 
+g:Dsphere(C,R,{color="LightBlue",mode=2})
+--g:Dedges(I, {color="red", hidden=true})
+g:Darc3d(B,H,A,r,-1,"red,"..Hiddenlinestyle) -- hidden part
+g:Ddots3d({C,H,A,B})
+g:Darc3d(B,H,A,r,1,"arrows={-Stealth[scale=2]}") -- visible part
+g:Dlabel3d( "$A$",A,{pos="SW"},"$B$",B,{pos="N"},"$C$",C,{pos="S"},"$H$",H,{pos="N"})
+g:Dpolyline3d({C,H},"dashed")
+g:Show()
+\end{luadraw} 
+\end{document} 

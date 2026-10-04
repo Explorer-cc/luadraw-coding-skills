@@ -1,0 +1,173 @@
+% source: https://github.com/pfradin/luadraw/discussions/288#discussioncomment-17625127 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/750541/pyramid-with-colors
+
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+
+function ld.graph3d:Cone_tangency(B, R, V, H) -- or Cone_tangency(B, R, H, options)
+    if not pt3d.isPoint3d(H) then -- format B, R, H
+        H = V; V = H-B
+    end
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    local O, I, J = ld.orthoframe({B, V})
+    local mat, H1 = self.matrix3d, H
+    if not ld.isID3d(mat) then
+        O, I, J = ld.mtransform3d(O,mat), ld.mLtransform3d(I,mat), ld.mLtransform3d(J,mat)
+        H1 = ld.mtransform3d(H,mat)
+    end
+    local f = function(t)
+        local  A = O + R*(cos(t)*I+sin(t)*J)
+        local N = self.Normal
+        if ld.projection_mode == "central" then N = ld.camera-A end
+        return pt3d.det(N, A-H1, R*(-sin(t)*I+cos(t)*J) )
+    end
+    local T = ld.solve(f,-pi,pi)
+        if (T ~= nil) and (#T >= 2) then
+        local M1, M2 = O+R*(cos(T[1])*I+sin(T[1])*J), O+R*(cos(T[2])*I+sin(T[2])*J)
+        if not ld.isID3d(mat) then
+            return ld.mtransform3d({M1, M2}, ld.invmatrix3d(mat))
+        else
+            return {M1, M2}
+        end
+    end
+end
+
+function ld.graph3d:Cylinder_tangency(B, R, V, H) -- or Cylinder_tangency(B, R, H)
+    if not pt3d.isPoint3d(H) then -- format B, R, H
+        H = V; V = H-B
+    end
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    local O, I, J = ld.orthoframe({B, V})
+    local mat, H1 = self.matrix3d, H
+    if not ld.isID3d(mat) then
+        O, I, J = ld.mtransform3d(O,mat), ld.mLtransform3d(I,mat), ld.mLtransform3d(J,mat)
+        H1 = ld.mtransform3d(H,mat)
+    end
+    local f = function(t)
+        local  A = O + R*(cos(t)*I+sin(t)*J)
+        local N = self.Normal
+        if ld.projection_mode == "central" then N = ld.camera-A end
+        return pt3d.det(N, V, R*(-sin(t)*I+cos(t)*J) )
+    end
+    local T = ld.solve(f,-pi,pi)
+        if (T ~= nil) and (#T >= 2) then
+        local M1, M2 = O+R*(cos(T[1])*I+sin(T[1])*J), O+R*(cos(T[2])*I+sin(T[2])*J)
+        if not ld.isID3d(mat) then
+            return ld.mtransform3d({M1, M2}, ld.invmatrix3d(mat))
+        else
+            return {M1, M2, M1+V, M2+V}
+        end
+    end
+end
+
+function ld.graph3d:Frustum_tangency(B, R, r, V, H) -- or Frustum_tangency(B, R, H)
+    if r == R then 
+        return self:Cylinder_tangency(B,R,V,H)
+    end
+    if not pt3d.isPoint3d(H) then -- format B, R, H
+        H = V; V = H-B
+    end
+    local k = r/R
+    local S = (H-k*B)/(1-k)
+    local P = self:Cone_tangency(B,R,V,S)
+    if P ~= nil then
+        return ld.concat(P, ld.scale3d(P, k, S))
+    end
+end
+
+function ld.graph3d:Sphere_tangency(C, R, P) -- C=center, R=radius, P=plane
+    local B, r, n = ld.interPS(P, {C,R})
+    if B == nil then return end
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    local O, I, J = ld.orthoframe({B,n})
+    local mat, C1 = self.matrix3d, C
+    local invmat = ld.invmatrix3d(mat)
+    if not ld.isID3d(mat) then
+        O, I, J = ld.mtransform3d(O,mat), ld.mLtransform3d(I,mat), ld.mLtransform3d(J,mat)
+        C1 = ld.mtransform3d(C,mat)
+    end
+    local f = function(t)
+        local A1 = O + r*(cos(t)*I+sin(t)*J)
+        local A = ld.mtransform3d(A1,invmat)
+        local N = self.Normal
+        if ld.projection_mode == "central" then N = ld.camera-A1 end
+        return pt3d.dot( ld.mLtransform3d(N, invmat), C-A)
+    end
+    local T = ld.solve(f,-pi,pi)
+        if (T ~= nil) and (#T >= 2) then
+        local M1, M2 = O+r*(cos(T[1])*I+sin(T[1])*J), O+r*(cos(T[2])*I+sin(T[2])*J)
+        if not ld.isID3d(mat) then
+            return ld.mtransform3d({M1, M2}, invmat)
+        else
+            return {M1, M2}
+        end
+    end
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=cylinder-cone-04}
+local ld = luadraw
+require 'luadraw_spherical'
+local pt3d = ld.pt3d
+local M, Mc, Ms, O, vecK = pt3d.M, pt3d.Mc, pt3d.Ms,pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local Rcone=4
+local hcone= 6
+local g = ld.graph3d:new{window={-Rcone-1,Rcone+1,-2.5,hcone},viewdir={70,60},size={12,12}}
+ld.Hiddenlinestyle = "dashed" 
+local Rcylinder=Rcone/2
+local hcylinder=(Rcone-Rcylinder)*hcone/Rcone 
+local T = M(0,0,hcone)
+local B = M(0,0,hcylinder)
+
+local C, D = table.unpack( g:Cone_tangency(B,Rcylinder,T) )
+local angle = 120*ld.deg
+local A = Mc(Rcylinder,angle,0)
+local X = Mc(Rcone,angle,0)
+local Y = A + hcylinder*vecK
+
+g:Dcone(O, Rcone, T ,{edgecolor="blue"})
+g:Dcylinder(O,Rcylinder,B, {edgestyle="dashed", edgecolor="red"})
+g:Darc3d(C,B,D,Rcylinder,1,vecK, "red")
+g:Dpolyline3d({{T,O,X},{B,Y,A}},"dashed,green")
+g:Dpolyline3d({{T,X}},"green")
+g:Ddots3d({O,T,A,B,X,Y})
+g:Dangle3d(T,O,X,0.25)
+g:Dlabel3d("$O$",O,{pos="S"}, "$T$",T,{pos="N"},"$A$",A,{pos="S"},"$X$",X,{},"$B$",B,{pos="W"},"$Y$",Y,{pos="N"})
+g:Ddots3d({C,D},"gray")
+g:Dlabel3d("$C$",C,{pos="NW", node_options="gray"}, "$D$",D, {pos="NE"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=cylinder-cone-sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local Rsphere = 5
+local Rcone = 2 * sqrt(2) * Rsphere / 3
+local hcone = 4 / 3 * Rsphere
+local B = M(0, 0, -Rsphere / 3) 
+local T = M(0, 0, hcone - Rsphere / 3)
+local Rcylinder = 2 * Rcone / 3
+local hcylinder = hcone / 3
+local H_cyl = M(0, 0, -Rsphere / 3 + hcylinder) 
+local g = ld.graph3d:new{window={-Rsphere-1,Rsphere+1,-Rsphere-1,Rsphere+1},viewdir={70,60},size={12,12}}
+ld.Hiddenlinestyle = "dashed" -- after the declaration of graph g
+local U, V = table.unpack( g:Sphere_tangency(O, Rsphere, {B,vecK}) )
+
+g:Dsphere(O,Rsphere, {mode=ld.mBorder, edgecolor="blue"})
+g:Dcylinder(B, Rcylinder, H_cyl, {edgestyle="dashed", edgecolor="red"}) 
+g:Dcone(B, Rcone, T, {edgestyle="dashed", edgecolor="green"})
+g:Darc3d(U,B,V,Rcone,1,vecK,"green")
+g:Ddots3d({U,V},"gray")
+g:Dlabel3d("$U$",U,{pos="W", node_options="gray"}, "$V$",V, {pos="E"})
+g:Show()
+\end{luadraw}
+\end{document}

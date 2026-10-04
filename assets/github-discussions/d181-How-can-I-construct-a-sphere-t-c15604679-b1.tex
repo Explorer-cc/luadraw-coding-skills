@@ -1,0 +1,36 @@
+% source: https://github.com/pfradin/luadraw/discussions/181#discussioncomment-15604679 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=pencil_of_sphere}
+
+require 'luadraw_spherical'
+local P = planeEqn(2,1,-2,41) -- the plane
+local I = M(1,3,5)
+local R = 13
+local S = {I,R}  -- the first sphere
+local T,r,n = interPS(P,S) -- the circle
+local A = M(-2,1,1) -- must be on the sphere we are looking for
+local J = dproj3d(A,{T,n})
+local r2 = pt3d.abs(A-J)
+local h = pt3d.abs(T-J)
+local OT = (h^2+r2^2-r^2)/(2*h) -- we must have: OT^2+r^2 = OJ^2+r2^2
+local O = T+OT*pt3d.normalize(n) -- center of the sphere we are looking for
+local r3 = pt3d.abs(O-A)  -- radius of the sphere we are looking for
+local x1,x2,y1,y2,z1,z2 = getbounds3d( {O-r3*vecI, O+r3*vecI, O-r3*vecJ, O+r3*vecJ, O-r3*vecK, O+r3*vecK })
+local ends = {}
+local g = graph3d:new{window3d={x1,x2,y1,y2,z1,z2}, window={-6,12,-2,16}, viewdir={80,60},size={12,12}}
+g:Linewidth(6); Hiddenlinestyle = "dashed";Hiddenlines = true
+
+g:Define_sphere({center=O, radius=r3}) 
+g:DSstars(A); g:DSdots({O,T,J}); g:DSline({T,n});
+g:DScircle({T,n},{color="Blue",width=6,out=ends})
+g:DSpolyline({O,A,J}); g:DSseg({T,ends[2]})
+g:Dspherical()
+g:Dangle3d(A,J,O,0.35); g:Dangle3d(O,T,ends[2],0.35)
+g:Dlabel3d("$O$",O,{pos="NW"},"$T$",T,{},"$J$", J,{}, "$A$",A,{pos="W"})
+g:Show()
+\end{luadraw} 
+\end{document} 

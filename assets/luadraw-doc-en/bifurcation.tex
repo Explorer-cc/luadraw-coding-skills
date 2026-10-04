@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-pdfliteral.tex (demo: Bifurcation diagram of the sequence $u_{u+1)
+\begin{luadraw}{name=bifurcation}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window={2.65,4,-0.15,1}, size={10,10} }
+require 'luadraw_pdfliteral'
+local dots = {}
+for r = 2.75, 4, 0.001 do
+    local u = 0.5
+    for k = 1, 25 do u = r*u*(1-u) end -- transition
+    for k = 1, 25 do u = r*u*(1-u); table.insert(dots, Z(r,u)) end
+end
+g:Daxes({Z(2.75,0),0.25,0.2}, {limits={{2.75,4},{0,1.001}}, originpos={"center","center"} })
+g:Dliteraldots(dots, {width=1, color=ld.Red}) -- 31275 points
+g:Show()
+\end{luadraw}

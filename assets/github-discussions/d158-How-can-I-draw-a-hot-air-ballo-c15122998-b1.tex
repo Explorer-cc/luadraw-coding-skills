@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/158#discussioncomment-15122998 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+\begin{luadraw}{name=balloon}
+local g = graph3d:new{bbox=false,viewdir={35,70},bg="LightBlue!50"}
+local A, B = 4*vecK, -3*vecK
+local L = bezier3d(A,A-5*vecJ, B-4*vecJ+4*vecK, B-vecJ)[1]
+local S = rotline(L,{Origin,vecK},0,360,{nbdots=37})
+local d = 0.5
+L = map(function(A) local A1=pz(A); return A1+1.005*(A-A1) end, L) -- we slightly separate the balloon cables
+table.insert(L,B-0.95*vecJ-d*vecK) -- We add a small length for the gondola
+local wires = {L}
+for k = 1, 12 do
+    table.insert(wires, rotate3d(L,30*k,{Origin, vecK}))
+end
+g:Dfrustum(B-d*vecK,0.95,0.85,-vecK, {color='Maroon',mode=mGrid,hiddenstyle="noline"})
+g:Dcircle3d(B-d*vecK,0.95,vecK,"Navy,line width=0.8pt")
+g:Dscene3d( g:addFacet(S, {backcull=true, usepalette={palRainbow,"z", contrast=0.25}}),
+    g:addPolyline(wires, {width=8, color="Navy"})
+)
+g:Show()
+\end{luadraw}
+\end{document} 

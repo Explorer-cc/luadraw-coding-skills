@@ -1,0 +1,31 @@
+% source: https://github.com/pfradin/luadraw/discussions/298#discussioncomment-18063950 (pfradin, block 1)
+\begin{luadraw}{name=linear_prog7}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-2,10,-2,8}, size={15,15},margin=0.5}
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+
+local function coord(A)
+    return "("..ld.strReal(A.re,2)..","..ld.strReal(A.im,2)..")" --returns a string in the format "(x,y)"
+end
+
+local sol = {}
+g:Dconstraints(
+'x>0', {color="green", label="", pattern=ld.mypattern(30)},
+'y>0', {color="green", ld.mypattern(-60),label=""},
+     '12*x+2*y>23', {color="purple", label="$12x+2y=23$", pattern=ld.mypattern(30),anchor1d=0.6},
+ '6*x+20*y>59', {color="orange", ld.mypattern(-60),label="$6x+20y=59$"},
+'18*x+22*y< 139', {color="blue", pattern=ld.mypattern(30),label="$18x+22y=139$",anchor1d=0.5},
+    sol
+    )
+g:Ddots(sol) -- vertices of the polygon
+g:Dpolyline(sol,true, {draw_options='draw=none,fill=cyan,fill opacity=0.5'})
+local pts = sol[1] 
+local A, B, C = pts[1], pts[2], pts[3]
+g:Dlabel(
+    "$A"..coord(A).."$", A, {pos="W"},
+    "$B"..coord(B).."$", B, {pos="SW"},
+    "$C"..coord(C).."$", C, {pos="NE"}
+)
+g:Show()
+\end{luadraw}

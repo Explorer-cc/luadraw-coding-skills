@@ -1,0 +1,27 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-linprog.tex (demo: The \emph{g:DlinprogHalfPlanes())
+\begin{luadraw}{name=linear_prog2}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = ld.cpx.Z
+local g = ld.graph:new{window={-3,6,-3,4.5}, size={10,10}}
+require 'luadraw_linprog'
+local C = {'x+y<2','x-y>-2','x+y/3>-2','y>-2'} -- contraints
+local function mypattern(angle, distance)
+    angle = angle or 0
+    distance = distance or 0.25 -- distance in centimeter
+    return "{Lines[angle="..angle..",distance="..distance.."cm]}"
+end
+local polygon, optimization = ld.linprogSolve(C,-5,5,-5,5,{"-2*x+y"})
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+g:Dpolyline(polygon, true, "draw=none,fill=Pink, fill opacity=0.6")
+g:DlinprogHalfPlanes(
+    C[1], {color="red", pattern=mypattern(-45)},
+    C[2], {color="blue", pattern=mypattern(45)},
+    C[3], {color="gray", pattern=mypattern(90), anchor1d=0.2},
+    C[4], {color="orange", pattern=mypattern(0)}
+    )
+for _, obj in ipairs(optimization) do
+    g:DlinprogObjectiveLine(obj, {color="ForestGreen", dots=true})
+end
+g:Show()
+\end{luadraw}

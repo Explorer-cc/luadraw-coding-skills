@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/301#discussioncomment-17973471 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=tetrahedron1} 
+local ld = luadraw 
+local pt3d = ld.pt3d 
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin, pt3d.vecK 
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt 
+local g = ld.graph3d:new{window={-2,6,-1,5}, viewdir={240,60} ,size={12,12}} 
+ld.Hiddenlinestyle = "dashed"; 
+local ASB,BSC,ASC=60,60,45 
+local as,bs,cs = 5, 6, 7
+local ab,bc,ac= sqrt(as^2 + bs^2 - 2*as*bs*cos(ASB*ld.deg)),sqrt(bs^2+cs^2-2*bs*cs*cos(BSC*ld.deg)), sqrt(as^2+cs^2-2*as*cs*cos(ASC*ld.deg)) 
+local A,B,C,S = ld.tetra_len(ab,ac,as,bc,bs,cs) 
+local T = ld.tetra(A,B-A,C-A,S-A) 
+local H = ld.proj3d(A,{S,pt3d.prod(B-S,C-S)})
+local u = pt3d.prod(C-S,A-S)
+local v = pt3d.prod(B-S,C-S)
+local a = pt3d.angle3d(u,v)
+local I = (3*C+S)/4 -- a dot on (SC)
+local d1, d2 =  pt3d.prod(u,C-S), pt3d.prod(C-S,v)
+-- a point J1 in (SCA) with (IJ1) and (IC) orthogonal
+-- a point J2 in (SCB) with (IJ2) and (IC) orthogonal
+local J1, J2 = I + 0.7*pt3d.normalize(d1), I + 0.7*pt3d.normalize(d2)
+g:Dpoly(T, {color="Crimson",mode=ld.mShadedHidden}) 
+g:Ddots3d({A,B,C,S,H}) 
+g:Dpolyline3d({A,H},"dashed")
+g:Dangle3d(A,H,B,0.25,"dashed") 
+-- angle a
+g:Dpolyline3d({I,J1}); g:Dpolyline3d({I,J2},"dashed")
+g:Dangle3d(C,I,J1,0.25); g:Dangle3d(C,I,J2,0.25,"dashed")
+g:Darc3d(J1,I,J2,0.5,1,"dashed")
+g:Labelsize("footnotesize")
+g:Dlabel3d( "$A$",A,{pos="S"}, "$B$",B,{pos="S"}, "$C$",C,{pos="N"},"$S$",S,{pos="N"},
+    "$"..ld.strReal(a*ld.rad,2).."^\\circ$",(J1+J2)/2,{pos="E"},"$H$",H,{pos="N"}) 
+g:Show() 
+\end{luadraw}
+\end{document} 

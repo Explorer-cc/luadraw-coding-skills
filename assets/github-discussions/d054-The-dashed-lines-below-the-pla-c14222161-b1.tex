@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222161 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%menger
+\begin{luadraw}{name=project_line_20_08_2025}
+local g = graph3d:new{window3d={-0.5,2,-0.5,2,-0.5,2},window={-2,3,-2,3}, viewdir={20,70}, size={10,10},border=true}
+g:Linejoin("round"); g:Linewidth(1); Hiddenlines = true; Hiddenlinestyle = "dotted"
+local P = poly2facet( parallelep(Origin,vecI,vecJ,vecK) )
+local Facet = {}
+local Edges = {}
+for x = 0, 2 do
+    for y = 0, 2 do
+        for z = 0, 2 do
+            local Q = shift3d(P,M(x,y,z))
+            if ((x~=1) or (y~=1)) and ((x~=1) or (z~=1)) and ((z~=1) or (y~=1)) then
+                insert(Facet, Q )
+            else
+                insert(Edges, facetedges(Q)) 
+            end
+        end
+    end
+end
+g:Dscene3d( g:addFacet(Facet,{backcull=true,color="Pink"}), g:addPolyline( Edges) )
+g:Dpoly(parallelep(Origin,3*vecI,3*vecJ,3*vecK),{mode=0})
+g:Show()
+\end{luadraw}
+\end{document} 

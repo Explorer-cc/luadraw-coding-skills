@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/255#discussioncomment-18029257 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%%https://tex.stackexchange.com/questions/739936/fill-area-between-hyperbola-and-line-with-pgfplots
+\begin{luadraw}{name=fill}
+local ld = luadraw
+local cpx = ld.cpx
+local sqrt = math.sqrt
+local Z, i = cpx.Z, cpx.I
+local xmin, xmax, ymin, ymax = -18, 18, -2, 12
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax}, size={12,12}}  
+g:Daxes({0,2,2}, {grid=true, gridstyle = "dashed",arrows="-Stealth", legend={"$x$","$y$"}})
+g:Linewidth(12)
+g:Linecap("round")
+local f = function(x) return sqrt(3)/4*sqrt(256-x^2)  end
+local h = function(x) return sqrt(100-x^2) end
+g:Dinequalities({f,'>', h,'<'}, {view={-10,10,0,10}, draw_options="draw=none,fill=green,fill opacity=0.6"})
+g:Dcartesian(f, {draw_options="blue"});
+g:Dcartesian(h, {draw_options="violet"});
+g:Show()
+\end{luadraw}
+\end{document} 

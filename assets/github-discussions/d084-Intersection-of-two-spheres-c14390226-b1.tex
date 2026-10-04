@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/84#discussioncomment-14390226 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=interSS}
+local g = graph3d:new{window={-10,13,-10,15},viewdir={240,50},size={10,10}}
+ g:Linewidth(4); Hiddenlinestyle = "dashed"; Hiddenlines = true
+require 'luadraw_spherical'
+local I1, I2 = M(3,-4,0), M(3,2,8)
+local R1,R2 = 8, 6
+local S1,S2 = {I1, R1},{I2, R2}
+local I,r,n = interSS(S1, S2)
+local s2 = sphere(I2,R2,40,40)
+s2 = cutfacet(s2, {I,n})
+s2 = g:Classifyfacet(s2)
+g:Define_sphere({center=I1, radius=R1}) 
+g:DScircle({I,n},{color="Blue"})
+g:Dspherical()
+g:Dpolyline3d( border(s2), "ball color=blue, blue, fill opacity=0.5")
+g:Ddots3d({I1,I2,I})
+g:Dpolyline3d({I1,I2}, "dashed")
+g:Dlabel3d("$I_1$",I1,{pos="S"}, "$I_2$",I2,{pos="N"}, "$I$",I,{pos="E"})
+g:Show()
+\end{luadraw} 
+\end{document} 

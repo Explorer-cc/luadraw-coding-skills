@@ -1,0 +1,48 @@
+% source: https://github.com/pfradin/luadraw/discussions/143#discussioncomment-14934986 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{luacode*}
+function perspective(k,alpha) 
+--k is a ratio and alpha is an angle in degrees.
+    alpha = alpha*deg -- conversion degrees -> radians (deg = pi/180)
+    local r = 1/math.sqrt(1+k^2)
+    local cos_alpha = math.cos(alpha) -- to calculate them only once
+    local sin_alpha = math.sin(alpha)
+    local phi = math.acos(k*sin_alpha*r)*rad -- angles in degrees for viewdir (rad = 180/pi)
+    local theta = cpx.arg(Z(1,k*cos_alpha))*rad
+    
+    function graph3d:Proj3d(L) -- we redefine Proj3d
+        local f = function(A)
+            if isPoint3d(A) then  -- We only transform the 3D points; the rest remains unchanged.
+                return Z(A.y-k*cos_alpha*A.x, A.z-k*sin_alpha*A.x)
+                -- In this perspective, vecJ becomes 1 and vecK becomes i
+            else return A end
+        end
+        L = self:Mtransform3d(L) -- we apply the 3D matrix of the graph
+        return ftransform3d(L,f)
+    end
+    return {theta,phi}
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=box3d}
+local g = graph3d:new{
+    window ={-6,6.5,-5,5.5},
+    viewdir = perspective(0.65,60), --<<-- just use it here
+    size={10,10}
+}
+
+local P = parallelep(Origin,4*vecI,6*vecJ,1.5*vecK) -- rectangular box
+table.remove(P.facets,2)
+P = shift3d(P,-isobar3d(P.vertices)) -- to center P on the origin
+g:Dscene3d(
+    g:addPoly(P,{edge=true,hidden=true,contrast=0,twoside=false,edgewidth=6}),
+    g:addFacet( getfacet(P,1) ,{color="LightGray"}),
+    g:addAxes(Origin, {arrows=1}) -- to verify that P is correctly translated
+)
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,42 @@
+% source: https://tex.stackexchange.com/a/765262 (question 726438, score 8, block 1)
+\documentclass[border=5pt,tikz]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/726438/drawing-the-steinmetz-solid-with-tikz
+\begin{document}
+\begin{luadraw}{name=Steinmetz_solid1}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window3d={-4,4,-4,4,-2.5,2.5}, adjust2d=true, size={12,12}}
+require 'luadraw_povray'
+local r = 2.5
+g:Pov_new()
+g:Pov_cylinder(-4*vecI, r, 4*vecI, {color=ld.Red, hollow=true})
+g:Pov_cylinder(-4*vecJ, r, 4*vecJ,{color=ld.Blue, hollow=true})
+g:Pov_exec()
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", zlabelstyle="W"})
+g:Pov_show()
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=Steinmetz_solid2}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window3d={-4,4,-4,4,-2.5,2.5}, adjust2d=true, size={12,12}}
+require 'luadraw_povray'
+local r = 2.5
+g:Pov_new()
+g:Pov_cylinder(-4*vecI, r, 4*vecI, {name="C1", render=false})
+g:Pov_cylinder(-4*vecJ, r, 4*vecJ, {name="C2", render=false})
+g:Pov_intersection( {"C1", "C2"}, {usepalette={ld.palGasFlame,"z",{-r,r}}, opacity=0.7})
+g:Pov_exec()
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", zlabelstyle="W"})
+g:Pov_show()
+g:Dcylinder(-4*vecI, r, 4*vecI, {edgecolor="red"})
+g:Dcylinder(-4*vecJ, r, 4*vecJ, {edgecolor="blue"})
+g:Show()
+\end{luadraw}
+\end{document}

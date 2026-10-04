@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/121#discussioncomment-14685714 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%
+\begin{luadraw}{name=cube}
+local g = graph3d:new{window={-3,3,-3,3},viewdir={40,70},size={12,12}}
+local a = 3
+local P = parallelep(Origin, a*vecI,a*vecJ,a*vecK)
+local Pv, Ph = g:Classifyfacet(P)
+local A, B = M(a,0,a), M(0,a,a)
+local n = 8
+local u,v = (B-A)/(n+1), M(1,1,0)/(3*math.sqrt(2)) -- to make "zigzag"
+local L = map(function(k) return A+k*u+(2*(k%2)-1)*(0.5+math.random()/2)*v end, range(1,n)) -- broken line
+L = concat({A},L,{B,a*vecK}) -- top of cube
+g:Dfacet(Ph,{color="Orange"})
+g:Dfacet(L,{color="Orange"})
+g:Show()
+\end{luadraw}
+\end{document} 

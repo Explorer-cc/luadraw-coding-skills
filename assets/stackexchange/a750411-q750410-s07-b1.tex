@@ -1,0 +1,35 @@
+% source: https://tex.stackexchange.com/a/750411 (question 750410, score 7, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\begin{document}
+\begin{luadraw}{name=implicit_function}
+    local g = graph:new{window={-3,3,-3,3},size={10,10}}
+    g:Linecap("round")
+    
+    local DtangentI = function(f,x0,y0,len,draw_options) -- f:(x,y()) -> f(x,y)
+        -- We assume that f(x0,y0)=0! 
+        local h = 1e-6
+        local A = Z(x0,y0)
+        local a,b = (f(x0+h,y0)-f(x0-h,y0))/(2*h), (f(x0,y0+h)-f(x0,y0-h))/(2*h)
+        local v = Z(-b,a)
+        if len == nil then 
+            g:Dline({A,v},draw_options)
+        else
+            local u = len*v/cpx.abs(v)/2
+            g:Dseg({A-u,A+u},draw_options) -- on renvoie un segment
+        end
+    end
+    
+    local F = function(x,y) return x^2+y^2+x*y-1 end
+    g:Dimplicit(F,{draw_options="thick"})
+    g:Dgradbox(
+        {Z(-2,-2),Z(2,2),1,1},{grid=true,title="\\textbf{Implicit Function Plot}"}
+    )
+    local x0 = 1/math.sqrt(3) 
+    local L = solve(function(t) return F(x0,t) end,-2,2)
+    for _, y in ipairs(L) do
+        DtangentI(F,x0,y,2,"thick,red") -- This work!!
+    end
+    g:Show()
+\end{luadraw}
+\end{document}

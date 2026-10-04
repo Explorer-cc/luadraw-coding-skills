@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/750671 (question 750663, score 7, block 1)
+% !TeX TS-program = lualatex
+\documentclass{standalone}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage[locale=FR]{siunitx}% pour avoir la virgule
+\begin{document}
+\begin{luadraw}{name=virgule}
+local g = graph:new{
+  window={-1,4,-1,8,1,0.4},
+  size={10,10}
+  }
+--
+defaultlabelshift = 0
+g:Labelsize("scriptsize")
+--
+local mygrad = function(grad1,grad2,unit)
+    local rep = {}
+    for x = grad1, grad2 do
+        table.insert(rep,x); table.insert(rep,"$\\num{"..x*unit.."}$")
+    end
+    return rep
+end
+--
+g:Daxes({0,0.4,1},
+    {
+        arrows="->",
+        limits={{0,3.2},{0,8}},
+        nbsubdiv={1,1},
+        legend={"Temps (en seconde)","Hauteur (en mètre)"},
+        legendpos={0.8,0.975},
+        legendsep={0.4,0.},
+        grid=true,
+        gridcolor="lightgray",
+        myxlabels = mygrad(0,7,0.4) -- from graduation 0 to graduation 7 with a step of 0.4
+    })
+--    
+g:Show()
+\end{luadraw}
+\end{document}

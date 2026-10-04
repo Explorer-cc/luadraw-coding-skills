@@ -1,0 +1,50 @@
+% source: https://github.com/pfradin/luadraw/discussions/306#discussioncomment-18021188 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=cube_split}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc, O, vecK, vecI, vecJ = pt3d.M, pt3d.Mc, pt3d.Origin, pt3d.vecK, pt3d.vecI, pt3d.vecJ
+local Z = ld.cpx.Z
+local g = ld.graph3d:new{window={-20,20,-20,20}, viewdir={70,70}, size={12,12}}
+ld.Hiddenlinestyle = "dashed"
+ld.Hiddenlines = true
+local k, a, b, h = 3, 2, 3, 4
+local P = ld.parallelep(M(-k*a,-k*b,-k*h)/2, k*a*vecI, k*b*vecJ, k*h*vecK)
+local A, E, B, F, G, D, H, C = table.unpack(P.vertices)
+local T1 = ld.pyramid({B, C, D}, A)
+local T2 = ld.pyramid({C, D, H}, B)
+local T3 = ld.pyramid({A, B, F}, C)
+local T4 = ld.pyramid({A, E, B}, D)
+local T5 = ld.pyramid({C, D, G}, A)
+
+local tx, ty = 12,12 -- translation on x and on y
+local Tbl, Ttl, Tbr, Ttr = Z(-tx,-ty), Z(-tx,ty), Z(tx,-ty), Z(tx, ty) 
+
+g:Dpoly(T1, {color="Crimson"})
+g:Dpoly(P, {mode=ld.mWireframe})
+g:Dlabel3d(
+    "$A$", A, {pos="S"}, "$B$", B, {}, 
+    "$E$", E, {}, "$F$", F, {},"$C$", C, {pos="N"}, "$D$", D, {}, "$G$", G, {}, "$H$", H, {}
+)
+g:Shift(Tbl); g:Dpoly(T2, {color="cyan", mode=ld.mShadedHidden})
+g:Dlabel3d("$B$", B, {pos="S"}, "$C$", C, {pos="N"}, "$D$", D, {}, "$H$", H, {} )
+g:Shift(-Tbl)
+
+g:Shift(Ttl); g:Dpoly(T4, {color="RoyalBlue", mode=ld.mShadedHidden})
+g:Dlabel3d("$A$", A, {pos="S"}, "$E$", E, {pos="S"}, "$D$", D, {pos="N"}, "$B$", B, {pos="S"} )
+g:Shift(-Ttl)
+
+g:Shift(Tbr); g:Dpoly(T3, {color="SeaGreen", mode=ld.mShadedHidden})
+g:Dlabel3d("$A$", A, {pos="S"}, "$F$", F, {pos="S"}, "$C$", C, {pos="N"}, "$B$", B, {pos="S"} )
+g:Shift(-Tbr)
+
+g:Shift(Ttr); g:Dpoly(T5, {color="orange", mode=ld.mShadedHidden})
+g:Dlabel3d("$A$", A, {pos="S"}, "$D$", D, {pos="N"}, "$C$", C, {pos="N"}, "$G$", G, {pos="N"} )
+g:Shift(-Ttr)
+
+g:Show()
+\end{luadraw}
+\end{document} 

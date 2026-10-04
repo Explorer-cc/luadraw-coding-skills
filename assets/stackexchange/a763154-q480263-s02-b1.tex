@@ -1,0 +1,58 @@
+% source: https://tex.stackexchange.com/a/763154 (question 480263, score 2, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/480263/multiple-2d-gaussian-ellipses-in-3d-plot
+\begin{document}
+\begin{luadraw}{name=Gaussian_ellipses}
+local ld = luadraw
+local pt3d, cpx =ld.pt3d, ld.cpx
+local M, Z = pt3d.M, cpx.Z
+local g = ld.graph3d:new{ viewdir={40,60}, window3d={-4,4,-4,4,-4,4}, window={-3,3.5,-2.5,3.5}, size={12,12} }
+local pal = {ld.White, ld.Blue}
+local nb = 50
+local color = ld.getpalette(pal,nb)
+local sc = ld.reverse( ld.linspace(0.05,1,nb) )
+local a, b = 0.5,1
+
+local shaded_ellipse = function(y,z)-- draw in the plane Y=y, origin at Z=z
+    g:Setmatrix({g:Proj3d( M(0,y,z) ), g:Proj3dV( M(1,0,0) ), g:Proj3dV( M(0,0,1) )})
+    g:Writeln("\\begin{scope}[transparency group, fill opacity=0.8]")
+    for k = 1, nb do
+        g:Dellipse(0,a*sc[k],b*sc[k],0,"draw=none,fill="..color[k])
+    end
+    g:Writeln("\\end{scope}")
+    g:Dellipse(0,a*0.8,b*0.8,0,"very thin")
+    local u, v, w, x = Z(-a,-b), Z(a,-b), Z(a,b), Z(-a,b)
+    for _, seg in ipairs({{u,v},{v,w},{w,x},{x,u}}) do g:Dseg(seg,1.25,"lightgray") end
+    if z ~= 0 then g:Dseg({Z(0,-z),0},"thick,-latex") end
+    if y < 0 then g:Darc( w,0,x,1.5,1,"-stealth")
+    else g:Darc( x,0,w,1.5,-1,"-stealth")
+    end
+    g:IDmatrix()
+end
+
+g:Dpolyline3d( {M(0,-4,0),M(0,-3,0)}, "thick")
+shaded_ellipse(-3,0.5)
+g:Dpolyline3d( {M(0,-3,0),M(0,-1,0)}, "thick")
+shaded_ellipse(-1,0)
+g:Dpolyline3d( {M(0,-1,0),M(0,1,0)}, "thick")
+g:Dpolyline3d( {{M(-4,0,0),M(4,0,0)}, {M(0,0,-1),M(0,0,4)}}, "thick,-stealth")
+g:Dpolyline3d({M(0,0,0), M(0,0,3)},"line width=2pt,-latex,blue")
+shaded_ellipse(1,0)
+g:Dpolyline3d( {M(0,1,0),M(0,3,0)}, "thick")
+shaded_ellipse(3,0.5)
+g:Dpolyline3d( {{M(0,3,0),M(0,4,0)}}, "thick,-stealth")
+g:Dlabel3d("$X_{\\omega}$",M(0,0,4),{pos="E"}, "$Y_{\\omega}$",M(4,0,0),{pos="S"},
+    "$\\omega$",M(0,4,0),{pos="SE"}, 
+    "$\\omega_0-\\Omega_2$", M(0,-3,-0.5),{dir={M(-1,0,0),M(0,0,1)},pos="S"},
+    "$\\omega_0-\\Omega_1$", M(0,-1,-1),{},
+    "$\\omega_0$", M(0,0,-1),{}, "$\\omega_0+\\Omega_1$", M(0,1,-1),{},
+    "$\\omega_0+\\Omega_2$", M(0,3,-0.5),{},
+    "Lower sideband",M(0,-1.5,1.75),{pos="N",dir={},node_options="font=\\footnotesize"},
+    "Upper sideband",M(0,2.5,2),{}
+    )
+g:Show()
+\end{luadraw}
+\end{document}

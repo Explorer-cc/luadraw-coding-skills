@@ -1,0 +1,58 @@
+% source: https://github.com/pfradin/luadraw/discussions/331#discussioncomment-18404861 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=orbit_ellipse}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sin, cos, pi = math.sin, math.cos, math.pi
+local g = ld.graph3d:new{ viewdir={-20,70}, size={10,10} }
+require 'luadraw_povray'
+ld.Hiddenlinestyle = "dotted"
+local r, R1 = 1, 4
+-- second orbit : ellipse with origin at the focus
+local a = 4.5
+local b = math.sqrt(R1*a)
+local c = math.sqrt(a^2-R1*a)
+local  p = function(t) return ld.rotate3d(ld.shift3d(a*cos(t)*vecJ-b*sin(t)*vecI,-c*vecJ),45,{O,vecI}) end
+local t0 = pi/6
+local A, B, Ap, Bp, S, h = R1*vecI, p(0), -R1*vecI, p(pi), p(t0), 1e-6
+local U, V = Ms(5,-pi/4,pi/2), Ms(5,pi/2-pi/4,pi/2)    
+local T = pt3d.normalize( (p(t0+h)-p(t0-h))/(2*h) ) -- tangent
+-- povray
+g:Pov_new()
+g:Pov_sphere(O, r,  {color=ld.SkyBlue, opacity=0.7})
+g:Pov_circle(O, r, vecK, {color=ld.Green})
+g:Pov_circle( O,R1, vecK, {width=8, color=ld.Green})
+g:Pov_facet( ld.circle3d(O,R1,vecK), {color=ld.Green, opacity=0.6})
+g:Pov_circle(O, r, Ms(1,pi/2,3*pi/4), {color=ld.Orange})
+g:Pov_polyline( ld.parametric3d(p,-pi,pi), {width=8, color=ld.Orange})
+g:Pov_facet( ld.parametric3d(p,-pi,pi), {color=ld.Orange, opacity=0.6})
+g:Pov_dots(O)
+g:Pov_polyline({{A,Ap}, {B,Bp}, {O,S}}, {color=ld.Blue, width=6})
+g:Pov_polyline({{O,5*vecK}, {O,U}, {O,V}}, {arrows=1, width=6})
+g:Pov_exec()
+g:Pov_show()
+-- tangent
+g:Dseg3d({S,S+2*T}, "-stealth, red, thick")
+-- arcs
+local r = 2
+g:Darc3d(A,O,B,r,1,"red,-stealth")
+g:Darc3d(B,O,S,r,1,"red,-stealth")
+g:Darc3d(U,O,vecI,r,1,"red,-stealth")
+local W = p(-pi/2+pi/6)
+local d = pt3d.abs(W-A)
+g:Darc3d(Ms(R1,d/3,pi/2),A,W,d,1,"red,-stealth") 
+-- dots and labels   
+g:Ddots3d({A,B,Ap,Bp, (Bp+B)/2})
+g:Dballdots3d(S,"red",1.5)
+g:Dlabel3d( "$A$",A,{pos="S"}, "$B$",B,{pos="N"}, "$A'$",Ap,{pos="NW"},
+    "$B'$",Bp,{pos="S"}, "$O$",(B+Bp)/2,{}, "$x$",U,{pos="S"}, "$y$", V, {}, "$z$",5*vecK,{pos="N"}, 
+    "$S$",S,{pos="N", dist=0.1, node_options="red"} )
+g:Show()
+\end{luadraw}
+\end{document}

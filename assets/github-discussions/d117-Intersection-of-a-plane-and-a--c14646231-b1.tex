@@ -1,0 +1,28 @@
+% source: https://github.com/pfradin/luadraw/discussions/117#discussioncomment-14646231 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/473179/intersection-of-a-line-with-a-plane-where-is-wrong-in-my-code
+\begin{luadraw}{name=sphere-pyramid_30_09_2025}
+local g = graph3d:new{window={-1,6,-3,3}, viewdir={15,65}, size={10,10}};
+g:Linewidth(5)
+Hiddenlines = true
+Hiddenlinestyle = "dashed"
+local a, b, h = 3, 3, 5
+local A, B, C, D, S = Origin, M(-2,5,0), M(4,4,0), M(6,2,0), M(a,b,h)
+local P = pyramid({A,D,C,B},S)  -- pay attention to the orientation, the base must be oriented by S
+local O = interDD({A,C-A},{B,D-B})
+local X = ({O,-pt3d.prod(A-B,S-C)}) -- change the sign of the normal vector to the plane to change the orientation
+local I, section = g:Intersection3d(P,X) 
+local E,F,G,H = table.unpack(section)
+g:Dscene3d(
+g:addPoly(P, {edge=true,color="green",edgewidth=4}),
+g:addPolyline({{E,F,G,H,E},{A,C},{B,D},{S,O}})
+)
+g:Ddots3d({A,B,C,D,S,O,E,F,G,H})
+g:Dlabel3d("$S$",S,{pos="N"}, "$A$",A,{pos="W"}, "$B$",B,{pos="S"}, "$C$",C,{pos="S"}, "$D$",D,{},"$O$",O,{},"$E$",E,{pos="W"},"$H$",H,{pos="W"},"$F$",F,{pos="E"},"$G$",G,{pos="E"})
+g:Show() 
+\end{luadraw}
+\end{document}

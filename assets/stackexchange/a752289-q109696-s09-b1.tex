@@ -1,0 +1,56 @@
+% source: https://tex.stackexchange.com/a/752289 (question 109696, score 9, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/109696/stereographic-projections
+\begin{document}
+\begin{luadraw}{name=stereographic_curve}
+local g = graph3d:new{window3d={-5,5,-2,2,-2,2},window={-4,4,-2.5,2}, size={12,12}, viewdir={30,70}}
+Hiddenlines = true
+
+local stereographic = function(L,S,a)
+-- L is a list of 3d points, or a list of list  of 3d points all in the plane z=a
+-- sphere S = {center,radius}
+-- the function returns the image of L on the sphere S by stereography.
+    local C, R = table.unpack(S)
+    a = a or -R
+    if C ~= Origin then L = shift3d(L,-C) end
+    if (L == nil) or (type(L) ~= "table") then return end
+    if isPoint3d(L[1]) then L = {L} end
+    local L1, l1, num = {}, {}, 2*R*(R-a)
+    local N = M(0,0,R)
+    for _, cp in ipairs(L) do
+        l1 = {}
+        for _, A in ipairs(cp) do
+            local t = num/(A.x^2+A.y^2+(R-a)^2)
+            table.insert(l1, N+t*(A-N))
+        end
+        table.insert(L1,l1)
+    end
+    if C ~= Origin then return shift3d(L1,C) 
+    else return L1
+    end
+end
+
+require 'luadraw_spherical'
+local C, R = Origin, 1
+local a = -R
+local P = planeEq(0,0,1,-a)
+local L = parametric3d( function(t) return Mc(2-1/t,t,a) end,-10,10,75,true) -- curve drawn on the plane P
+local L1 = stereographic(L,{C,R},a) -- curve drawn on the sphere by stereography
+local a = L1[1][#L1[1]-85] -- one point of L1
+local A = L[1][#L[1]-85]
+
+g:Define_sphere( {center=C,radius=R, color="SlateGray!30"} )
+g:Dplane(P,vecJ,6,6,15,"draw=none,fill=Beige")
+g:DSpolyline(L,{color="blue"})
+g:DScurve(L1,{color="red",width=8})
+g:DSplane(P,{scale=1.5})
+g:DSseg({C+R*vecK,A}, {color="ForestGreen",width=8})
+g:DSpolyline({{-2*vecK,2*vecK}}, {arrows=1})
+g:Dspherical()
+g:Dcrossdots3d({{C+R*vecK,vecK},{a,a-C}},nil,0.5)
+g:Dballdots3d(A,"ForestGreen")
+g:Show()
+\end{luadraw}
+\end{document}

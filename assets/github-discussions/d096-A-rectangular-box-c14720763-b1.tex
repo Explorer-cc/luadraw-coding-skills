@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/96#discussioncomment-14720763 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\definecolor{PaleGray}{gray}{0.8} % gray!20
+\begin{luadraw}{name=box2}
+local x = 2
+local g = graph3d:new{window3d={0,7+2*x,0,10+2*x,-1,1}, margin={0,0,0,0},window={-8,12,-10,2},viewdir={30,60}, size={10,10}}
+local A, B, C, D, E, F, G = M(0,x,0), M(x,x,0), M(2*x,x,0), M(2*x,0,0), M(7+2*x,0,0), M(7+2*x,x,0), M(7+3*x,x,0)
+local N, M, L, K, J, I, H = table.unpack( sym3d({A,B,C,D,E,F,G}, {M(0,5+x,0),vecJ}) )
+local alpha, beta = 70, 60 -- angles of rotation
+A,B,M,N = table.unpack (rotate3d({A,B,M,N}, alpha, {C,vecJ}) ) --first we rotate A,B,M,N around (CL)
+A,N = table.unpack (rotate3d({A,N}, beta, {B,vecJ}) ) -- then we rotate A,N around (BM)
+D,E = table.unpack (rotate3d({D,E}, alpha, {C,-vecI}) ) -- and so on
+G,H = table.unpack (rotate3d({G,H}, alpha, {F,-vecJ}) )
+J,K = table.unpack (rotate3d({J,K}, alpha, {I,vecI}) )
+
+local facets = {{A,N,M,B},{B,M,L,C},{C,L,I,F},{D,C,F,E},{F,I,H,G},{L,K,J,I} }
+g:Dfacet( facets, {color="Pink"})
+g:Show() 
+\end{luadraw}
+\end{document}
+
+-- dot grid
+local dots = {["A"]=A,["B"]=B,["C"]=C,["D"]=D,["E"]=E,["F"]=F,["G"]=G,["H"]=H,["I"]=I,["J"]=J,["K"]=K,["L"]=L,["M"]=M,["N"]=N}
+for key,val in pairs(dots) do
+    g:Dlabel3d( key,val,{pos="N"}); g:Ddots3d(val)
+end

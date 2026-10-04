@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222079 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=medianPlane}
+ local g = graph3d:new{window={-5,3,-5.5,5.5},viewdir={60,70},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local A, B = M(4,0,0), M(0,4,0)
+local H = (A+B)/2
+local P = {H,B-A}
+local u = pt3d.prod(vecK,B-A)
+if pt3d.N1(u) < 1e-12 then u = pt3d.normalize(pt3d.prod(vecJ,B-A)) end
+local v = pt3d.normalize(pt3d.prod(B-A,u)) -- (H,u,v) is an orthonormal coordinate system in the plane P
+local C = H + 0.5*u + 2*v  -- a point in plane P
+Hiddenlines = true
+g:Dscene3d(
+    g:addPlane(P),
+    g:addPolyline({{A,C,B,A},{C,H}}, {color="Gold",width=8}),
+    g:addLabel("$C$",C,{style="NE"},"$H$",H,{style="S",dist=0.05})
+    )
+g:Ddots3d({A,B,C,H})
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{pos="S"})
+g:Dangle3d(C,H,B,0.25)
+g:Show()
+\end{luadraw}
+\end{document} 

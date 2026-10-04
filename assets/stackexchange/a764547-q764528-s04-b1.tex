@@ -1,0 +1,58 @@
+% source: https://tex.stackexchange.com/a/764547 (question 764528, score 4, block 1)
+\documentclass[]{standalone} % compile with lualatex
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+\begin{luacode*}
+luadraw.nbimages = 200
+\end{luacode*}
+
+% images creation
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local L, l = 8, 5
+local g = ld.graph:new{ window={0,L,0,l}, size={12,12}, margin=0 }
+
+-- declarations
+local v = 3
+local pos, dt = Z(0,l/2), 0.25
+local V, r, len, color = Z(1,math.sqrt(2)), 0.125, 2, "blue"
+
+local function dparticle(pos)
+    dir = cpx.normalize(V)
+    local dir2 = ld.cpx.I*dir
+    local angle = cpx.arg(dir)*ld.rad+90
+    -- trace
+    g:Dpath( {pos-len*dir+r/3*dir2, "m", pos+r*dir2, pos-r*dir2, pos-len*dir-r*dir2, "l"},
+        'draw=none, left color=white, right color='..color..'!50, shading angle='..angle)
+    -- particle
+    g:Dcircle(pos, r, "draw=none,ball color="..color)
+end
+
+-- create the image number k, this function must be global
+function ld.makeframe(k) -- do not modify this line
+    pos = pos +dt*V
+    dparticle( pos )
+    if (pos.re+r >= L) or (pos.re-r <= 0) then V.re = -V.re end
+    if (pos.im+r >= l) or (pos.im-r <= 0) then V.im = -V.im end
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{12}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+
+\end{document} 

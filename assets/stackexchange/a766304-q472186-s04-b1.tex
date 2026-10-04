@@ -1,0 +1,56 @@
+% source: https://tex.stackexchange.com/a/766304 (question 472186, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/472186/how-to-construct-a-circle-that-is-tangent-to-three-given-semi-circles
+\begin{document}
+\begin{luadraw}{name=tangent_circles}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window={-5,5,-4,5.5}, size={10,10} }
+
+local function hyperbola(F1, F2, r, t1, t2) -- returns {M / MF1-MF2 = r}
+    local c = cpx.abs(F2-F1)/2
+    local O, u = (F1+F2)/2, cpx.normalize(F2-F1)
+    local a = r/2
+    local b = math.sqrt(c^2-a^2)
+    local matrix = {O, u, cpx.I*u}
+    local L = ld.parametric(function(t) return Z(a*math.cosh(t), b*math.sinh(t)) end, t1,t2)
+    return ld.mtransform(L, matrix)
+end
+
+-- data
+local A, B, C = Z(-3,-1), Z(2,0), Z(3.5,3) -- Z(2.5,-2), Z(0,4)
+-- calculus
+local rAB, rBC, rCA = cpx.abs(A-B)/2, cpx.abs(B-C)/2, cpx.abs(C-A)/2
+local C1, A1, B1 = (A+B)/2, (B+C)/2, (A+C)/2
+local d = 3
+local L1 = hyperbola(C1, A1, rBC-rAB,-d,d) 
+local L2 = hyperbola(C1, B1, rCA-rAB,-d,d) 
+local L3 = hyperbola(A1, B1, rCA-rBC,-d,d) 
+local I = ld.interL(L1,L2) -- potential centers
+for _, J in ipairs(I) do
+    if (cpx.det(J-A,C-A)>=0) and (cpx.det(B-A,J-A)>=0) and (cpx.det(J-C,B-C)>=0)
+        then -- J is inside {A,B,C}
+            I = J; break 
+        end
+end
+local R = cpx.abs(I-C1)+rAB -- radius
+local P1, P2, P3 = I+R*cpx.normalize(A1-I), I+R*cpx.normalize(B1-I), I+R*cpx.normalize(C1-I) -- contact
+-- drawing
+g:Linewidth(12)
+g:Dpolyline({A,B,C}, true, "blue")
+g:Darc(A,C1,B,rAB,1, "gray"); g:Darc(B,A1,C,rBC,1, "gray") 
+g:Darc(C,B1,A,rCA,1, "gray")
+g:Dcircle(I,R,"green")
+g:Ddots({P1,P2,P3,I}, "red")
+g:Dpolyline( ld.concat(L1,L2,L3), "thin, dashed")
+g:Dlabel("$B$",B,{pos="NW"}, "$A$",A,{pos="N",dist=0.1}, "$C$",C,{pos="W"},
+    "$P_1$",P1,{pos="E"}, "$P_2$",P2,{pos="N"}, "$P_3$",P3,{pos="S"}, 
+    "$I$",I,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

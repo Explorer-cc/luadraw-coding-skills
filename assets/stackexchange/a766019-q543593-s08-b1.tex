@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/766019 (question 543593, score 8, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/543593/projective-plot-of-a-elliptic-curve
+\begin{document}
+\begin{luadraw}{name=projective_plot}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-9,8,-10,8}, viewdir={30,70}, size={10,10} }
+local eps = 1e-8
+local function f(x,z) return M(x, (x^3+3*z^2*(z-x))/z, z) end
+local xval = ld.linspace(-5,5,31)
+local zval = ld.linspace(-5,-2,15, -eps,20)
+local S1 = ld.surface(f,{xval, zval})
+S1 = ld.cutfacet(S1,{Origin, vecJ})
+S1 = ld.ftransform3d(S1, function(A) return M(A.x, math.sqrt(math.abs(A.y)), A.z) end)
+table.append(S1, ld.mtransform3d(S1, {Origin,-vecI,vecJ,-vecK})) --symmetry with respect to the y-axis
+table.append(S1, ld.mtransform3d(S1, {Origin,vecI,-vecJ,vecK})) --symmetry with respect to the plane y=0
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", xyzstep=2})
+g:Dfacet( S1, {usepalette={ld.palRainbow,"z"}, mode=ld.mShadedOnly, 
+    contrast=0.5, clip=true, twoside=false})
+g:Show()
+\end{luadraw}
+\end{document}

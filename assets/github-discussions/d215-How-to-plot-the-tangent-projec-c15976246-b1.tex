@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/215#discussioncomment-15976246 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=simple_projection}
+    local g = graph3d:new{
+        window3d={-10,10,-10,10,-10,10}, 
+        size={10,10}, adjust2d=true,
+        viewdir = perspective("xz",0.75,30)
+    }
+    local dist, ratio = 20, 0.65
+    local RC, RS = 5, 6
+    local Rc, Rs = RC * ratio, RS * ratio
+    local distX = dist * ratio / (1-ratio)
+    
+    local F = frustum(-10*vecJ,RC,Rc,20*vecJ, 50) --truncated cone
+    F = g:Classifyfacet(F) -- only visible facets
+
+    -- g:Dboxaxes3d({grid=true})
+    g:Dpolyline3d( border(F), "line width=.8pt,dotted" ) -- outline of the visible facets
+    g:Dcircle3d(M(0,-10,0), RC, vecJ, "blue, line width=1.2pt, fill=blue!20")
+    g:Dcircle3d(M(0,10,0), Rc, vecJ, "Crimson, line width=1.5pt, fill=Crimson!20")
+    
+    g:Dpolyline3d({M(RS,-10,RS),M(RS,-10,-RS),M(-RS,-10,-RS),M(-RS,-10,RS)}, true, "blue, line width=1.2pt")
+    g:Dpolyline3d({M(Rs,10,Rs),M(Rs,10,-Rs),M(-Rs,10,-Rs),M(-Rs,10,Rs)}, true, "Crimson, line width=1.5pt")
+    g:Dpolyline3d({{M(-RS,-10,RS),M(-Rs,10,Rs)},{M(RS,-10,-RS),M(Rs,10,-Rs)}}, true, "line width=.8pt,dotted")
+    g:Show()
+\end{luadraw}
+\end{document}

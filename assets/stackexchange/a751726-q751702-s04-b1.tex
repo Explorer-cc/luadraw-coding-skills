@@ -1,0 +1,86 @@
+% source: https://tex.stackexchange.com/a/751726 (question 751702, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/751702/traversing-a-curve-by-portions-of-its-arclength
+\begin{document}
+\begin{luadraw}{name=curvilinear_abscissa}
+local g = graph:new{window={-5.5,5,-5,5},size={11.5,11}}
+
+local f = function(x) 
+    return math.cos(x)
+end
+
+local df = function(x)
+    local h = 1e-6
+    return (f(x+h)-f(x-h))/(2*h)
+end
+
+local S = function(a,x) -- curvilinear abscissa with origin on a
+    return int(function(t) return math.sqrt(1+df(t)^2) end,a,x)
+end
+local x1, x2, len = -5, 5, 0.8
+local x, list, s = x1, {Z(x1,f(x1))}, 0
+local draw = function(k)
+    if k == 1 then
+        for _,z in ipairs(list) do g:Dline({z.re,cpx.I},"lightgray") end
+    end
+    g:Dcartesian(f,{x={x1,x2}, draw_options="red,line width=0.8pt"})
+    g:Ddots(list); g:Dlabel("method "..k,Z(-3.14,0.25),{})
+end
+
+-- first method : we solve S(x)=length
+while x < x2 do
+    local x3 = solve(function(t) return S(x,t)-len end,x,x2)
+    if x3 ~= nil then x = x3[1]; table.insert(list,Z(x,f(x))) 
+    else x = x2 end
+end
+g:Shift(Z(0,3)); draw(1)
+
+-- second method we solve ode y(0)=x1, y'=1/sqrt(1+df(y)^2) to find y=S^{-1}
+local L = odesolve(function(t,y) return 1/math.sqrt(1+df(y)^2) end,0,x1,0,13,50)
+local L1, L2 = L[1], L[2]  -- L1=values of t, L2=values of y
+
+local l = function(s) -- returns x=S^{-1}(s) using linear interpolation
+    local k = 1
+    local n = #L1
+    while (k<=n) and (L1[k] < s) do k = k+1 end
+    if k <=n then
+        local u = (s-L1[k-1])/(L1[k]-L1[k-1])
+        return L2[k-1]+u*(L2[k]-L2[k-1])
+    end
+end
+x, list,s = x1, {Z(x1,f(x1))},0
+while (x ~= nil) and (x<x2) do
+    s = s+len
+    x = l(s)
+    if x ~= nil then table.insert(list,Z(x,f(x))) end
+end
+g:Shift(Z(0,-2)); draw(2)
+
+-- third method : graphical method 
+local C = cartesian(f,x1,x2,25)[1] 
+L2, L1, s = {x1}, {0}, 0 -- L2=abscissa, L1 = length
+local a, b = nil, C[1]
+for k=2, #C do
+    a = b; b = C[k]
+    s = s + cpx.abs(b-a) -- curve length from beginning to b
+    table.insert(L2,b.re); table.insert(L1,s)
+end
+x, list,s = x1, {Z(x1,f(x1))},0
+while (x~=nil) and (x<x2) do
+    s = s+len
+    x = l(s)
+    if x ~= nil then table.insert(list,Z(x,f(x))) end
+end
+g:Shift(Z(0,-2)); draw(3)
+
+-- with tikz decorate
+local options = "decorate,decoration = {markings,mark = between positions 0 and 1 step 8mm with {\\fill circle (1.8pt);}}"
+g:Shift(Z(0,-2))
+g:Dcartesian(f,{x={x1,x2}, draw_options="red,line width=0.8pt"})
+g:Dcartesian(f,{x={x1,x2}, draw_options=options})
+g:Dlabel("tikz decorate",Z(-3.14,0.25),{})
+g:Show()
+\end{luadraw}
+\end{document}

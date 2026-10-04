@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/765759 (question 736785, score 7, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=sphere_R}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local Z,M,Ms,deg = cpx.Z, pt3d.M, pt3d.Ms, ld.deg
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sin, cos, pi = math.sin, math.cos, math.pi
+local g = ld.graph3d:new{ window = {-2.1,2.1,-2.1,2.1}, viewdir={45,55}, size={10,10} }
+require 'luadraw_compile_tex'
+local L = ld.compile_tex("\\sffamily\\bfseries R","R_on_sphere") -- --shell-escape the first time
+require 'luadraw_spherical'
+local sM = ld.sM
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "noline"
+g:Define_sphere{radius=2,color="",edgecolor="black"}
+local A,B,C,D = {0,0}, {0,90}, {90,90}, {45,55}
+local utheta = function(theta,phi) return M(-sin(theta),cos(theta),0) end
+local uphi = function(theta,phi) return -Ms(1,theta,phi+math.pi/2) end
+local plotR = function(P, size, rotate)
+    local theta, phi = table.unpack(P)
+    local I = sM(theta,phi)
+    size = size or 0.5
+    local U = utheta(theta*deg,phi*deg)
+    local V = uphi(theta*deg,phi*deg)
+    if rotate ~= nil then
+        U, V = table.unpack( ld.rotate3d({U,V},rotate,{I,I}) )
+    end
+    local m = function(x,y) return I+x*U+y*V end
+    local d = size/2
+    g:DSfacet({m(-d,d), m(d,d), m(d,-d), m(-d,-d)}, {fill="gray"})
+    local C = g:Compiled_tex2path3d(L,{scale=2, anchor=I, dir={U,V}, polyline=true}) -- 2D -> 3D
+    C = ld.ftransform3d(C,ld.toSphere) -- project the points of C onto the sphere
+    C = ld.polyline2path3d(C) -- conversion to path
+    g:Dpath3d(C, "draw=none,fill=black")
+end
+for k,P in ipairs({A,B,C,D}) do
+    plotR(P,1)
+end
+g:DScircle({Origin, vecJ}); g:DScircle({Origin, vecI}); g:DScircle({Origin, vecK})
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

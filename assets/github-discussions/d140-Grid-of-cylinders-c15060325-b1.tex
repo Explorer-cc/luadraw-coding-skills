@@ -1,0 +1,48 @@
+% source: https://github.com/pfradin/luadraw/discussions/140#discussioncomment-15060325 (pfradin, block 1)
+\documentclass[boder=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=tubes}
+local g = graph3d:new{window={-6,6,-4,7},bg="lightgray!30" }
+local O, r = Origin, 0.5
+local R  = r*math.sqrt(2)
+local S = sphere(O,R)
+local C = parallelep(M(-r,-r,-r), 2*r*vecI,2*r*vecJ,2*r*vecK)
+local crossing_base = clip3d(S,C)
+local Xtube = poly2facet( cylinder(-r*vecI,r,r*vecI,20,true) )
+local Ytube = poly2facet( cylinder(-r*vecJ,r,r*vecJ,20,true) )
+local Ztube = poly2facet( cylinder(-r*vecK,r,r*vecK,20,true) )
+
+local crossing = function(center)
+    return shift3d(crossing_base,center)
+end
+
+local tube = function(center, dir) -- dir = "x" or "y" or "z"
+    if dir == "x" then return shift3d(Xtube,center)
+    elseif dir == "y" then return shift3d(Ytube,center)
+    elseif dir == "z" then return shift3d(Ztube,center)
+    end
+end
+
+local grid_base = {}
+for y = -4, 4  do
+    local A = y*2*r*vecJ
+    if y%3 == 0 then
+        insert(grid_base, crossing(A))
+        insert(grid_base, tube(A+2*r*vecI,"x"))
+        insert(grid_base, tube(A-2*r*vecI,"x"))
+        insert(grid_base, tube(A+2*r*vecK,"z"))
+        insert(grid_base, tube(A-2*r*vecK,"z"))
+    else
+        insert(grid_base, tube(A, "y"))
+    end
+end
+local k = 6*r
+local grid = concat(grid_base,shift3d(grid_base,k*vecI),shift3d(grid_base,-k*vecI))
+grid = concat(grid, shift3d(grid,k*vecK))
+g:Dfacet(grid ,{color="orange",mode=mShadedOnly, contrast=0.5})
+g:Show()
+\end{luadraw}
+\end{document} 

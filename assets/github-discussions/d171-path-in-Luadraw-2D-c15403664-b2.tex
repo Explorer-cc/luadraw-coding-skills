@@ -1,0 +1,20 @@
+% source: https://github.com/pfradin/luadraw/discussions/171#discussioncomment-15403664 (pfradin, block 2)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\begin{document}
+
+\begin{luadraw}{name=arc2d}
+local i = cpx.I
+local g = graph:new{bbox=false}
+
+local a, b, c, r = 0, -2+3*i, 3+i, 1
+local b1, c1 = a+r*cpx.normalize(b-a), a+r*cpx.normalize(c-a)
+g:Dhline({a,b},"gray,dashed"); g:Dhline({a,c},"gray,dashed")
+g:Ddots({a,b,c,b1,c1}); g:Dlabel("$b$",b,{pos="W"},"$a$",a,{pos="S"},"$c$",c,{pos="S"},"$b1$",b1,{pos="E"},"$c1$",c1,{pos="N"})
+g:Dseg({a,a-r},"<->,line width=0.2pt"); g:Dlabel("$r$",-r/2,{pos="N"})
+-- instruction Dpath
+g:Dpath({b,b1,"l",a,c1,r,1,"ca",c,"l"},"red,line width=0.8pt")
+g:Show()
+\end{luadraw}
+\end{document} 

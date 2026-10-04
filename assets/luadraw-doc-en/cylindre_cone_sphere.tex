@@ -1,0 +1,25 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: Cylinders, Cones, and Spheres)
+\begin{luadraw}{name=cylindre_cone_sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local vecI, vecJ, vecK, M = pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{ size={10,10} }
+local dessin = function(args)
+    g:Dsphere(M(-1,-2.5,1),2.5, args)
+    g:Dcone(M(-1,2.5,5),-5*vecK,2, args)
+    g:Dcylinder(M(3,-2,0),6*vecJ,1.5, args)
+end
+-- top left, default options
+g:Saveattr(); g:Viewport(-5,0,0,5); g:Coordsystem(-5,5,-5,5,true); dessin(); g:Restoreattr()
+g:Saveattr(); g:Viewport(0,5,0,5); g:Coordsystem(-5,5,-5,5,true) 
+-- top right
+dessin({mode=ld.mGrid, hiddenstyle="solid", hiddencolor="LightGray"}); g:Restoreattr()
+g:Saveattr(); g:Viewport(-5,0,-5,0); g:Coordsystem(-5,5,-5,5,true) 
+-- bottom left
+dessin({mode=ld.mBorder, color="orange"}); g:Restoreattr()
+g:Saveattr(); g:Viewport(0,5,-5,0); g:Coordsystem(-5,5,-5,5,true) 
+-- bottom right
+dessin({mode=ld.mGrid,opacity=0.8,hiddenstyle="noline",color="LightBlue"}); g:Restoreattr()
+g:Show()
+\end{luadraw}

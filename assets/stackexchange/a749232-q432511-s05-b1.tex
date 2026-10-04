@@ -1,0 +1,52 @@
+% source: https://tex.stackexchange.com/a/749232 (question 432511, score 5, block 1)
+\documentclass[12pt]{article}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/432511/fill-cylinder-in-latex/496419#496419
+
+\begin{luadraw}{}
+local g = graph3d:new{window={-3,3,-2,6},viewdir={0,70},size={12,12,1}}
+g:Linejoin("round"); g:Linewidth(8); Hiddenlinestyle = "dashed"
+local A, H, R = Origin, 5, 2
+
+local draw = function(v, B)
+    v = pt3d.normalize(v)
+    local C = cylinder(A, H*v, R,50,false) 
+    local plane = {B,vecK}
+    local V, Hi = g:Classifyfacet(C)
+    local V1, V2 = cutfacet(V,plane)
+    local H1, H2 = cutfacet(Hi,plane)
+    local I = g:Intersection3d(C,plane)
+    g:Dpolyline3d( border(H2), "draw=none,fill=LightBlue!50")
+    g:Dpolyline3d( border(V2), "draw=none,fill=LightBlue!50")
+    g:Dedges(I,{hidden=true, color="LightBlue"})
+    g:Dcylinder(A,H*v,R)
+end
+
+draw(vecK,M(0,0,2))
+g:Savetofile("water_cylinder1.tkz")
+
+g = graph3d:new{window={-3,6,-3,5.5},viewdir={0,70},size={12,12,1}}
+draw(M(0,1,1),M(0,0,1.5))
+g:Savetofile("water_cylinder2.tkz")
+
+g = graph3d:new{window={-2,6,-3,5},viewdir={0,70},size={12,12,1}}
+draw(M(0,1,0.5),M(0,0,0.25))
+g:Savetofile("water_cylinder3.tkz")
+
+g = graph3d:new{window={-2,6,-3,3},viewdir={20,70},size={12,12,1}}
+draw(M(0,1,0),M(0,0,-0.75))
+g:Savetofile("water_cylinder4.tkz")
+\end{luadraw}
+
+\begin{document}
+
+\input{water_cylinder1.tkz}
+
+\input{water_cylinder2.tkz}
+
+\input{water_cylinder3.tkz}
+
+\input{water_cylinder4.tkz}
+
+\end{document} 

@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/749588 (question 729038, score 4, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/729038/drawing-latitudinal-line-on-a-sphere-associated-with-a-given-angle-of-elevation
+\begin{document}
+\begin{luadraw}{name=test_9_8_2025}
+local g = graph3d:new{window={-6,6,-7,7},viewdir={30,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local O = Origin
+local R,r,h= 3,2.5,6
+local d = R*h/math.sqrt(h^2+r^2)
+local R1 = R*r/math.sqrt(h^2+r^2)
+local H = M(0,0,d)
+local P1= {H,-vecK}
+local S = sphere(O,R,30,30)
+local C1 = cone(Origin,h*vecK,r,40,false)
+local C1b = cutpoly(C1,{H,vecK})
+local C2 = cone(Origin, -h*vecK,r,40,false)
+local C2b = cutpoly(C2,{-H,-vecK})
+local C1v = g:Classifyfacet(C1b)
+local C2v = g:Classifyfacet(C2b)
+local I1, I2
+if pt3d.dot(vecK,g.Normal) < 0 then 
+    I1 = g:Intersection3d(S,P1)
+    I2 = g:Intersection3d(C2,{-H,vecK})
+    C1v, C2v = C2v, C1v 
+else
+    I1 = g:Intersection3d(C1,P1)
+    I2 = g:Intersection3d(S,{-H,vecK})
+end
+g:Dpolyline3d( border(C2v), "left color=white, right color=Navy, fill opacity=0.8")
+g:Dsphere(O,R,{mode=2,color="orange"})
+g:Dpolyline3d( border(C1v), "left color=white, right color=Navy, fill opacity=0.8")
+g:Linestyle("dashed")
+g:Dcone(Origin,h*vecK,r,{mode=0}) ; g:Dcone(Origin,-h*vecK,r,{mode=0})
+g:Linestyle("solid")
+g:Dedges(I1, {hidden=true}); g:Dedges(I2, {hidden=true});
+g:Dpolyline3d( {{O,H}}, "dashed")
+if pt3d.dot(vecK,g.Normal) < 0 then  g:Dcircle3d(-6*vecK,r,vecK)
+else  g:Dcircle3d(6*vecK,r,vecK)
+end
+g:Dlabel3d("$O$",O,{pos="E"}, "$H$",H,{pos="E"})
+g:Show()
+\end{luadraw}
+\end{document}

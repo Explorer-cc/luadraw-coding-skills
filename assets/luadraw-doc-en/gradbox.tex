@@ -1,0 +1,16 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Using Dgradbox)
+\begin{luadraw}{name=gradbox}
+local ld = luadraw
+local g = ld.graph:new{window={-5,4,-5.5,5},size={10,10}}
+local i, pi = ld.cpx.I, math.pi
+local h = function(x) return x^2/2-2 end
+local f = function(x) return math.sin(3*x)+h(x) end
+g:Dgradbox({-pi-4*i,pi+4*i,pi/3,1},{grid=true,originloc=0, originnum={0,0}, labeltext={"\\pi",""},
+labelden={3,1}, title="\\textbf{Title}", legend={"Legend $x$","Legend $y$"}})
+g:Saveattr(); g:Viewport(-pi,pi,-4,4) -- The view is limited (clip).
+g:Filloptions("full","blue",0.6); g:Linestyle("noline"); g:Ddomain2(f,h,{x={-pi/2,2*pi/3}})
+g:Filloptions("none",nil,1); g:Lineoptions("solid",nil,8); g:Dcartesian(h,{x={-pi,pi}, draw_options="DarkBlue"})
+g:Dcartesian(f,{x={-pi,pi},draw_options="Crimson"})
+g:Restoreattr()
+g:Show()
+\end{luadraw}

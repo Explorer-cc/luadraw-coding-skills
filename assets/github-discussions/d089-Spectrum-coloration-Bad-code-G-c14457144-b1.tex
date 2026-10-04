@@ -1,0 +1,113 @@
+% source: https://github.com/pfradin/luadraw/discussions/89#discussioncomment-14457144 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luacode*}
+------------------
+-- spectrum.lua --
+------------------
+
+function get_bary_bbox(facets)
+  local update_extreme_vals = function (a, a_min, a_max)
+    return math.min(a, a_min), math.max(a, a_max)
+  end
+
+  local G, level
+
+  local xmin, xmax = math.huge, -math.huge
+  local ymin, ymax = math.huge, -math.huge
+  local zmin, zmax = math.huge, -math.huge
+
+  for _ , f in ipairs(facets) do
+    G = isobar3d(f)
+
+    xmin, xmax = update_extreme_vals(G.x, xmin, xmax)
+    ymin, ymax = update_extreme_vals(G.y, ymin, ymax)
+    zmin, zmax = update_extreme_vals(G.z, zmin, zmax)
+  end
+
+  return {xmin, xmax, ymin, ymax, zmin, zmax}
+end
+
+function graph3d:draw_spectrum(surface, spectrum, dir, backcull) -- ajout de l'option backcull=true/false
+  local bary_bbox = get_bary_bbox(surface)
+
+  local sorted_facets = self:Sortfacet(surface, backcull) -- Sortfacet de renverra que les facettes "visibles"  si backcull=true
+
+  local imin, imax
+
+  if dir == "x" then
+    imin, imax = 1, 2
+
+  elseif dir == "y" then
+    imin, imax = 3, 4
+
+  else
+    imin, imax = 5, 6
+  end
+
+  local val_min   = bary_bbox[imin]
+  local delta_val = bary_bbox[imax] - val_min
+
+  local G, val, level
+
+  for _ , f in ipairs(sorted_facets) do
+    G = isobar3d(f)
+
+    if dir == "x" then
+      val = G.x
+
+    elseif dir == "y" then
+      val = G.y
+
+    elseif dir == "z" then
+      val = G.z
+    end
+
+    level = math.abs((val - val_min) / delta_val)
+
+    self:Dpolyline3d(f, true, "fill=" .. palette(spectrum, level))
+  end
+end
+
+function graph3d:draw_Xspectrum(surface, spectrum,backcull)
+  self:draw_spectrum(surface, spectrum, "x",backcull)
+end
+
+function graph3d:draw_Yspectrum(surface, spectrum,backcull)
+  self:draw_spectrum(surface, spectrum, "y",backcull)
+end
+
+function graph3d:draw_Zspectrum(surface, spectrum,backcull)
+  self:draw_spectrum(surface, spectrum, "z",backcull)
+end
+\end{luacode*}
+
+\begin{luadraw}{name = projective-plane-colorful}
+local spectrum = {Gray, SlateGray, LightSkyBlue, LightPink, Pink, LightSalmon}
+
+local pi, sin, cos, tanh = math.pi, math.sin, math.cos, math.tanh
+
+local projplane = surface(
+  function(u, v)
+    return M(2*(1 + cos(v))*cos(u), 2*(1 + cos(v))*sin(u), 2*sin(v)*tanh(u-pi))
+  end,
+  pi, 0, 0, pi, -- seulement 1/4 de la figure, avec la bonne orientation
+  {25, 15})
+
+-- on complète par symétrie (attention une symétrie inverse l'orientation)
+projplane = concat(projplane, reverse_face_orientation(sym3d(projplane,{Origin,vecJ})))
+projplane = concat(projplane, reverse_face_orientation(sym3d(projplane,{Origin,vecK})))
+
+local graphview = graph3d:new{
+  size    = {12, 12},
+  viewdir = {120, 55}
+}
+
+graphview:draw_Zspectrum(projplane, spectrum,true) -- avec backcull=true
+
+graphview:Show()
+\end{luadraw}
+
+\end{document} 

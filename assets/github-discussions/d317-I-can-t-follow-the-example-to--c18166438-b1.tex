@@ -1,0 +1,39 @@
+% source: https://github.com/pfradin/luadraw/discussions/317#discussioncomment-18166438 (pfradin, block 1)
+% Source - https://tex.stackexchange.com/a/765700
+% Posted by Explorer, modified by community. See post 'Timeline' for change history
+% Retrieved 2026-08-26, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=campo}
+    local ld = luadraw
+    local pt3d, cpx = ld.pt3d, ld.cpx
+    local Z = cpx.Z
+    local M, vecI, vecK = pt3d.M, pt3d.vecI, pt3d.vecK
+    local g = ld.graph3d:new{
+        window3d = {-12,12,-12,12,-5,5,1,1,2},
+        adjust2d=true, viewdir = {-60,75}
+    }
+    -- function: z=x/y, the same as (x,y) -> (x,y,z(x,y))=(x,y,x/y) 
+    -- rewrute as: x=y*z, we could use parameters (u,v) -> (x(u,v),y(u,v),z(u,v))=(u*v,u,v) to avoid singularity at y=0,
+    local S = ld.surface(function(u,v) return M(u*v,u,v) end, -12, 12, -5, 5, {50,50})
+    local Sleft, Sright = ld.cutfacet(S, {M(0,0,0),-vecI}) -- cut with the plane x=0
+    g:Labelsize("scriptsize")
+    g:Dboxaxes3d{
+        grid = true, gridcolor = "gray", fillcolor="lightgray", -- background
+        xstep = 3, ystep = 3, zstep = 5,
+        xlegend = "$\\vec{F}$", ylegend = "$q$",
+        zlegend = "$E$", zlegendsep = 0.25
+    }
+    g:Dfacet(Sleft, {mode = ld.mShadedOnly, usepalette = {ld.palRainbow, "z", {-5,5}}, opacity = 0.8, clip = true})
+    g:Dseg3d({M(0,0,5), M(0,0,-5)}, "white, line width=1")
+    g:Dfacet(Sright, {mode = ld.mShadedOnly, usepalette = {ld.palRainbow, "z", {-5,5}}, opacity = 0.8, clip = true})
+    g:Dseg3d({M(0,0,0), M(0,0,5)}, "white, line width=1")
+    g:Labelsize("normalsize")
+    g:Dlabel("Campo in funzione della forza e della carica", Z((g:Xinf()+g:Xsup())/2, g:Ysup()), {})
+    g:Show()
+    \end{luadraw}
+\end{document}

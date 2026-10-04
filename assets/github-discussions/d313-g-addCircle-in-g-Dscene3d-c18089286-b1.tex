@@ -1,0 +1,41 @@
+% source: https://github.com/pfradin/luadraw/discussions/313#discussioncomment-18089286 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/481922/how-can-i-draw-a-circle-knowing-center-and-radius-lies-on-a-plane
+\begin{luadraw}{name=circle3d1}
+local ld = luadraw
+local pt3d = ld.pt3d
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local M = pt3d.M
+
+function ld.graph3d:addArc(B,A,C,r,sens,normal,options) -- patch
+    return self:addPolyline( ld.path3d( ld.arc3db(B,A,C,r,sens,normal), 100), options )
+end
+
+local g = ld.graph3d:new{window={-3,4,-4,5.5},viewdir={25,65},size={10,10}}
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+local a, h = 1,5
+local A,B,C,S = M(0,0,0), M(4*a,0,0), M(0,3*a,0), M(0,0,h)
+local P = ld.pyramid({A,B,C}, S)
+local lineSB = {S, B-S} 
+local lineSC =  {S,C-S} 
+local E = ld.dproj3d(A,lineSB)
+local F = ld.dproj3d(A,lineSC)
+local P1, P2 = {(B+E)/2, B-E}, {(B+C)/2,B-C}
+local I, R, n   =  ld.circumcircle3d(E, B, C)
+g:Dscene3d(
+    g:addPoly(P,{edge=true,color="LightBlue"}),
+    g:addCircle(I,R,n,{color="Red"}),
+    g:addPolyline({A,E,F,A})
+)
+--g:Dcircle3d(I, R, n, "red")
+g:Dangle3d(A,E,B)
+g:Dangle3d(A,F,C)
+g:Dangle3d(B,A,C)
+g:Ddots3d({A,B,C,S,E,F,I})
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{pos="W"}, "$C$",C,{pos="E"}, "$S$",S,{pos="N"}, "$E$",E,{pos="W"},"$F$",F,{pos="E"},"$I$",I,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

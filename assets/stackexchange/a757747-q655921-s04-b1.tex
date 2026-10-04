@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/757747 (question 655921, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/655921/rotate-ellipsoid-in-tikz-environment
+\begin{document}
+\begin{luadraw}{name=ellipsoid_in_sphere}
+require 'luadraw_spherical'
+local g = graph3d:new{window={-3.5,3.5,-3.5,3.5}, viewdir={30,70},size={12,12},bbox=false, margin={0,0,0,0}} 
+Hiddenlines =true; Hiddenlinestyle = "dashed"; arrowBstyle = "-stealth"
+g:Setmatrix3d({Origin, 3*vecI,vecJ,vecK})
+g:Define_sphere({radius=1, color="Crimson",hiddenstyle="noline",mode=mGrid})
+g:DSpolyline( {{-vecI, vecI}, {-3*vecJ, 3*vecJ}, {-3*vecK, 3*vecK}}, {arrows=1,width=8})
+g:Dspherical()
+g:IDmatrix3d()
+g:Define_sphere({radius=3, color="Cyan",opacity=0.3})
+g:DScircle({Origin, vecK}, {color="gray"})
+g:DScircle({Origin, vecI}, {color="gray"})
+g:DScircle({Origin, vecJ}, {color="gray"})
+g:Dspherical()
+g:Dlabel3d( "$x$",3*vecI,{pos="W"}, "$y$", 3*vecJ,{pos="E"}, "$z$",3*vecK,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

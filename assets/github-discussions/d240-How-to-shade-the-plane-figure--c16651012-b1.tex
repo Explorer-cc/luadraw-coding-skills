@@ -1,0 +1,136 @@
+% source: https://github.com/pfradin/luadraw/discussions/240#discussioncomment-16651012 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[b]{esvect}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%\author{Huỳnh Văn Thơ}
+
+% declarations
+\begin{luacode*}
+function cutpolyline2(C1,f,sg, close) 
+-- C1 is a polygonal line
+-- f is fonction x->f(x) real
+-- sg is ">" or "<"
+-- The function returns the outline of the region contained in C1 and satisfying y>f(x) oryf<f(x) depending on the value of sg
+
+    local oldepsilon = epsilon
+    epsilon = 1e-12
+    if close and (not (C1[1] == C1[#C1])) then table.insert(C1, C1[1]) end
+    local x1,x2,y1,y2 = getbounds(C1)
+    local C2
+    if sg == ">" then
+        C2 = clippolyline(cartesian(f, x1-0.5, x2+0.5), x1-0.5, x2+0.5,-math.huge, y2+0.5)[1]
+        table.insert(C2,1, Z(C2[1].re, math.max(C2[1].im,y2+0.5)))
+        table.insert(C2, Z(C2[#C2].re, math.max(C2[#C2].im,y2+0.5)))
+        table.insert(C2,C2[1])
+    else
+        C2 = clippolyline(cartesian(f, x1-0.5, x2+0.5), x1-0.5, x2+0.5, y1-0.5, math.huge)[1]
+        table.insert(C2,1, Z(C2[1].re, math.min(C2[1].im,y1-0.5)))
+        table.insert(C2, Z(C2[#C2].re, math.min(C2[#C2].im,y1-0.5)))
+        table.insert(C2,C2[1])
+        C2 = reverse(C2)
+    end
+
+    local test = function(A)
+        if sg == ">" then
+            return A.im > f(A.re)
+        else
+            return A.im < f(A.re)
+        end
+    end
+    
+    local L = interL(C2,C1)
+    if L == nil then
+        if test(C1[1]) then return C1
+        elseif inside(C2[1],C1) then return C2
+        else return 
+        end
+    end
+    local rep = {}
+    local L1 = L[1] -- premier point commun, on réorganise C1 et C2 pour commencer par L1
+    local C1B, C1A = cut(C1,L1) -- C1B = avant L1, C1A = après L1
+    table.remove(C1A) --on enlève le dernier
+    C1 = concat(C1A, C1B)
+    local C2B, C2A = cut(C2,L1) -- C2B = avant L1, C2A = après L1
+    table.remove(C2A) --on enlève le dernier
+    C2 = concat(C2A, C2B) ;   
+    -- on parcourt L par paire (L1,L2)
+    local L2 = table.remove(L,1)
+    table.insert(L,L1)
+    local aux, aux2, A, k = {}, {}
+    for j, z in ipairs(L)  do
+        L1 = L2; L2 = z
+        k = 1; A = C1[2]
+        while (cpx.abs(L1-A) < 0.1) and (k<#C1) do k=k+1; A = C1[k] end -- point suivant L1 dans C1
+        if test(A) then -- on prend la partie [L1,L2] de C1
+            aux = cut(C1,L2)
+        else -- on prend la partie [L1,L2] de C2
+            aux = cut( cut(C2,L1,true), L2)
+            if aux == nil then
+                aux2 = cut(C2,L1,true)
+                table.remove(aux2)
+                aux = concat(aux2, cut(C2,L2))
+            end
+        end
+        table.remove(aux); C1 = cut(C1,L2,true) -- on coupe C1 avant L2
+        if #C1 == 0 then  return end
+        insert(rep,aux)
+    end
+    table.insert(rep,C2[1])
+    epsilon = oldepsilon
+    return rep
+end
+
+function graph:Inequalities(...)
+    --- Inequalities( f1, sg1, f2, sg2, ...) where fi are functions (x->fi(x) real) and sgi = '>' or'<'
+    local f, sg
+    local P = self:Box2d()
+    table.insert(P,P[1]) -- close P
+    local n = select("#", ...)  -- number of arguments
+    for i = 1, n-1, 2 do   -- step = 2
+        f, sg = select(i, ...)  -- 2 args
+        if (P ~= nil)  and (#P > 0) then
+            P = cutpolyline2(P, f, sg)
+        end
+    end
+    return P
+end
+\end{luacode*}
+
+
+\begin{document}
+ %first example
+\begin{luadraw}{name=fill1}
+local g = graph:new{window = {-1.5, 4.5, -4, 3.5}, size ={11,11}}
+local i = cpx.I 
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+--
+local f = function(x) return x*x - 2*x - 2 end
+local h = function(x) return 4 - x end
+local k = function(x) return 2*x - 2 end 
+--
+g:Dpolyline( g:Inequalities(f,'>', h,'<', k,'<'), "draw=none,fill=pink,fill opacity=0.6")
+g:Dcartesian(f, {x={-0.55,3.2}, draw_options="red, line width=0.8pt"})
+g:Dcartesian(h, {x={-0.55,3.2}, draw_options="blue, line width=0.8pt"})
+g:Dcartesian(k, {x={-0.55,3.2}, draw_options="green, line width=0.8pt"})
+g:Show()
+\end{luadraw}
+
+%second example
+\begin{luadraw}{name=fill2}
+local g = graph:new{window = {-2, 6, -4, 12}, size ={14,14}}
+local i = cpx.I 
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+--
+local f = function(x) return x*x - 2*x - 2 end
+local h = function(x) return x*x + 2 end
+local k = function(x) return -x*x+5*x + 2 end
+--
+g:Dpolyline( g:Inequalities(f,'>', h,'<', k,'<'), "draw=none,fill=pink,fill opacity=0.6")
+g:Dcartesian(h, {x={-1,3}, draw_options="blue, line width=0.8pt"})
+g:Dcartesian(f, {x={-1,4.2}, draw_options="red, line width=0.8pt"})
+g:Dcartesian(k, {x={-1,4.2}, draw_options="green, line width=0.8pt"})
+--
+g:Show()
+\end{luadraw}
+\end{document}

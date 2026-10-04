@@ -1,0 +1,35 @@
+% source: https://tex.stackexchange.com/a/763475 (question 698640, score 2, block 1)
+% Source - https://tex.stackexchange.com/a/763461
+% Posted by Explorer, modified by community. See post 'Timeline' for change history
+% Retrieved 2026-06-06, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=cutploy_function}
+    local ld = luadraw
+    local g = ld.graph3d:new{window = {-2.5,4,-1,4},viewdir={40,80}, size={12,12}}
+    local cpx, pt3d = ld.cpx, ld.pt3d
+    local M = pt3d.M
+    local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local a = math.sqrt(3)
+    ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"; g:Linewidth(6)
+    local L = ld.parametric3d(function(t) return M(t, t*t, 0) end, -a, a,100)[1]
+    local solid = ld.prism(L, 3*vecK)
+    local cut, cut2, section = ld.cutfacet(solid, {M(0, 3, 0), M(0, -1, -1)}, false)    
+    local V = g:Classifyfacet(cut) -- visible facets
+    g:Dpolyline3d({{-3*vecI,3*vecI},{Origin,4*vecJ},{Origin,3.5*vecK}},"thick,-stealth") --axes
+    g:Dpolyline3d( ld.border(V), true, "gray!50,left  color=cyan!80,right color=cyan, middle color=cyan!40")
+    local angle = cpx.arg(g:Proj3dV(-vecJ+vecK))*ld.rad
+    g:Dpolyline3d( section, true,"gray!50,left color=cyan!25, right color=cyan, shading angle="..angle)
+    g:Dpolyline3d({{-3*vecI,3*vecI},{Origin,4*vecJ},{Origin,3*vecK}},"thick,dashed") -- hidden axes
+    g:Dpolyline3d(L,"gray!50, dashed") -- hidden base
+    g:Dlabel3d(
+        "$x$", 3.2*vecI,{},
+        "$y$", 4.2*vecJ,{},
+        "$z$", 3.7*vecK,{}
+     )
+    g:Show()
+    \end{luadraw}
+\end{document}

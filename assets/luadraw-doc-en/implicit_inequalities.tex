@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: The \cmd{g:Dimplicit\_inequalities)
+\begin{luadraw}{name=implicit_inequalities}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window = {-3, 4, -3, 5}, size = {10, 10} }
+local f1 = function(x,y) return -x*y+y^2-x^2-1  end
+local f2 = function(x,y) return x^3-x-y^2+4 end
+local filloptions = "draw=none,pattern= north west lines, pattern color=cyan"
+g:Daxes()
+g:Dimplicit_inequalities( {f1,'<',f2,">"}, {view={-2,5,-5,5}, draw_options=filloptions}) 
+g:Dimplicit(f1, {draw_options="red,thick"})
+g:Dimplicit(f2, {view={-2,5,-5,5}, draw_options="violet,thick"})
+local eq = \luastringO{$\begin{cases}y^2-x^2-xy < 1\\ x^3-x+4 > y^2\end{cases}$}
+g:Dlabel( eq, Z(2.25,1), {node_options="fill=white"})
+g:Show()
+\end{luadraw}

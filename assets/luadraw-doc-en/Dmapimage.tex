@@ -1,0 +1,15 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Mapping an Image)
+\begin{luadraw}{name=Dmapimage}
+local ld = luadraw
+local g = ld.graph:new{window={-2,3.5,-0.5,7}, margin={0,0,0,0}, size={10,10},bg="green!30"}
+local filename = ld.cachedir.."flower.jpg"
+local i = ld.cpx.I
+local a, u, v, w = 0, 3, -1.5+i, 4*i
+local facets = {{a,u,w}, {a+v,-v,w}, {a+v+w,-v,u} }
+local portrait = {a+w+(2*v+u)/3+0.2, (u-v)/4, 1.5*i+0.2}
+for _,f in ipairs(facets) do
+    g:Dmapimage(filename,f,{border_options="Navy"})
+end
+g:Dmapimage(ld.cachedir.."russell.jpg", portrait, {border_options="lightgray,line width=1.5mm"})
+g:Show()
+\end{luadraw}

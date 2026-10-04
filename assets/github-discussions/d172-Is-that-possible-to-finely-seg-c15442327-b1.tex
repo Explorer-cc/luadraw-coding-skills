@@ -1,0 +1,39 @@
+% source: https://github.com/pfradin/luadraw/discussions/172#discussioncomment-15442327 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=clip3d}
+    local g = graph3d:new{
+        window={-5,5,-5,5},
+        size={10,10},
+        viewdir={10,80},
+    }
+    require 'luadraw_spherical'
+    local O = Origin
+    Hiddenlines = true; Hiddenlinestyle = "dashed"; g:Linewidth(8)
+    g:Define_sphere({radius=5,show=false})
+    local C = parallelep(M(-4,-4,-4),8*vecI,8*vecJ,8*vecK)
+    --We determine the extremities of the arcs of circles visible on the sphere.
+    local AB, CD,EF, GH = {}, {}, {}, {}
+    g:DScircle(facet2plane(getfacet(C,1)), {out=AB})
+    local A, B = table.unpack(AB)
+    g:DScircle(facet2plane(getfacet(C,3)), {out=CD})
+    local C1, D = table.unpack(CD)
+    g:DScircle(facet2plane(getfacet(C,2)), {out=EF})
+    local E, F = table.unpack(EF)
+    g:DScircle(facet2plane(getfacet(C,4)), {out=GH})
+    local G, H = table.unpack(GH)
+    -- now we can calculate the outline of the sphérical part
+    local ctr = {A,-4*vecK,B,3,1,-vecK,"ca",O,C1,5,1,"ca", -4*vecJ,D,3,1,-vecJ,"ca", O,E,5,1,"ca", 4*vecK,F,3,1,vecK,"ca", O,G,5,1,"ca",4*vecJ,H,3,1,vecJ,"ca", O,A,5,1,"ca", M(4,3,0),"m",4*vecI,vecI,"c"}
+    g:Dpath3d(ctr,"ball color=Chocolate") -- spherical part
+    -- now we draw the visible circular facets
+    g:Dcircle3d(4*vecK,3,vecK,"fill=Chocolate!50!black"); 
+    g:Dcircle3d(4*vecJ,3,vecJ,"fill=Chocolate!50!black")
+    g:Dcircle3d(4*vecI,3,vecI,"left color=Chocolate!70!black, right color=Chocolate!50!black")
+    -- and the circles with hidden parts
+    g:Dspherical()
+
+    g:Show()
+\end{luadraw}
+\end{document}

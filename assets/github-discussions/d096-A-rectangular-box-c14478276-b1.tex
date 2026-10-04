@@ -1,0 +1,46 @@
+% source: https://github.com/pfradin/luadraw/discussions/96#discussioncomment-14478276 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\definecolor{PaleGray}{gray}{0.8} % gray!20
+\begin{luadraw}{name=cube_one_color}
+local g = graph3d:new{window={-5,5,-3,3},viewdir={-50,65},size={12,12}}
+Hiddenlines = false; Hiddenlinestyle = "dashed"
+local x,l = 0.5, 6
+local P = {}
+P.vertices = {
+    Origin,l*vecI,l*(vecI+vecJ), l*vecJ, --1 to 4
+    M(-x,-x,0), M(0,-x,0), M(l,-x,0), M(l+x,-x,0), M(l+x,0,0), M(l+x,l,0), -- 5 to 10
+    M(l+x,l+x,0), M(l,l+x,0), M(0,l+x,0), M(-x,l+x,0), M(-x,l,0), -- 11 to 15
+    M(-x,0,0), M(0,-2*x,0), M(l,-2*x,0), M(l,l+2*x,0), M(0,l+2*x,0)} -- 16 to 20
+local F = {4,3,2,1} -- bottom of the box
+local T = {16,15,4,1} -- top
+local Tl = {6,5,16,1}  --top left
+local Tr = {15,14,13,4} -- top right
+local B = {3,10,9,2}  -- bottom
+local Bl = {7,2,9,8}  -- bottom left
+local Br = {3,12,11,10}  -- bottom right
+local Le = {7,18,17,6}   -- left side outside
+local Li = {2,7,6,1}  -- left side inside
+local Re = {13,20,19,12} -- right side outside
+local Ri = {4,13,12,3} -- right side inside
+P.facets = {F,T,Tl,Tr,B,Bl,Br,Le,Li,Re,Ri}
+P = shift3d(P, -M(l/2,l/2,0)) -- put then center on Origin
+local alpha, beta, gamma = 80,45,60 -- angles for rotations
+F,T,Tl,Tr,B,Bl,Br,Le,Li,Re,Ri = table.unpack( poly2facet(P)) -- conversion to facets
+local axe = function(i,j)
+    return {P.vertices[i], P.vertices[j]-P.vertices[i]}
+end
+-- now we have to do the rotations...
+Tl = rotate3d(Tl, 90,axe(1,16)); Tr = rotate3d(Tr, 90,axe(15,4))
+T,Tl,Tr = table.unpack( rotate3d({T,Tl,Tr},alpha,axe(1,4)) )
+Bl = rotate3d(Bl,90,axe(9,2)); Br = rotate3d(Br,90,axe(3,10))
+B,Bl,Br = table.unpack( rotate3d({B,Bl,Br},alpha,axe(3,2)) )
+Le = rotate3d(Le,beta,axe(7,6)); Re = rotate3d(Re,beta,axe(13,12))
+Li, Le = table.unpack( rotate3d({Li,Le},gamma,axe(2,1)) )
+Ri,Re = table.unpack( rotate3d({Ri,Re},gamma,axe(4,3)) )
+g:Dscene3d( g:addFacet( {F,T,Tl,Tr,B,Bl,Br,Le,Li,Ri,Re}, {color="orange",edge=true} ))
+g:Show()
+\end{luadraw}
+\end{document}

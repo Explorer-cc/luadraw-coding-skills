@@ -1,0 +1,54 @@
+% source: https://tex.stackexchange.com/a/762625 (question 213566, score 9, block 1)
+\documentclass{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\usepackage{animate}
+%https://tex.stackexchange.com/questions/213566/transform-paper-folding-diagram-to-3d-object-or-vice-versa
+% images creation,
+\begin{luacode*}
+local ld = luadraw -- shortcut to spacename
+ld.nbimages = 35 -- global variable (in luadraw spacename)
+local pt3d = ld.pt3d
+local M, Origin, vecI, vecJ, vecK = pt3d.M, pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window={-9,15,-9,9,0.6,0.6},bg="lightgray", viewdir={30,60}, margin={0,0,0,0}}
+require 'luadraw_cvx_polyhedra_nets'
+-- declarations
+local P = ld.parallelep(Origin, 4*vecI,5*vecJ,3*vecK)
+local A, B, C = M(4,2.5,3), M(2,5,3), M(4,5,1.5)
+P = ld.cutpoly(P, ld.plane(A,B,C), true) -- P is truncated with the plane (ABC)
+local net = ld.unfold_polyhedron(P)
+local tree = net.tree
+local theta = ld.linspace(0,360,ld.nbimages+1) 
+local opening = ld.linspace(0,1,18)
+-- -- create the image number k, 
+function ld.makeframe(k) -- this function must be global (in luadraw spacename)
+    -- draw image number k here
+    local r = k
+    if k > 18 then r = 36-k end
+    g:Shift3d(M(0,-4,5))
+    g:Dpolynames(P,"facet") -- this method shows the facet numbers of P
+    -- P opening
+    g:Shift3d(M(0,0,-11))
+    local P1 = ld.rotate3d( ld.unfold_tree(tree, opening[r]), theta[k], {M(2,2.5,0),vecK})
+    g:Dfacet(P1, {color="Crimson", edgecolor="Gold", edgewidth=8})
+    -- 2D net
+    g:Shift(10)
+    g:Dpolyhedron_net(P,{tabs=true, tabs_options="pattern=north west lines, pattern color=gray",
+        facet_name=true, rotate=90})
+    g:IDmatrix3d(); g:IDmatrix() -- restore 2D matrix and 3D matrix
+    -- save image number k
+    g:Sendtotex() -- send the tikzpicture to TeX
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}%
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+\begin{animateinline}[poster=first,controls,loop]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

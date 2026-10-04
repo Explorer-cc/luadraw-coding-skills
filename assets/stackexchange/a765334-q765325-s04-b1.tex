@@ -1,0 +1,41 @@
+% source: https://tex.stackexchange.com/a/765334 (question 765325, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/765325/how-to-reproduce-the-correct-intersection-curve-of-two-3d-surfaces-using-pgfplot
+\begin{document}
+\begin{luadraw}{name=two_surfaces}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Mc = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, pt3d.Mc
+local ch, sh, pi = math.cosh, math.sinh, math.pi
+local g = ld.graph3d:new{ window3d={-3,3,-3,3,-3,4}, viewdir={110,60}, 
+    window={-4,4,-4.5,4.5}, size={12,12}, bg="lightgray"}
+require 'luadraw_povray'
+g:Linewidth(6)
+local p1 = function(x,y) 
+    return M(x, y, (x^2+x*y-y)/3)
+end
+local p2 = function(x,y) 
+    return M(x, y, (2*x^2+3*x*y-2*y)/3)
+end
+local p3 = function(t)
+    return M(t, t^2/(1-2*t), t^3/(3*(2*t-1)))
+end
+local L = ld.parametric3d(p3,-3,3,100,true)
+L = ld.clippolyline3d(L, g:Box3d()) -- clip with the current 3D window
+g:Pov_new()
+g:Pov_surface(p1, -3,3,-3,3, {color=ld.Crimson, clip=true,opacity=0.7})
+g:Pov_surface(p2, -3,3,-3,3, {color=ld.Green, clip=true, opacity=0.7})
+g:Pov_polyline(L, {color=ld.Blue, width=12})
+g:Pov_axes(Origin, {arrows=1, shadow=false})
+g:Pov_exec() -- compile with --shell-escape option
+g:Pov_show()
+g:Dlabel3d( "$x$",3*vecI,{pos="W"},"$y$",3*vecJ,{pos="S"},"$z$",4*vecK,{pos="N"})
+g:Linewidth(4); g:Linestyle("dashed") -- hiddenlines
+g:Dpolyline3d(L, "blue,dashed")
+g:Show()
+\end{luadraw}
+\end{document}

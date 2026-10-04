@@ -1,0 +1,33 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-4-Computations-on-Lists.tex (demo: Tangents to a circle {O,2)
+\begin{luadraw}{name=interCC}
+local ld = luadraw
+local cpx = ld.cpx
+local g = ld.graph:new{window={-10,10,-5,5}, margin={0,0,0,0},size={16,8}}
+local i = cpx.I
+-- pour le cercle {O,2}
+g:Saveattr(); g:Viewport(-10,0,-5,5); g:Coordsystem(-4,6,-5,5)
+local O = -1
+local C1, I = {O, 2}, 4-i
+local C2 = {(O+I)/2,cpx.abs(I-O)/2}
+local rep = ld.interCC(C1,C2) -- points of tangency
+g:Dcircle(C1,"blue"); g:Dcircle(C2,"dashed")
+g:Dhline(I,rep[1],"red"); g:Dhline(I,rep[2],"red") --half-tangents
+g:Ddots(rep); g:Ddots({O,I}); g:Dlabel("$I$",I,{pos="SE"},"$O$",O,{pos="W"},
+  "tangents to the circle arising from $I$",1-5*i,{pos="N"})
+g:Restoreattr()
+-- pour l'ellipse (E) : {O,3,2}
+g:Saveattr(); g:Viewport(0,10,-5,5); g:Coordsystem(-4,6,-5,5)
+local mat = {0,1.5,i} -- This matrix transforms a circle {O1,2} into the ellipse (E)
+local inv_mat = ld.invmatrix(mat) -- inverse matrix
+local O1, I1 = table.unpack( ld.mtransform({O,I},inv_mat) ) -- antecedents of O and I
+C1 = {O1, 2}
+C2 = {(O1+I1)/2,cpx.abs(I1-O1)/2}
+rep = ld.interCC(C1,C2) -- points of tangency (tangents from I1)
+g:Composematrix(mat) -- The matrix is applied to find the ellipse; the tangency is preserved.
+g:Dcircle(C1,"blue"); g:Dcircle(C2,"dashed")
+g:Dhline(I1,rep[1],'red'); g:Dhline(I1,rep[2],"red")
+g:Ddots(rep); g:Ddots({O1,I1}); g:Dlabel("$I$",I1,{pos="SE"},"$O$",O1,{pos="W"},
+  "tangents to the ellipse arising from $I$",1-5*i,{pos="N"})
+g:Restoreattr()
+g:Show()
+\end{luadraw}

@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/763768 (question 604334, score 6, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/604334/how-to-plot-the-3d-graph-of-the-following-three-inequalities-in-latex-e-g-tik
+\begin{document}
+\begin{luadraw}{name=q604334}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M = pt3d.M
+local g = ld.graph3d:new{ window3d={-2,8,-2,8,-2,17,1,1,0.5}, window={-20,20,-11,10}, 
+    viewdir={"central",30,60,50}, size={12,12}, bbox=false }
+local scene = {}
+
+local function checkPlane(a,b,c,d, inequality, color) -- to solve ax+by+cz+d >=0 or ax+by+cz+d <=0
+    -- inequality = '<' or '>'
+    local A, n = table.unpack( ld.planeEq(a,b,c,d) ) -- a point and a normal vector to the plane
+    if inequality == '>' then n = M(a,b,c) else n = -M(a,b,c) end
+    local P = g:Plane2facet({A,n})
+    table.insert(scene, g:addFacet(P, {color=color, twoside=false, contrast=0, opacity=0.8 }) ) -- for drawing
+    return {A,n}
+end
+
+local P1, P2, P3 = checkPlane(1,1,-1,1,">","Gold"), checkPlane(4,0,-1,0,">","ForestGreen"),
+    checkPlane(0,-5,1,0,"<","SteelBlue")
+local solution = g:Box3d() --current 3D window in the form of a parallelepiped
+for _, P in ipairs({P1,P2,P3}) do
+    solution = ld.cutpoly(solution,P,true) -- we keep the part on the right side of P
+end
+table.insert(scene,  g:addPoly(solution, {color="Crimson",edge=true,opacity=0.6}) )
+-- left drawing 
+g:Saveattr(); g:Viewport(-20,0,-11,10); g:Coordsystem(-10,10,-11,10)
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", xyzstep=2, drawbox=true})
+g:Dscene3d( table.unpack( scene ) )
+g:Dlabel3d("$P_1$",M(-2,8,7),{pos="E"}, "$P_2$",M(4,8,17),{pos="N"},"$P_3$",M(-2,3,17), {pos="N"})
+g:Restoreattr(); 
+-- right drawing
+g:Saveattr(); g:Viewport(0,20,-11,10); g:Coordsystem(-10,10,-11,10)
+g:Setviewdir("xOy")
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", xyzstep=2})
+g:Dscene3d( g:addPoly(solution, {color="Crimson",edge=true,opacity=0.6}) )
+g:Dlabel3d("$P_1$",M(5,5,17),{}, "$P_2$",M(1,6,17),{},"$P_3$",M(7,1,17), {})
+g:Restoreattr()
+g:Show()
+\end{luadraw}
+\end{document}

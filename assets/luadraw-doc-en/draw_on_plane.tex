@@ -1,0 +1,42 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: Draw on a plane)
+\begin{luadraw}{name=draw_on_plane}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Z, M = cpx.Z, pt3d.M
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{ window={-8,8,-9,8}, size={10,10}}
+g:Labelsize("footnotesize")
+local function f(x) return 2*math.sin(x) end
+-- left
+g:BeginOnPlane( {M(0,-5,0), vecI, vecK}, {labeldir="auto", view={-5,5,-5,5}})
+    g:Daxes(nil, {limits={{-5,5},{-5,5}}})
+    g:Dcartesian(f, {x={-5,5}, draw_options="red,thick"})
+    g:Dcircle(0,3, "ForestGreen, fill=green!30,opacity=0.3")
+    g:Dlabel("$\\mathcal{C}_{f}$", Z(2,2),{pos="N",node_options="red"})
+g:EndOnPlane()
+-- cube
+g:Dpoly( g:Box3d(), {color="LightBlue!50!white", opacity=0.6})
+-- top
+g:BeginOnPlane( {M(0,0,5), vecJ, -vecI}, {labeldir="auto", view={-5,5,-5,5}})
+    g:Daxes(nil, {limits={{-5,5},{-5,5}}, grid=true})
+    g:Dcartesian(f, {x={-5,5}, draw_options="red,thick"})
+    g:Dcircle(0,3, "ForestGreen, fill=green!30,opacity=0.3")
+    g:Dlabel("$\\mathcal{C}_{f}$", Z(2,2),{pos="N",node_options="red"})
+g:EndOnPlane() 
+-- front
+g:BeginOnPlane( {M(5,0,0), vecK, -vecJ}, {labeldir={vecJ,vecK}, view={-5,5,-5,5}})
+    g:Daxes(nil, {limits={{-5,5},{-5,5}}, labelstyle={"E","S"}, arrows="-stealth",
+        legend={"$x$","$y$"}, legendpos={0.9,0.98}})
+    g:Dcartesian(f, {x={-5,5}, draw_options="red,thick"})
+    g:Dcircle(0,3, "ForestGreen, fill=green!30,opacity=0.3")
+    g:Dlabel("$\\mathcal{C}_{f}$", Z(2,2),{pos="W",node_options="red"})
+g:EndOnPlane()
+-- right
+g:BeginOnPlane( {M(0,5,10), -vecK, -vecI}, {labeldir="auto", view={5,15,-5,5}})
+    g:Daxes({10,1,1}, {grid=true, arrows="-stealth", labelshift={0,0}})
+    g:Dcartesian(f, {x={5,15}, draw_options="red,thick"})
+    g:Dlabel("$\\mathcal{C}_{f}$", Z(14,2),{pos="NW",node_options="red"})
+g:EndOnPlane()
+g:Show()
+\end{luadraw}

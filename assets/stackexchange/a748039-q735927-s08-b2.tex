@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/748039 (question 735927, score 8, block 2)
+\begin{luadraw}{name=bigcircles}
+local g = graph3d:new{window={-4,4.5,-4,4.5},viewdir={30,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(6); Hiddenlinestyle = "dashed"
+local R=3
+local O,A,B,C,D = Origin, M(0,0,-R), M(0,0,R), M(0,0,R+2), M(0,0,R+1)
+local S = sphere(O,R,100,100) 
+local I1 = g:Intersection3d(S, {O,vecI}) 
+local I2 = g:Intersection3d(S, {O,vecJ})
+local I3 = g:Intersection3d(S, {O,vecK})
+g:Dline3d({O,vecK})
+g:Dsphere(O,R,{color="LightBlue", mode=2})
+g:Dline3d({O,vecK},"dashed,line width=0.4pt") -- hidden lines
+g:Dpolyline3d({5*vecJ,O,5*vecI},"dashed,line width=0.4pt") -- hidden lines 
+g:Dedges(I1, {hidden=true,color="red"})
+g:Dedges(I2, {hidden=true,color="blue"})
+g:Dedges(I3, {hidden=true,color="green"})
+g:Dpolyline3d({{B,6*vecK},{M(R,0,0),6*vecI},{M(0,R,0),5*vecJ}},"-Latex")
+g:Darc3d(D+vecJ,D,D+vecI,0.35,1,vecK,"->") -- arc above
+g:Ddots3d({O,A,B})
+g:Dlabel3d("$O$",O,{pos="W"},  "$S$",A,{pos="E"}, "$N$",B,{pos="SE"}, "$z$",C,{pos="E"}, "$y$",5*vecJ,{pos="E"}, "$x$",6*vecI,{pos="SW"} )
+g:Show()
+\end{luadraw}

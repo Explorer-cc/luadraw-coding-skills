@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/225#discussioncomment-16407887 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+
+\begin{luadraw}{name=AMC}
+local g = graph3d:new{window={-2.5,2.5,-0.5,3.5},viewdir={-40,40},size={10,10}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local h = 2.5
+local a, n = 2, 4
+local base = reverse(shift3d(map(toPoint3d,polyreg(0,a,n)), h*vecK))
+local apex = -h*vecK/2 -- apex of the pyramid
+local water_height = 1/3 -- height of water in [0;1]
+local P1 = scale3d( base, (1+2*water_height)/3, apex) -- water
+g:Dscene3d(
+    g:addFacet(scale3d(P1,0.99,h/2*vecK), {color="cyan"})
+    ,g:addPoly(truncated_pyramid(base,apex,h,true), {color="Orange", edge=true})
+)
+g:Show()
+\end{luadraw}
+\end{document} 

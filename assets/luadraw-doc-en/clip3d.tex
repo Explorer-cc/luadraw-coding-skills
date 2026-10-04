@@ -1,0 +1,21 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Example with clip3d: constructing a die from a cube and a sphere)
+\begin{luadraw}{name=clip3d}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-3,3,-3,3},size={10,10}, viewdir="central"}
+local S = ld.sphere(Origin,3)
+local C = ld.parallelep(M(-2,-2,-2),4*vecI,4*vecJ,4*vecK)
+local C1 = ld.clip3d(S,C) -- sphere clipped by the cube
+local C2 = ld.clip3d(C,S) -- cube clipped by the sphere
+local V = g:Classifyfacet(C2) -- visible facets of C2
+g:Dfacet( ld.concat(C1,C2), {color="Beige",mode=ld.mShadedOnly,backcull=true} ) -- only visible faces
+g:Dpolyline3d(V,true,"line width=0.8pt") -- outline of the visible faces of C2
+local A, B, C, D = M(2,-2,-2), M(2,2,2), M(-2,2,-2), M(0,0,2) -- drawing black dots
+g:Filloptions("full","black")
+g:Dcircle3d( D,0.25,vecK); g:Dcircle3d( (2*A+B)/3,0.25,vecI)
+g:Dcircle3d( (A+2*B)/3,0.25,vecI); g:Dcircle3d( (3*B+C)/4,0.25,vecJ)
+g:Dcircle3d( (B+C)/2,0.25,vecJ); g:Dcircle3d( (B+3*C)/4,0.25,vecJ)
+g:Show()
+\end{luadraw}

@@ -1,0 +1,27 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: A Lotka-Volterra differential system)
+\begin{luadraw}{name=lotka_volterra}
+local ld = luadraw
+local cpx = ld.cpx
+local g = ld.graph:new{window={-5,50,-0.5,5},size={10,10,0}, border=true}
+local i = cpx.I
+local f = function(t,y) return {y[1]-y[1]*y[2],-y[2]+y[1]*y[2]} end
+g:Labelsize("footnotesize")
+g:Daxes({0,10,1},{limits={{0,50},{0,4}}, nbsubdiv={4,0}, legendsep={0.1,0},
+originpos={"center","center"}, legend={"$t$",""}})
+local y0 = {2,2}
+local M = ld.odesolve(f,0,y0,0,50,250) -- approximate resolution
+-- M est une table à 3 éléments: t, x et y
+g:Lineoptions("solid","blue",8)
+g:Dseg({5+3.5*i,10+3.5*i}); g:Dlabel("$x$",10+3.5*i,{pos="E"})
+g:DplotXY(M[1],M[2]) -- points (t,x(t))
+g:Linecolor("red"); g:Dseg({5+3*i,10+3*i}); g:Dlabel("$y$",10+3*i,{pos="E"})
+g:DplotXY(M[1],M[3]) -- points (t,y(t))
+g:Lineoptions(nil,"black",4)
+g:Saveattr(); g:Viewport(20,50,3,5) -- change of view
+g:Coordsystem(-0.5,3.25,-0.5,3.25) -- new associated landmark
+g:Daxes({0,1,1},{legend={"$x$","$y$"},arrows="->"})
+g:Lineoptions(nil,"ForestGreen",8); g:DplotXY(M[2],M[3]) -- points (x(t),y(t))
+g:Restoreattr() -- back to the old view
+g:Dlabel("$\\begin{cases}x'=x-xy\\\\y'=-y+xy\\end{cases}$", 5+4.75*i,{})
+g:Show()
+\end{luadraw}

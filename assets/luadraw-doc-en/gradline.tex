@@ -1,0 +1,12 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Examples of numbered lines)
+\begin{luadraw}{name=gradline}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5},size={10,10}}
+g:Labelsize("footnotesize")
+local i = ld.cpx.I
+g:Dgradline({3.25*i,1+i/2}, {limits={-4,4}, legend="Axe", legendpos=0.5, arrows="-stealth"})
+g:Dgradline({-3,1}, {legend="demo", labeltext="\\pi", labelden=3, unit=2, nbsubdiv=1, arrows="-latex"})
+g:Dgradline({3-4*i,-1.25+i/5}, {legend="A", labelstyle="N", gradlimits={-1,5},
+nbsubdiv=3, unit=1.411, nbdeci=3, arrows="-Latex"})
+g:Show()
+\end{luadraw}

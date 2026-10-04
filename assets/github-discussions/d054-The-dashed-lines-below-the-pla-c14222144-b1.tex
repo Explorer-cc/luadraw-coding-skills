@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222144 (pfradin, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/729038/drawing-latitudinal-line-on-a-sphere-associated-with-a-given-angle-of-elevation
+\begin{document}
+
+\begin{luadraw}{name=prism}
+local g = graph3d:new{window={-4,4,-4,4},viewdir={30,60},size={10,10}}
+local i = cpx.I
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local P1 = {-3*vecK, vecK}
+local h, sc = 4, 0.5
+local S = M(0,0,h)
+local A = scale3d(-3*vecK,sc,S)
+local T = map(toPoint3d, polyreg(0,3,6))
+local T1 = proj3d(T,P1) -- big facet
+local T2 = scale3d(T1,sc,S) -- small facet
+local P = pyramid(T1,S)
+local I = g:Intersection3d(P,{A,vecK})
+g:Dscene3d(
+    g:addPoly(P, {backcull=true,contrast=0,opacity=0.5}), -- opacity<1 to see orange facets
+    g:addFacet({T1,T2},{color="orange"})
+    )
+g:Dpoly(P,{mode=0}); g:Dedges(I,{hidden=true})
+g:Show()
+\end{luadraw}
+\end{document}

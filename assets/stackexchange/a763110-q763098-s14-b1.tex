@@ -1,0 +1,98 @@
+% source: https://tex.stackexchange.com/a/763110 (question 763098, score 14, block 1)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\usepackage{animate}
+%https://tex.stackexchange.com/questions/763098/draw-balls-in-galton-board
+\begin{luacode*}
+luadraw.nbBalls = 50
+\end{luacode*}
+% images creation
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+
+local y1 = -6
+local g = ld.graph:new{ window={-1,12,y1,11}, size={10,10} }
+
+-- declarations
+math.randomseed(42)
+local dx = 1
+local u, v, r = dx, Z(dx/2,dx), dx/4
+local rb = 0.8*r
+local z = function(x,y) return x*u+y*v end
+local stacks = {0,0,0,0,0,0,0,0,0,0,0}
+local nb = ld.nbBalls
+ld.nbimages = 22 + 2*nb - 1 -- must be global
+local ball = {} -- ball displacement numbers
+local pos = {}  -- ball position
+for k = 1, nb do
+    table.insert(ball, -k)
+    table.insert(pos, z(0,11))
+end
+local obstacles = {}
+for x = 0, 11 do
+    for y = 0, math.min(10,11-x) do
+        table.insert(obstacles,z(x,y))
+    end
+end
+local walls = { {Z(0,-0.5),Z(0,y1),Z(11,y1),Z(11,-0.5)} }
+for k = 1, 12 do table.insert(walls, {Z(k-1,y1), Z(k-1,-0.5)}) end
+
+local draw = function(active) -- active = list of active balls
+    for k = 1, 11 do
+        local dep = Z(k-1/2,y1+rb)
+        for h = 1, stacks[k] do
+           table.insert(active,dep)
+           dep = dep + 2*rb*i
+        end
+    end
+    g:Ddots(obstacles,"Brown,scale=3")
+    g:Dpolyline(walls)
+    g:Ddots(active, 'blue,scale=2')
+end
+
+-- create the image number k, this function must be global
+function ld.makeframe(k) -- do not modify this line
+    local active = {}
+    for n = 1, math.min(k,nb) do
+        if ball[n] < 22 then
+            ball[n] = ball[n] + 1
+            if ball[n] >= 0 then
+                if ball[n] == 0 then 
+                    table.insert(active, pos[n])
+                    pos[n] = pos[n] + z(0.5,-1)
+                elseif ball[n]%2 == 1 then
+                    table.insert(active, pos[n])
+                    pos[n] = pos[n] + z(0.5,-1)
+                else
+                    if ball[n] < 22 then
+                        table.insert(active, pos[n]+2*i*r)
+                        pos[n] = pos[n] + z( math.random(0,1)-0.5, 0)
+                    else
+                        local x = math.ceil( pos[n].re )
+                        stacks[x] = stacks[x] + 1
+                    end
+                end
+            end
+        end
+    end
+    draw(active)
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

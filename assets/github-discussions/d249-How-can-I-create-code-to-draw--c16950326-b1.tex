@@ -1,0 +1,74 @@
+% source: https://github.com/pfradin/luadraw/discussions/249#discussioncomment-16950326 (pfradin, block 1)
+\documentclass[border=2mm ]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\begin{luacode*}
+local ld= luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+function ld.parabola(A,B,C)
+    A = cpx.toComplex(A); B = cpx.toComplex(B); C = cpx.toComplex(C)
+    local x1, x2, x3 = A.re, B.re, C.re -- the x-coordinates must be different
+    local y1,y2,y3 = A.im, B.im, C.im
+    local f = function(t)
+        return (t-x2)*(t-x3)/(x1-x2)/(x1-x3)*y1 + (t-x1)*(t-x3)/(x2-x1)/(x2-x3)*y2 + (t-x2)*(t-x1)/(x3-x2)/(x3-x1)*y3
+    end
+    return f
+end
+
+function ld.parabola_horizontal(A,B,C)
+    A = cpx.toComplex(A); B = cpx.toComplex(B); C = cpx.toComplex(C)
+    local y1, y2, y3 = A.im, B.im, C.im -- các tung độ phải khác nhau
+    local x1, x2, x3 = A.re, B.re, C.re
+
+    local f = function(t)
+        return (t-y2)*(t-y3)/(y1-y2)/(y1-y3)*x1
+             + (t-y1)*(t-y3)/(y2-y1)/(y2-y3)*x2
+             + (t-y2)*(t-y1)/(y3-y2)/(y3-y1)*x3
+    end
+
+    return f
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=implicit}
+local ld = luadraw
+local g = ld.graph:new{ window = {-1, 5, -1, 5}, size = {10, 10} }
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I  
+local A, B, C, D = Z(0,4), Z(0,0), Z(4,0), Z(4,4)
+local E, F, P, Q = Z(2,3), Z(1,2), Z(2,1), Z(3,2)
+local f1 = ld.parabola_horizontal(D,F,C) 
+local f2 = ld.parabola_horizontal(A,Q,B) 
+local f3 = ld.parabola(A,P,D)
+local f4 = ld.parabola(B,E,C)
+
+local p_arcAC = function(t) -- parametrization of lower AC arc
+    if t < 4/3 then return Z(f1(t),t)
+    else 
+        local t0 = 0.5*(4-t)
+        return Z(t0,f3(t0)) end
+end
+
+local arcAC = ld.parametric(p_arcAC,0,4)[1] -- lower AC arc
+ld.insert( arcAC, ld.reverse(ld.sym(arcAC,{A,C-A})) ) -- arcAC = lower AC arc + upper AC arc
+local arcBD = ld.sym( arcAC, {2,Z(0,1)} ) -- arcBD = lower BD arc + upper BD arc
+local bothArcs = ld.concat(arcAC,arcBD)
+
+g:Ddots({A,B,C,D,E,F,P,Q})
+g:Linecolor("blue") 
+g:Linewidth(10) 
+g:Dpolyline(bothArcs, "draw=none,pattern= north west lines, pattern color=cyan, even odd rule")  
+g:Dparametric(function(t) return Z(f1(t), t) end, {t={0,4}})
+g:Dparametric(function(t) return Z(f2(t), t) end, {t={0,4}})
+g:Dcartesian(f3, {x={0,4}})
+g:Dcartesian(f4, {x={0,4}})
+g:Dpolyline({{A,B,C,D,A}},"color = red") 
+g:Dlabel("$A$",A, {pos="N"}, "$D$",D, {},"$B$",B, {pos="S"},
+"$C$", C, {}, "$E$",E, {pos="S"},"$F$",F, {pos="E"},"$P$",P, {pos="N"},"$Q$",Q, {pos="W"})
+g:Show()
+\end{luadraw}
+\end{document} 

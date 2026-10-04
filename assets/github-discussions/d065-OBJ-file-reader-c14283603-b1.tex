@@ -1,0 +1,115 @@
+% source: https://github.com/pfradin/luadraw/discussions/65#discussioncomment-14283603 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+%%%
+% src::
+%     urls = https://github.com/pfradin/luadraw/discussions/64 ,
+%            https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html ,
+%            https://dmccooey.com/polyhedra
+%%%
+
+\documentclass{standalone}
+
+\usepackage{xcolor}
+
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luacode}
+function parse_obj(file)
+  local polyhedron = {}
+  local vertices  = {}
+  local facets    = {}
+
+-- Dans les ¨regexs ¨lua, ''%'' est le caractère d'échappement.
+  for line in io.lines(file) do
+-- Nettoyage des espaces finaux et initiaux : en ¨lua, ''-''
+-- est un caractère spécial pour une recherche non gourmande.
+    line = line:match("^%s*(.-)%s*$")
+
+-- On ignore les lignes vides et les commentaires.
+    if line ~= "" and not line:match("^#") then
+-- Cas d'un sommet.
+      if line:match("^v%s") then
+-- La ¨regex suivante est fragile, mais nous faisons confiance
+-- aux fichiers ext::''obj'' utilisés.
+        local x, y, z = line:match(
+          "^v%s+([%-%d%.]+)%s+([%-%d%.]+)%s+([%-%d%.]+)"
+        )
+
+        if x and y and z then
+          x, y, z = tonumber(x), tonumber(y), tonumber(z)
+
+-- Un nouveau sommet.
+          table.insert(vertices, M(x, y, z))
+        end
+
+-- Cas d'une face.
+      elseif line:match("^f%s") then
+        local face = {}
+
+        for idx in line:gmatch("(%d+)") do
+          table.insert(face, tonumber(idx))
+        end
+
+        if #face > 0 then
+          table.insert(facets, face)
+        end
+      end
+    end
+  end
+
+  polyhedron.vertices = vertices
+  polyhedron.facets   = facets
+
+  return polyhedron
+end
+\end{luacode}
+
+
+\begin{luadraw}{name = 3D-model-obj-file}
+------
+-- Analyse d'un modèle 3D au format Wavefront.
+------
+local file = "obj/icosahedron.obj"
+-- local file = "obj/truncated_icosahedron.obj"
+-- local file = "teapot.obj"
+
+local polyhedron = parse_obj(file)
+local x1,x2,y1,y2,z1,z2 = getbounds3d(polyhedron.vertices)
+
+------
+-- Définition de la zone graphique.
+------
+local graphview = graph3d:new{
+    window3d = {x1,x2,y1,y2,z1,z2},
+    adjust2d = true, 
+    viewdir = {-110, -20},
+    size    = {10, 10}
+}
+
+------
+-- Réglages liés aux lignes.
+------
+graphview:Linejoin("round")
+
+Hiddenlines     = true
+Hiddenlinestyle = "dashed"
+
+------
+-- Tracé du modèle.
+------
+graphview:Dpoly(
+  polyhedron,
+  {
+    mode  = 4,
+    color = "cyan"
+  })
+
+------
+-- Et le merveilleux se révèle au monde.
+------
+graphview:Show()
+\end{luadraw}
+\end{document}

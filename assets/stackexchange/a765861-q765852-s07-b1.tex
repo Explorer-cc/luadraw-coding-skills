@@ -1,0 +1,51 @@
+% source: https://tex.stackexchange.com/a/765861 (question 765852, score 7, block 1)
+\documentclass{standalone} %lualatex only
+\usepackage[3d]{luadraw}
+\usepackage{animate}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=3d-reflection}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Mc = pt3d.M, pt3d.Mc
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local sqrt = math.sqrt
+local g = ld.graph3d:new{ window={-5,5,-4,4}, viewdir={"ortho",0,90}, size={10,10} }
+local R = sqrt(3)
+local B,C,A = M(0,-R,0), M(0,R,0), M(0,0,2)
+ld.nbimages = 61 + 20
+local angles = ld.linspace(0,180,61)
+local B1, C1, phi, i = B, C, 90, 0
+    
+function ld.makeframe(k)
+    if k <= 10 then
+        phi = phi + 8
+    elseif k <= 71 then
+        i = angles[k-10]
+        B1,C1 = table.unpack( ld.rotate3d( {B,C}, i, {Origin, vecK} ) )
+    else
+        phi = phi - 8
+    end
+    g:Setviewdir(0,phi)
+    g:Dscene3d( g:addPlane( {Origin,vecI}, {color="Beige", contrast=0, edge=true}),
+        g:addPolyline({A,B1,C1}, {close=true, hidden=true})
+    )
+    g:Dline3d({Origin,A},"dashed",true)
+    if i<90 then
+        g:Dlabel3d("$A$",A,{pos="NE"},"$B$",B1,{pos="W"},"$C$",C1,{pos="E"})
+    else
+        g:Dlabel3d("$A$",A,{pos="NE"},"$B$",B1,{pos="E"},"$C$",C1,{pos="W"})
+    end
+    g:Sendtotex()
+    g:Cleargraph()
+end
+\end{luadraw}
+\newcommand*\nb{\directlua{tex.print(luadraw.nbimages)}}%
+\newcommand*\makeframe[1]{\directlua{luadraw.makeframe(#1)}}%
+\begin{animateinline}[poster=first,controls,palindrome]{12}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document}

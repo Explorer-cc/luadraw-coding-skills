@@ -1,0 +1,20 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-coils-chains.tex (demo: The \emph{g:Dcoil2())
+\begin{luadraw}{name=Dcoil2_examples}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{window={-5.6,5,-5,5}, size={10,10}}
+require 'luadraw_coils_chains'
+local a, b, c, d = Z(-5,4), Z(-1,4), Z(1,4), Z(3,4)
+g:Dcoil2({a,10,b}, 0.75, {}); g:Dlabel("default options", b+0.5, {pos="E"})
+g:Shift(Z(0,-2))
+g:Dcoil2({a,10,b,10,c,4,d}, 0.75, {color="SteelBlue", direction=-1, width=12})
+g:Dlabel("3 springs", d+0.5, {pos="E"})
+g:Shift(Z(0,-2))
+g:Dcoil2({Z(-4,4),8, Z(-4,0)}, 1, {border="", width=12}); g:Dlabel('border=""',Z(-4,-0.5),{pos="S"})
+local C = ld.circle(Z(2,2),2)
+g:Dcoil2( {C,60}, 0.5, {color="Crimson", width=8, border="white"})
+g:Dlabel("Along a circle",Z(2,-0.5),{pos="S"})
+g:Show()
+\end{luadraw}

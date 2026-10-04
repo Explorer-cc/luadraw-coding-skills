@@ -1,0 +1,33 @@
+% source: https://tex.stackexchange.com/a/757478 (question 757445, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/757445/tikz-to-plot-a-part-of-a-cone
+\begin{document}
+\begin{luadraw}{name=part_of_cone}
+local g = graph3d:new{window3d={-1.125,1.125,-1.125,1.125,0,2}, window={-1.5,1.55,-1.25,2}, bbox=false, size={12,12}} 
+g:Labelsize("footnotesize"); g:Linewidth(6)
+local C = rotline({Origin, M(0,-1,2)}, {Origin, vecK}, 200,30)
+C = g:Classifyfacet(C)
+local u, v, w = g:Proj3dV(vecI), g:Proj3dV(vecJ), g:Proj3dV(vecK)
+--  x-axe
+g:Linecolor("red"); g:Labelcolor("red"); g:Labeldir({-u,w})
+g:Dgradline({0,u/5}, {limits={-5.5,5.5}, gradlimits={-5,5}, unit=0.2, arrows='->', tickdir=w, labelpos="top", labelstyle="S", legend="$x$", legendpos=1, xyticks=0})
+for x = -1, 1, 0.2 do g:Dballdots3d(x*vecI,"red",0.75) end
+-- y-axe
+g:Linecolor("green"); g:Labelcolor("green"); g:Labeldir({v,w})
+g:Dgradline({0,v/5}, {limits={-5.5,5.5}, gradlimits={-5,5}, unit=0.2,  originpos="none", arrows='->', tickdir=w, labelpos="top", labelstyle="S", legend="$y$", legendpos=1, xyticks=0})
+for y = -1, 1, 0.2 do g:Dballdots3d(y*vecJ,"green",0.75) end
+-- plane
+g:Dpolyline3d( g:Plane2facet({Origin,vecK}), "draw=none,fill=lightgray,opacity=0.3")
+-- z-axe
+g:Linecolor("blue"); g:Labelcolor("blue")
+g:Dgradline({0,w/5}, {limits={0,10.5}, originpos="none", unit=0.2, arrows='->', tickdir=v, labelpos="top", labelstyle="W", legend="$z$", legendpos=1, xyticks=0})
+for z = 0, 2, 0.2 do g:Dballdots3d(z*vecK,"blue",0.75) end
+-- part of cone
+g:Dpolyline3d(border(C),"draw=none,left color=Crimson!50, right color=Crimson, middle color=Crimson!10, fill opacity=0.9")
+g:Dpolyline3d(C,"line width=0.2pt,gray")
+g:Show()
+\end{luadraw}
+\end{document}

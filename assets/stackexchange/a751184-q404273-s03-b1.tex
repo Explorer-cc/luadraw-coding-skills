@@ -1,0 +1,18 @@
+% source: https://tex.stackexchange.com/a/751184 (question 404273, score 3, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/404273/how-to-draw-two-intersecting-cylinders?noredirect=1&lq=1
+\begin{document}
+\begin{luadraw}{name=two_cylinders}
+local g = graph3d:new{size={12,12},window={-6,6,-3,3},viewdir={30,70}}
+local R = 1.5
+local C1 = cylinder(-5*vecJ,R,5*vecJ,45,true)
+local C2 = cylinder(-5*vecI,R,5*vecI,45,true)
+g:Dscene3d(
+    g:addPoly(C1, {color="Chocolate",contrast=0.5}),
+    g:addPoly(C2, {color="Chocolate",contrast=0.5})
+    )
+g:Show()
+\end{luadraw} 
+\end{document} 

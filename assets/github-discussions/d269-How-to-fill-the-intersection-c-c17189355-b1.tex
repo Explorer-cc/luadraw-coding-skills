@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/269#discussioncomment-17189355 (pfradin, block 1)
+% Source - https://tex.stackexchange.com/a/763272
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=interScircles, exec=true, auto=false}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+
+require 'luadraw_spherical'
+local C, R = M(0,0,0), 3
+
+function ld.interSphericalC(P1, P2) -- planes
+    local D = ld.interPP(P1,P2)
+    if D ~= nil then
+        return ld.interDS(D, {C,R})
+    end
+end
+
+local g = ld.graph3d:new{}
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+g:Define_sphere({center=C, radius=R})
+local P1 = {M(0,0,2), M(0,0,1)}
+local P2 = {M(math.sqrt(5),0,0), M(1,0,0)}
+local P3 = {M(0,0,0), M(-1,1,0)}
+local inter12 = { ld.interSphericalC(P1,P2) }
+local inter13 = { ld.interSphericalC(P1,P3) }
+local inter23 = { ld.interSphericalC(P2,P3) }
+
+g:DScircle(P1, {color="red"})
+g:DScircle(P2, {color="blue"})
+g:DScircle(P3, {color="green"})
+g:DSstars( ld.concat(inter12,inter13,inter23) )
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,80 @@
+% source: https://github.com/pfradin/luadraw/discussions/329#discussioncomment-18364670 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+
+\begin{luacode*}
+local ld = luadraw
+local Z = ld.cpx.Z
+
+function ld.common_tangent(p1,u1,u2,grid1, p2,v1,v2,grid2)
+    local h = 1e-6
+    local det = ld.cpx.det
+    local function diff(f,t) return (f(t+h)-f(t-h))/(2*h) end
+    local function F(x,y) return det(diff(p2,y), diff(p1,x)) end -- x = parameter for p1, y = parameter for p2
+    local function G(x,y) return det(p2(y)-p1(x), diff(p1,x)) end
+    local L1 = ld.implicit(F,u1,u2,v1,v2, grid1)
+    local L2 = ld.implicit(G,u1,u2,v1,v2, grid2)
+    return ld.interL(L1,L2)
+end
+
+function ld.graph:Dcommon_tangent(p1, p2, options)
+    options = options or {}
+    local t1 = options.t1 or {-5,5} -- p1 parameter limits 
+    local t2 = options.t2 or {-5,5} -- p2 parameter limits 
+    local grid1 = options.grid1 or {50,50}
+    local grid2 = options.grid2 or {50,50}
+    local draw = options.draw_options or ""
+    local scale  = options.scale or 1
+    local I = ld.common_tangent(p1,t1[1],t1[2],grid1, p2,t2[1],t2[2], grid2)
+    if I ~= nil then
+        local out = {}
+        for _, z in ipairs(I) do
+            local a, b = p1(z.re), p2(z.im)
+            self:Dline(a, b, draw, scale)
+            table.insert(out, {a,b})
+        end
+        if options.out ~= nil then table.append(options.out, out) end
+    end
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=common_tangent}
+local ld = luadraw
+local cpx = ld.cpx
+local det = cpx.det
+local Z, Zp = cpx.Z, cpx.Zp
+local i,sin,cos,pi = cpx.I, math.sin,math.cos,math.pi
+
+local g = ld.graph:new{ window={-5,5,-3,6}, size={10,10} }
+
+local function ellipse(c,a,b,u)
+    u = cpx.normalize(u)
+    return function(t) -- parametrization of ellipse
+            return c+a*cos(t)*u+b*sin(t)*i*u
+        end
+end
+local p1 = ellipse(-1,4,2,1+i/2) -- parametrization of (E1)
+local example = function(k) -- to choose ellipse (E2)
+    if k == 1 then -- (E2) inside (E1)        
+        return ellipse(0.5+i/2, 1.5, 1, 1-i)
+    elseif k == 2 then -- (E2) outside (E1)
+        return ellipse(2+4*i, 1.5, 1, 1-i)
+    elseif k == 3 then -- (E2) cuts (E1) in 2 points
+        return ellipse(-1+2*i, 2, 1, 1-i)
+    elseif k == 4 then -- (E2) cuts (E1) in 4 points
+        return ellipse(2*i, 4, 1, 1-i)
+    end
+end
+local p2 = example(4) -- we choose a example for (E2) (1,2,3 or 4)
+--drawing
+g:Dparametric(p1, {t={-pi,pi}, draw_options="thick,red"})
+g:Dparametric(p2, {t={-pi,pi}, draw_options="thick,blue"})
+local dots = {}
+g:Dcommon_tangent(p1,p2, {t1={-pi,pi},t2={-pi,pi}, out=dots})
+g:Ddots(dots)
+g:Show()
+\end{luadraw}
+\end{document}

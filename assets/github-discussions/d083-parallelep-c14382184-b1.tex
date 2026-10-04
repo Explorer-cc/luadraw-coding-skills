@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/83#discussioncomment-14382184 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=two_parallelep}
+local g = graph3d:new{window={-10,9,-9,5},viewdir={30,60},size={10,10}}
+g:Linewidth(4); Hiddenlines = true; g:Labelsize("footnotesize")
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a, b, h ,c= 5,10,4,3
+local P1 = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local P2 = parallelep(M(a,b/2,0), c*vecI,a*vecJ,h*vecK)
+local F = getfacet(P2,{2,3,4,6}) -- remove back and bottom faces of P2
+
+g:Dscene3d(
+g:addPoly(P1,{edge=true,color="LightBlue"}),
+g:addFacet(F,{edge=true,color="LightBlue"})
+)
+g:Dlabel3d("10 in",M(0,b/2,h),{dir={vecJ,-vecI},pos="N"})
+g:Dlabel3d("5 in",M(a/2,0,h),{dir={-vecI,-vecJ},pos="N"})
+g:Dlabel3d("4 in",M(a,0,h/2),{dir={vecK,vecI},pos="N"})
+g:Show()
+\end{luadraw}
+\end{document} 

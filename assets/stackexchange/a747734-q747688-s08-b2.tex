@@ -1,0 +1,20 @@
+% source: https://tex.stackexchange.com/a/747734 (question 747688, score 8, block 2)
+\begin{luadraw}{name=parabole}
+local g = graph3d:new{window={-5,5,-9,5.5}, viewdir={5,60}, size={10,10}}
+g:Linejoin("round")
+Hiddenlinestyle = "dashed"
+local C1 = cone(Origin,4*vecK,3,35,true)
+local C2 = cone(Origin, -4*vecK,3,35,true)
+local P = {M(0,0,-3),-12*vecJ+9*vecK} -- plan de coupe
+local I2 = g:Intersection3d(C2,P) -- intersection entre le cône C2 et le plan P
+local V = g:Classifyfacet(C2) -- V = facettes visibles
+local V1, V2 = cutfacet(V,P) -- V1 = facettes au-dessus de P, V2 facettes en dessous de P
+g:Dpolyline3d(border(V2), "left color=white, right color=orange") --partie du cône sous le plan
+g:Dplane(P, 3*vecJ+4*vecK,12,9,5,"Navy,line width=1.2pt,fill=Crimson,fill opacity=1")
+g:Dpolyline3d(border(V1), "left color=white, right color=orange")--partie du cône au-dessus du plan
+g:Dcone(Origin,4*vecK,3,{color="orange"})
+g:Dedges(I2,{hidden=true,color="Navy",width=12}) -- dessin des arêtes I2
+g:Linestyle(Hiddenlinestyle)
+g:Dplane(P, 3*vecJ+4*vecK,12,9,5,"Navy"); g:Dcone(Origin,-4*vecK,3)
+g:Show()
+\end{luadraw}

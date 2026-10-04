@@ -1,0 +1,107 @@
+% source: https://github.com/pfradin/luadraw/discussions/151#discussioncomment-15003356 (pfradin, block 1)
+\documentclass[varwidth,border = 3pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage{fouriernc}
+
+\begin{luacode*}
+function solve(f,a,b,n,df)
+    n = n or 25
+    if a > b then a, b = b, a end
+    local x, delta, S = a, (b-a)/n, {}
+    local fin, h, r = x+delta, 1e-6, nil
+    if df == nil then
+        df = function(x)
+            return (f(x+h)-f(x))/h
+        end
+    end
+    local iter = function(x)
+        return x-f(x)/df(x)
+    end
+    while x < b do
+        r = x+delta/2
+        for i = 1,5 do
+            if r~= nil then r = evalf(iter,r) end
+            if (r==nil) then break end
+        end
+        if (r ~= nil) and (r >= x) and (r < fin) and (math.abs(f(r)) < 1e-6) then
+            table.insert(S,r) -- on considère que r est une solution
+        end
+        x = fin; fin = x+delta
+    end
+    if #S > 0 then return S end
+end
+
+function tangent_from(p,t1,t2,from,dp)
+-- p: t -> p(t) parameterization of the curve
+-- t1, t2 : interval boundaries
+-- from : point on the plane from which the tangents will originate
+-- dp (optionnal) derivative of the function p
+    local h = 1e-6
+    if dp == nil then
+        dp = function(t) -- approximate derivative function
+            return (p(t+h)-p(t))/h
+        end
+    end
+    local f = function(t)
+        return cpx.det(p(t)-from,dp(t))
+    end
+    local n = math.max(25, math.floor((t2-t1)*2.5))
+    local S = solve(f,t1,t2-h,n) --<< here we use the solve function
+    if S ~= nil then return map(p,S) else return {} end -- empty list if no solution is found
+end
+\end{luacode*}
+
+\begin{document}
+
+\begin{luacode*}
+function draw(index)
+local g = graph:new{bbox=false, size={10,10}}
+local i = cpx.I
+local cos, sin, pi = math.cos, math.sin, math.pi
+
+local p1 = function(t)
+    return t+i*t^2/4 -- Explorer example
+end
+local p2 = function(t)
+    return  1+i+rotate( 2*cos(t)+i*sin(t),-15)  -- an ellipse
+end
+local p3 = function(t)
+    return  t + i*(t+1)*(t-2)*t
+end
+local L = {p1,p2,p3}
+local p = L[index]
+local P = 1.5-1.5*i -- the "from" point
+local S = tangent_from(p,-5,5,P)
+
+-- drawing
+local axis_style = {
+  arrows='-Stealth',
+  xyticks={0.15, 0.15},
+  legend={'$x$','$y$'} 
+}
+g:Daxes({0, 1, 1}, axis_style)
+g:Dparametric(p,{t={-5,5}, draw_options="line width=0.8pt, red"})
+for _,a in ipairs(S) do
+    g:Dline(P,a,"blue")
+end
+g:Ddots(S,"red"); g:Ddots(P); g:Dlabel("$P$",P,{pos="S"})
+g:Sendtotex()
+end
+\end{luacode*}
+
+\centering
+
+\section*{Explorer example}
+
+\directlua{draw(1)}%
+
+\section*{Another example}
+
+\directlua{draw(2)}%
+
+\section*{Not a quadratic curve}
+
+\directlua{draw(3)}%
+
+\end{document}

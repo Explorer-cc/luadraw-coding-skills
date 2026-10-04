@@ -1,0 +1,14 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-4-Computations-on-Lists.tex (demo: cutpolyline2)
+\begin{luadraw}{name=cutpolyline2}
+local ld = luadraw
+local g = ld.graph:new{window = {-4, 4, -4, 4}, size ={10,10}}
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = function(x) return 1.5*math.sin(x) end
+local P = ld.polyreg(0,3,5) -- pentagone
+local L = ld.cutpolyline2(P,f,'<',true) -- partie du polygone située sous la courbe de f
+g:Dpolyline(L,true,"draw=none,fill=pink,fill opacity=0.6")
+g:Linewidth(12)
+g:Dcartesian(f, {draw_options="blue"})
+g:Dpolyline(P,true,"red")
+g:Show()
+\end{luadraw}

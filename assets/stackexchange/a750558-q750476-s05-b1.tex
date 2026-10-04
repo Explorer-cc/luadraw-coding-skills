@@ -1,0 +1,26 @@
+% source: https://tex.stackexchange.com/a/750558 (question 750476, score 5, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/750476/graph-surfaces-in-tikz-in-triangular-regions
+\begin{document}
+\begin{luadraw}{name=pyramid_with_colors}
+local N = 1.1
+local zmax = 2
+local g = graph3d:new{ 
+    window3d={1,N,1,N,-2,zmax},
+    adjust2d = true, -- to adjsut the 2d window
+    viewdir={50,2.5}, 
+    size={10,10,0} -- 0 means non-orthonormal
+}
+g:Linejoin("round"); g:Labelsize("footnotesize")
+local p = function(x,y) return M(x,y,(x^2-2*x*y+y)/(y-1)) end  --parametrization
+local s = surface(p,1,N,1+1e-15,N,{30,30})
+local s = cutfacet(s, {M(0,0,zmax),-vecK}) -- to keep z <= zmax
+local s = cutfacet(s, {Origin, vecI-vecJ}) -- to keep y < x
+g:Dboxaxes3d({grid=true,xstep=0.02, ystep=0.02,gridcolor="gray",fillcolor="LightGray"})
+g:Dfacet(s,{color="cyan",mode=5})
+g:Show() 
+\end{luadraw}
+\end{document}

@@ -1,0 +1,66 @@
+% source: https://tex.stackexchange.com/a/762926 (question 393031, score 1, block 1)
+\documentclass{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+% images creation,
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Ms, Origin = pt3d.M, pt3d.Ms, pt3d.Origin
+local pi, sin, cos = math.pi, math.sin, math.cos
+ld.nbimages = 36
+
+require 'luadraw_spherical'
+
+local g = ld.graph3d:new{
+  window3d={-1.2,1.2,-1.2,1.2,-1.2,1.2},
+  window={-1,1,-1,1},
+  viewdir={150,70},
+  size={10,10}
+}
+
+local a = pi/4
+local c = a/pi
+local eps = 1e-8
+
+local p = function(theta)
+  local u = theta % pi
+  local d = math.min(u, pi-u)
+  if d <= c+eps then return nil end
+  return Ms(1,theta, a/d)
+end
+
+ld.Hiddenlines = true
+ld.Hiddenlinestyle = "dashed"
+local theta = ld.linspace(0,360,ld.nbimages+1)
+
+-- -- create the image number k, 
+function ld.makeframe(k) -- this function must be global (in luadraw spacename)
+    -- draw image number k here
+    g:Define_sphere({
+        radius=1,
+        opacity=0.75,
+        edgestyle="noline"
+        })
+    local L = ld.rotate3d( ld.parametric3d(p,0,2*pi,300,true,5), theta[k], {Origin,M(1,1,1)})
+    g:DScurve(L,{color="Crimson",hidden=true,width=8})
+    g:Dspherical()
+
+    -- save image number k
+    g:Sendtotex() -- send the tikzpicture to TeX
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}%
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

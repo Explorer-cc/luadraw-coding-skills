@@ -1,0 +1,21 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-coils-chains.tex (demo: The \emph{g:Dchain2())
+\begin{luadraw}{name=Dchain2_examples}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{window={-5,5,-4.5,5}, size={10,10}}
+require 'luadraw_coils_chains'
+g:Labelsize("small")
+local a, b = Z(-4,4.5), Z(4,4.5)
+g:Dchain2({a,b}, 0.1, {width=8})
+g:Shift(Z(0,1))
+a, b = Z(-4,3), Z(-4,-4)
+g:Dchain2({a,b}, 0.35, {color="SteelBlue", width=24, border=""})
+g:Dlabel('border=""', b, {pos="S",dist=0.1})
+a, b = Z(-2,1), Z(4,1)
+local C = ld.circle(Z(1,-1), 2.5)
+g:Dchain2(C, 0.125, {color="Brown", width=12})
+g:Dlabel("Along a circle",Z(1,-4),{pos="S",dist=0.1})
+g:Show()
+\end{luadraw}

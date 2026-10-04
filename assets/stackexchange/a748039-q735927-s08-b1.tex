@@ -1,0 +1,29 @@
+% source: https://tex.stackexchange.com/a/748039 (question 735927, score 8, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+
+\begin{luadraw}{name=bigcircles}
+local g = graph3d:new{window={-4,5,-4,5},viewdir={30,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local R=3
+local O,A,B,C,D = Origin, M(0,0,-R), M(0,0,R), M(0,0,R+2), M(0,0,R+1)
+local S = sphere(O,R,35,35) 
+local I1 = g:Intersection3d(S, {O,vecI}) 
+local I2 = g:Intersection3d(S, {O,vecJ})
+local I3 = g:Intersection3d(S, {O,vecK})
+g:Dscene3d(
+    g:addPoly(S, {backcull=true, color="LightBlue", contrast=0.5}),
+    g:addAxes(Origin, {arrows=1})
+    )
+g:Dedges(I1, {hidden=true,color="red"})
+g:Dedges(I2, {hidden=true,color="blue"})
+g:Dedges(I3, {hidden=true,color="green"})
+g:Darc3d(D+vecJ+vecI,D,D+vecI,0.35,1,vecK,"->") -- arc above
+g:Ddots3d({O,A,B})
+g:Dlabel3d("$O$",O,{pos="W"},  "$S$",A,{pos="E"}, "$N$",B,{pos="SE"} )
+g:Show()
+\end{luadraw}
+\end{document}

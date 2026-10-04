@@ -1,0 +1,35 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222179 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=truncated_cylinder}
+local g = graph3d:new{window3d={-1,5,-4,4,-1,4},window={-3,5,-2,4},viewdir={-120,60},size={12,12}}
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+
+local P = {Origin, vecI-vecK}
+local x = 1.75
+local A = x*vecI
+local B = proj3dO(A,P,vecK)
+local P2 = {A,vecI}
+local C = cylinder(Origin,5*vecK,3,100,false)
+local C,C2,section = cutpoly(C,P,true)
+local I = g:Intersection3d(C,P2)
+local D,E,F = table.unpack(I.visible[1])
+local G = (3*D+E)/4
+g:Dscene3d(
+    g:addPoly(C,{color="YellowGreen"}),
+    g:addArc(-vecJ,Origin,vecJ,3,1,vecK,{color="Navy",width=8}),
+    g:addPolyline({Origin, A, B, Origin}, {color="Violet",width=8}),
+    g:addPolyline({{-0.5*vecI,5*vecI},{-4*vecJ,4*vecJ}}, {arrows=1})
+    )
+g:Dpolyline3d(section,true,"Navy,line width=0.8pt")
+g:Dedges(I,{hidden=true,color="Violet",width=8})
+g:Darc3d(A,Origin,B,0.5,1,"-stealth"); g:Dangle3d(Origin,A,B)
+g:Dpolyline3d({F,F-vecJ}); g:Dballdots3d(F,"red"); g:Dlabel3d("$(x,-\\sqrt{9-x^2})$",F-vecJ,{pos="S"})
+g:Dpolyline3d({G,G+1.25*(vecK+vecI)}); g:Dlabel3d("$2\\sqrt{9-x^2}$",G+1.25*(vecK+vecI),{pos="NE"})
+g:Dlabel3d("$45^\\circ$",A/2,{pos="N"},"$x$",2*A/3,{pos="S"},"$x$",(A+B)/2,{pos="E"}, "$x$",5*vecI,{pos="E"},"$y$",4*vecJ,{pos="N"} )
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,21 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Section of a non-circular cylinder)
+\begin{luadraw}{name=curve2cylinder}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local cos, sin, pi = math.cos, math.sin, math.pi
+
+local g = ld.graph3d:new{ window3d={-5,5,-5,5,-4,4},window={-9,8,-10.5,5.5},
+    viewdir={"central",39,64}, size={10,10}}
+local f = function(t) return M(4*cos(t)-cos(4*t),4*sin(t)-sin(4*t),-4) end -- curve in the plane z=-3
+local V = 8*vecK
+local C = ld.curve2cylinder(f,-pi,pi,V,{nbdots=25,nbdiv=2})
+local plan = {M(0,0,2), -vecK} -- cutting plane z=2
+local C1, C2, section = ld.cutfacet(C,plan)
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray"})
+g:Dfacet(C1, {mode=ld.mShaded,color="LightBlue"}) -- part below the plane
+g:Dfacet(g:Plane2facet(plan), {opacity=0.3,color="Chocolate"}) -- draw the plane as a facet
+g:Filloptions("fdiag","red"); g:Dpolyline3d(section) -- drawing of the section
+g:Dfacet(C2, {mode=3,color="LightBlue"}) -- part of the cylinder above the plane
+g:Show()
+\end{luadraw}

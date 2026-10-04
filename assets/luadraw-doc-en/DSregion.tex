@@ -1,0 +1,35 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: Paint a spherical region)
+\begin{luadraw}{name=DSregion}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Ms, O = pt3d.Ms, pt3d.Origin
+local g = ld.graph3d:new{window={-4,4,-4,4},margin={0,0,0,0},viewdir={30,65},size={10,10}}
+ld.Hiddenlines = false
+ld.Hiddenlinestyle = "dashed"
+g:Linewidth(8)
+require 'luadraw_spherical'
+local poly = require 'luadraw_polyhedrons'
+local R = 3
+local T = poly.tetrahedron(O, Ms(R,30*ld.deg,20*ld.deg))
+local A, B, C, D = table.unpack(T.vertices)
+local function edge(A,B,cut) -- cut = true/false, to remove the first point
+    cut = cut or false
+    local m = (A+B)/2
+    local u = pt3d.normalize(B-A)
+    local v = ld.rotate3d(u,90,{O,m})
+    local L = ld.path3d({A,"m",A+2*v+u/2, m+2*v+u/2,m,"b",m-2*v-u/2,B-2*v-u/2,B,"b"},100)[1]
+    if cut then table.remove(L,1) end
+    return ld.map(ld.toSphere, L)
+end
+local ABD = ld.concat(edge(A,B), edge(B,D,true), edge(D,A,true) )
+local ABC = ld.concat(edge(A,B), edge(B,C,true), edge(C,A,true) )
+local ADC = ld.concat(edge(A,D), edge(D,C,true), edge(C,A,true) )
+local BCD = ld.concat(edge(B,C), edge(C,D,true), edge(D,B,true) )
+g:Define_sphere({radius=R, color="SlateGray", opacity=0.7})
+g:DSregion(ABD,{fill="red"})
+g:DSregion(ABC,{fill="green"})
+g:DSregion(ADC,{fill="blue"})
+g:DSregion(BCD,{fill="yellow"})
+g:Dspherical()
+g:Show()
+\end{luadraw}

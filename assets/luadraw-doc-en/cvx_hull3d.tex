@@ -1,0 +1,15 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-6-Geometric-Constructions.tex (demo: Using cvx\_hull3d())
+\begin{luadraw}{name=cvx_hull3d}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-2,4,-6,1},bbox=false,size={10,10}}
+local L = {Origin, 4*vecI, M(4,4,0), 4*vecJ}
+ld.insert(L, ld.shift3d(L,-3*vecK))
+ld.insert(L, {M(2,1,2), M(2,3,2)})
+local V = ld.cvx_hull3d(L)
+local P = ld.facet2poly(V)
+g:Dpoly(P , {color="cyan",mode=ld.mShadedHidden})
+g:Show()
+\end{luadraw}

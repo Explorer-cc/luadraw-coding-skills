@@ -1,0 +1,38 @@
+% source: https://github.com/pfradin/luadraw/discussions/258#discussioncomment-17046729 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier}
+\begin{document}
+    \begin{luadraw}{name=intersection}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    local M, I, J, K = pt3d.M, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local g = ld.graph3d:new{
+        window3d={-2.5,3,-2.5,3,-1.5,5.5},
+        window={-4,4,-2,5},
+        viewdir={-30,60}, size={10,10}
+    }
+    ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+    local Pbox = ld.parallelep(M(1,0,0), J-I, -I-J, 4*K)
+    local A, u, n = M(0,0,2), pt3d.normalize(I-J), pt3d.normalize(I+J+K)    
+    local v = pt3d.prod(n,u)
+    local Plane = {A, n}
+    local section = ld.clipplane(Plane,Pbox)
+    local rect_plane = {A-2.5*u-2.5*v, A+2.5*u-2.5*v,  A+2.5*u+2.5*v, A-2.5*u+2.5*v }
+    g:Dscene3d(
+        --g:addPlane(Plane, {color="blue!10!white", edge=true, edgecolor="blue"}), --not rectangular
+        g:addFacet(rect_plane, {color="blue!30!white", edge=true, edgecolor="blue",edgewidth=2}),
+        g:addPoly(Pbox, {color="gray", edge=true, hidden=true}),
+        g:addAxes( M(0,0,0), {arrows=1})
+        )
+    g:Dballdots3d( section, "magenta",1)
+    g:Dpolyline3d( ld.facetedges({section}), "-Stealth, magenta, thick, dashed")
+    g:Dlabel3d(
+        "$|x|+|y|=1$", M(-1,2,3.5), {}, 
+        "$x+y+z=2$", M(-3,-0.5,3.75), {node_options="text=blue"}, 
+        "$L$", (section[1]+section[2])/2, {pos="S",dir={J-I, 2*K-I-J},node_options="text=magenta"}
+    )
+    g:Show()
+    \end{luadraw}
+\end{document}

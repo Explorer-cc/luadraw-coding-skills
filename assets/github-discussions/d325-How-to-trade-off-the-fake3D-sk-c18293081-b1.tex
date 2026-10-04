@@ -1,0 +1,44 @@
+% source: https://github.com/pfradin/luadraw/discussions/325#discussioncomment-18293081 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=hemisphere_tetra}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{
+    window3d = {-5,5,-5,5,-5,5},window = {-5,5,-5,5},
+    viewdir = {35,65} -- should be fixed
+}
+require 'luadraw_spherical'
+local sM = ld.sM
+g:Define_sphere({edgestyle="noline",show=false})
+local A,B,C = sM(250,100), sM(-25,110), sM(100,110)
+local P = ld.interSSS( {(A+B)/2, pt3d.abs(A-B)/2}, {(A+C)/2, pt3d.abs(A-C)/2}, {(C+B)/2, pt3d.abs(C-B)/2} )
+local T1, T2 = table.unpack( g:Sphere_tangency(O, 3, {O, vecK}) )
+local I, r, n = table.unpack( g:Sphere_outline(O,3).data )
+
+g:Dangle3d(A,P,B); g:Dangle3d(A,P,C); g:Dangle3d(B,P,C)
+g:DSbigcircle({3*vecI,3*vecJ},{width=6})
+g:DScircle( ld.plane(A,B,C), {style="dashed",width=6})
+g:DSpolyline({{O,A},{O,B},{O,C},{P,A},{P,B},{P,C},{A,B},{C,A}},{style="dashed",width=6})
+g:Dspherical()
+g:Darc3d(T1,I,T2,r,1,n)
+g:Dlabel3d(
+    "$O$",O,{pos="N"}, "$A$", A, {},
+    "$B$",B,{pos="SW"},
+    "$C$",C,{pos="SE"},
+    "$P$",P,{pos="SE"}
+)
+g:Ddots3d({A,B,C,P,O})
+-- Verification
+print(pt3d.angle(B-P,A-P)*ld.rad)
+print(pt3d.angle(B-P,C-P)*ld.rad)
+print(pt3d.angle(C-P,A-P)*ld.rad)
+print("OP=",pt3d.abs(P))
+g:Show()
+\end{luadraw}
+\end{document}

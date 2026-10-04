@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/761137 (question 761135, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/761135/creating-a-cube-with-labels-on-its-faces
+\begin{document}
+\begin{luadraw}{name=cubes_labels}
+local g = graph3d:new{ viewdir=perspective("yz"), window={-2,4,-2,4}, size={12,12}, bbox=false}
+local P = parallelep(Origin, 4*vecI,4*vecJ,4*vecK)
+g:Labelsize("Large"); g:Linewidth(8)
+g:Dlabel3d(
+    "$T_8$",M(0,2,2),{dir={vecJ,vecK}, node_options="red"},
+    "$T_5$",M(2,0,2),{dir={-vecI,vecK}},
+    "$T_6$",M(2,2,0),{dir={vecJ,-vecI}}
+    )
+g:Dpoly(P, {color="WhiteSmoke", opacity=0.5})
+g:Dpolyline3d( {{M(0,2,4), M(4,2,4)},{M(2,4,0), M(2,4,4)}})
+g:Dlabel3d(
+    "$T_1$",M(3,4,2),{dir={-vecI,vecK}, node_options="red"},
+    "$T_2$",M(1,4,2), {},
+    "$T_3$",M(2,3,4),{dir={vecJ,-vecI}},
+    "$T_4$",M(2,1,4),{},
+    "$T_7$",M(4,2,2),{dir={vecJ,vecK}}    
+    )
+g:Show()
+\end{luadraw}
+\end{document}

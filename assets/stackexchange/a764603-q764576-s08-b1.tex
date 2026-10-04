@@ -1,0 +1,67 @@
+% source: https://tex.stackexchange.com/a/764603 (question 764576, score 8, block 1)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+\begin{luacode*}
+luadraw.nbimages = 36
+\end{luacode*}
+
+% images creation
+\begin{luacode*}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{window={-6,6,-3,3}, bg="gray"}
+
+-- declarations
+local angle = ld.linspace(0,360,ld.nbimages+1)
+local O = 0
+local r1, r2 = 2.5, 1.5
+local P1 = ld.polyreg(O,O+r1,8)
+local P2 = ld.polyreg(O,O+r2,8)
+local color = {"blue", "yellow"}
+local index1, index2 = 1, 2
+local wheel = function()
+    for i = 1, 8, 2 do
+        local i1 = 1+(i-1)%8
+        local i2 = 1+i%8
+        local i3 = 1+(i+1)%8
+        g:Dpath( {P1[i1],"m", O, P1[i3],r1,1, "ca", P2[i3], "l", O, P2[i1], r2, -1, "ca", "cl"},
+            "color="..color[index1]..", fill="..color[index1])
+        g:Darc(P1[i1], O, P1[i2],r1,1, "color="..color[index2])
+        g:Darc(P2[i2], O, P2[i3],r2,1, "color="..color[index2])
+        index1, index2 = index2, index1
+    end
+end
+
+-- create the image number k, this function must be global
+function ld.makeframe(k) -- do not modify this line
+    local a = angle[k]
+    g:Savematrix(); 
+    g:Shift(-3); 
+    g:Dpolyline( {{O+0.2, O+1}, {O-0.2,O-1}, {O+Z(0,0.2), O+Z(0,1)}, {O-Z(0,0.2), O-Z(0,1)}},
+        "line width=4, -stealth")
+    g:Rotate(-2*a,O); wheel(); g:Restorematrix()
+    g:Savematrix(); g:Shift(3); 
+    g:Dpolyline( {{O+1, O+0.2}, {O-1,O-0.2}, {O+Z(0,1), O+Z(0,0.2)}, {O-Z(0,1), O-Z(0,0.2)}},
+        "line width=4, -stealth")
+    g:Rotate(2*a,O); wheel(); g:Restorematrix()  
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\newcommand*{\nb}{\directlua{tex.print(luadraw.nbimages)}}
+\newcommand*{\makeframe}[1]{\directlua{luadraw.makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{24}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

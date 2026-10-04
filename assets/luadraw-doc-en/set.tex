@@ -1,0 +1,13 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Drawing a Set)
+\begin{luadraw}{name=set}
+local ld = luadraw
+local g = ld.graph:new{window={-5.25,5.25,-5,5},size={10,10}}
+local i = ld.cpx.I
+local A, B, C = ld.set(i,0), ld.set(-2-i,25), ld.set(2-i,-25)
+g:Fillopacity(0.3)
+g:Dpath(A,"fill=orange"); g:Dpath(B,"fill=blue")
+g:Dpath(C,"fill=green")
+g:Fillopacity(1)
+g:Dlabel("$A$",5*i,{pos="N"},"$B$",-4+3*i,{pos="W"},"$C$",4+3*i,{pos="E"})
+g:Show()
+\end{luadraw}

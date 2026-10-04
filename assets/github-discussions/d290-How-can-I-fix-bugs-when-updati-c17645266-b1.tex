@@ -1,0 +1,49 @@
+% source: https://github.com/pfradin/luadraw/discussions/290#discussioncomment-17645266 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=frustum2}
+local ld = luadraw
+require 'luadraw_spherical'
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local g = ld.graph3d:new{window={-4,4,-4,4},viewdir={30,60},size={10,10}}
+ld.Hiddenlinestyle = "dashed"
+local a = 2
+local A, B, C, D,S = O, M(a,0,0), M(a,a,0), M(0,2*a,0), M(0,0,2*a)
+local R,r =  pt3d.abs(A-S),  pt3d.abs(D-C)
+local P = ld.pyramid({A,B,C,D},S)
+ld.Hiddenlines = true 
+g:Dscene3d(
+   g:addPoly(ld.frustum(A,R,r,C,200),{color="cyan",backcull=true,contrast=0.5}),
+    g:addPolyline(ld.facetedges(P)) -- only edges of pyramid
+)
+g:Dfrustum(A,R,r,C)
+g:Ddots3d({A,B,C,D,S})
+g:Dlabel3d( "$A$",A,{pos="S"}, "$B$",B,{pos="S"}, "$C$",C,{pos="S"}, "$D$",D,{pos="E"}, "$S$",S,{pos="N"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=frustum3}
+local ld = luadraw
+require 'luadraw_spherical'
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local g = ld.graph3d:new{window={-4,4,-4,4},viewdir={30,60},size={10,10}}
+ld.Hiddenlinestyle = "dashed"
+local a = 2
+local A, B, C, D,S = O, M(a,0,0), M(a,a,0), M(0,2*a,0), M(0,0,2*a)
+local R,r =  pt3d.abs(A-S),  pt3d.abs(D-C)
+local P = ld.pyramid({A,B,C,D},S)
+g:Dfrustum(A,R,r,C, {color="cyan"})
+g:Dpoly(P, {mode=ld.mWireframe, edgestyle="dashed"})
+g:Dseg3d({C,D}, "line width=0.6")
+g:Ddots3d({A,B,C,D,S})
+g:Dlabel3d( "$A$",A,{pos="S"}, "$B$",B,{pos="S"}, "$C$",C,{pos="S"}, "$D$",D,{pos="E"}, "$S$",S,{pos="N"})
+g:Show()
+\end{luadraw}
+
+\end{document} 

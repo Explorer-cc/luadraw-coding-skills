@@ -1,0 +1,35 @@
+% source: https://tex.stackexchange.com/a/747719 (question 747599, score 11, block 1)
+\begin{luadraw}{name=cylinder_stackExchange, exec=true}
+local g = graph3d:new{size={10,10},window={-6,6,-5,8}, viewdir={-5,70}, margin={0,0,0,0}}
+g:Linejoin("round")
+local R = 2
+local C = cylinder(M(0,0,-4), 8*vecK, R,35,true)
+local V = g:Classifyfacet(C)
+local P1, P2 = {Origin, vecK}, {M(0,0,4.00),vecK}
+local E1 = g:Intersection3d(C,P1)
+local U,U2, U3, U4 = rotate3d(vecJ,120,{Origin,vecK}), rotate3d(vecJ,40,{Origin,vecK}), rotate3d(vecJ,70,{Origin,vecK}), rotate3d(vecJ,130,{Origin,vecK})
+g:Dscene3d(
+    g:addPlane(P1, {color="LightGray",opacity=0.75,edge=true,scale=0.85}),
+    g:addPlane(P2, {color="LightGray",opacity=0.75,edge=true,scale=0.85}),
+    g:addFacet(V, {color="WhiteSmoke",opacity=0.5,contrast=0.5}),
+    g:addPolyline( border(V) ),
+    g:addPolyline({{-7*vecK,7*vecK},{Origin,4*vecJ},{Origin,4*U}, {4*vecK,4*vecK+R*U2}}, {arrows=1}),
+    g:addPolyline({4*vecK,4*vecK+4*vecJ,-4*vecK+4*vecJ,-4*vecK,-4*vecK+4*U,4*vecK+4*U,4*vecK}),
+    g:addArc(vecJ,Origin,U,1,1,vecK,{arrows=1}),
+    g:addCircle(M(0,0,4),R,vecK),
+    g:addLabel("$O$", Origin, {style="SW"},"$\\varphi_0$", U2, {style="N"}),
+    g:addDots(Origin)
+)
+g:Dedges(E1, {hidden=true})
+g:Linestyle("dotted"); g:Dcircle3d(M(0,0,-4),R,vecK);
+g:Dpolyline3d({{4*vecK+R*U3,-4*vecK+R*U3}, {4*vecK+R*U4,-4*vecK+R*U4}})
+g:Dlabel3d(
+    "$x$", 4.25*vecJ, {pos="E"},
+    "$y$", 4*U, {pos="NW"},
+    "$z$", 7.5*vecK, {pos="N"},
+    "$R$", 4*vecK+2.5*U2, {pos="N"},
+    "$z=z_0$", M(-4,-4.25,4), {pos="SE",dir={vecJ,-vecI}},
+    "$z=0$", M(-4,-4.25,0), {pos="SE",dir={vecJ,-vecI}}
+)
+g:Show()
+\end{luadraw}

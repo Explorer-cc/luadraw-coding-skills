@@ -1,0 +1,53 @@
+% source: https://tex.stackexchange.com/a/763876 (question 427380, score 2, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/427380/tikz-draw-a-3d-intersection-of-planes?rq=1
+\begin{document}
+\begin{luadraw}{name=planes_fig1}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M = pt3d.M
+local O, vI, vJ, vK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{ viewdir="yz", window3d={-6,8,-4,5,-5,5}, 
+    window={-6,6,-6,6}, size={12,12}, margin=0 }
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+local P1 = {O,vK} -- xy plane
+local P2 = {O,vJ} -- xz plane
+local D = ld.interPP(P1, P2) -- intersection
+g:Dscene3d(
+    g:addPlane(P1, {color="pink!30!white", edge=true, contrast=0.5}),
+    g:addPlane(P2, {color="blue!30!white", edge=true, contrast=0.5}),
+    g:addLine(D, {color="Crimson", width=8, scale=1}),
+    g:addAxes(O, {arrows=1})
+    )
+g:Dlabel3d("{line of intersection}", M(-6,0,0),{pos="NE"},
+    "$xz$-plane", M(-3,0.5,3),{pos="E"}, "$xy$-plane",M(6,4,0),{pos="E"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=planes_fig2}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M = pt3d.M
+local O, vI, vJ, vK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+local g = ld.graph3d:new{ viewdir="yz", window3d={-6,8,-4,5,-5,5}, 
+    window={-6,6,-6,6}, size={12,12}, margin=0 }
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+local P1 = ld.planeEq(1,1,1,-1) -- x+y+z-1=0
+local P2 = ld.planeEq(1,-1,0,0) -- x-y=0
+local D = ld.interPP(P1, P2) -- intersection
+g:Dscene3d(
+    g:addPlane(P1, {color="pink!30!white", rectangle={M(-1,1,0),7.5,9}, edge=true}),
+    g:addPlane(P2, {color="blue!30!white", edge=true}),
+    g:addLine(D, {color="Crimson", width=8, scale=0.9}),
+    g:addAxes(O, {arrows=1})
+    )
+g:Dlabel3d("{line of intersection}", M(0,-1,5.5),{pos="W"},
+    "$x+y+z=1$", M(0,2.5,4.5),{pos="NE"}, "$x-y=0$",M(0,2.5,-5),{pos="E"})
+g:Show()
+\end{luadraw}
+\end{document}

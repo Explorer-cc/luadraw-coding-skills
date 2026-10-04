@@ -1,0 +1,62 @@
+% source: https://github.com/pfradin/luadraw/discussions/129#discussioncomment-14793004 (pfradin, block 1)
+% !TEX TS-program = lualatex
+\documentclass[varwidth]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luacode*}
+local genecurve = function(t)
+  return M(t, 2 - t/2, 0)
+end
+local tmin, tmax = -0.2, 6.5
+local xmin, xmax = tmin, tmax
+local ymax = math.max(math.abs(2 - tmax/2), math.abs(2 - tmin/2))
+local zmin, zmax = -ymax, ymax
+local ymin = -ymax
+local cone = rotcurve(
+  genecurve, tmin, tmax,
+  {
+    Origin, -vecI
+  },
+  0, 360,
+  {
+    grid = {25, 36}
+  }
+)
+
+local draw = function(name, viewdir)
+    local graphview = graph3d:new{
+      window3d = {xmin, xmax, ymin, ymax, zmin, zmax},
+      adjust2d = true,
+      viewdir = viewdir,
+      bbox     = false,
+    }
+    graphview:Dfacet(
+        cone,
+        {
+          color  = "orange",
+          contrast = 0.5
+        }
+    )
+    graphview:Savetofile(name)
+end
+
+------
+-- Vue 1.
+------
+draw("_luadraw/mesh-cone-1.tkz", {290,60})
+
+------
+-- Vue 2.
+------
+draw("_luadraw/mesh-cone-2.tkz", {240,60})
+\end{luacode*}
+
+\section*{1st point of view}
+
+\input{_luadraw/mesh-cone-1.tkz}
+
+\section*{2nd point of view}
+
+\input{_luadraw/mesh-cone-2.tkz}
+\end{document}

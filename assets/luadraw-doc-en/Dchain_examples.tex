@@ -1,0 +1,23 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-coils-chains.tex (demo: The \emph{g:Dchain())
+\begin{luadraw}{name=Dchain_examples}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{window={-5.25,6,-5,5.25}, size={10,10}}
+require 'luadraw_coils_chains'
+g:Labelsize("small")
+local a, b = Z(-5,4.5), Z(3,4.5)
+g:Dchain({a,b}, 1, {}); g:Dlabel(" default options", b, {pos="E", dist=0.1})
+g:Shift(Z(0,-1))
+g:Dchain({a,b}, 0.25, {wireframe=true}); g:Dlabel("wireframe=true", b, {pos="E"})
+g:Shift(Z(0,1))
+a, b = Z(-4,3), Z(-4,-4)
+g:Dchain({a,b}, 0.35, {color="SteelBlue", colorB="DarkBlue", width="circle", wire_dia=0.1, border="lightgray"})
+g:Dlabel('width="circle"', b, {pos="S",dist=0.1})
+a, b = Z(-2,1), Z(4,1)
+local C = ld.ellipticarc(a,Z(1,1),b,3,4,1)
+g:Dchain(C, 0.75, {color="Brown", border="lightgray"}); g:Ddots({a,b})
+g:Dlabel("Elliptic Arc",Z(1,-3),{pos="S",dist=0.5})
+g:Show()
+\end{luadraw}

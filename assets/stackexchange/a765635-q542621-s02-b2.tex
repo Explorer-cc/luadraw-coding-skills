@@ -1,0 +1,40 @@
+% source: https://tex.stackexchange.com/a/765635 (question 542621, score 2, block 2)
+\documentclass[border=5pt,tikz]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/542621/drawing-western-hemisphere-in-tikz-3d?rq=1
+\begin{document}
+\begin{luadraw}{name=half_sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{ viewdir={5,65}, window={-3,3,-3,3}, size={12,12} }
+require 'luadraw_povray'
+g:Linewidth(8)
+local a = 4
+local R, r = 0.75, 0.25
+local A, B, C, D, E, F, O = M(-a,-a,a)/2, M(a,a,a)/2, M(a,a,-a)/2, M(-a,-a,-a)/2, M(a,-a,-a)/2, M(-a,a,-a)/2, Origin
+local f = {A, B, C, D}
+local P = ld.parallelep(M(-a,-a,-a)/2, a*vecI, a*vecJ, a*vecK)
+local color = ld.Gray
+g:Pov_new()
+g:Pov_sphere(A,r,{color=color})
+g:Pov_sphere(B,r,{color=color})
+g:Pov_sphere(E,r,{color=color})
+g:Pov_sphere(F,r,{color=color})
+g:Pov_sphere(O,R,{color=color})
+g:Pov_facet(f,{color=ld.Blue, opacity=0.8})
+g:Pov_polyline( ld.concat({{A,O,B},{E,O,F}}, ld.facetedges(P)), {shadow=false})
+local u = pt3d.normalize(vecI-vecJ)
+g:Pov_polyline({O, O+3*R*u}, {color=ld.Red, arrows=1})
+g:Pov_exec()
+g:Pov_show()
+g:Dlabel3d(
+    "$h_2$", A, {pos="W",dist=0.5},
+    "$h_1$", B, {pos="E"},
+    "$h_3$", E, {pos="W"},
+    "$h_4$", F, {pos="E"})
+g:Show()
+\end{luadraw}
+\end{document}

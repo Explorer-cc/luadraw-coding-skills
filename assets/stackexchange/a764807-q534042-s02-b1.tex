@@ -1,0 +1,34 @@
+% source: https://tex.stackexchange.com/a/764807 (question 534042, score 2, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/534042/modeling-randomly-generated-inscribed-triangles
+\begin{document}
+\begin{luadraw}{name=random_triangles}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, Zp, rd, det, deg = cpx.Z, cpx.Zp, math.random, cpx.det, ld.deg
+local g = ld.graph:new{ window={0,6,0,7}, size={12,12} }
+local inCpt, outCpt = 0,0
+local function inside(O,A,B,C)
+    local d = det(B-A,C-A)
+    if d == 0 then return det(B-A,O-A) == 0 
+    else return (det(B-A,O-A)*d>=0) and (det(C-B,O-B)*d>=0) and (det(A-C,O-C)*d>=0)
+    end
+end
+local function acircle(O)
+    local r, u, v, w = 0.45, rd(0,360), rd(0,360), rd(0,360)
+    local A ,B, C = O+Zp(r,u*deg), O+Zp(r,v*deg), O+Zp(r,w*deg) 
+    local color = "red"
+    if inside(O,A,B,C) then color = "green"; inCpt = inCpt+1
+    else outCpt = outCpt+1 end
+    g:Ddots({A,B,C,O},"gray, scale=0.5"); g:Dcircle(O,r)
+    g:Dpolyline({A,B,C}, true, 
+        "draw="..color..",fill="..color..",fill opacity=0.5")
+end
+for i = 1, 5 do for j = 1, 6 do acircle( Z(i,j) ) end end
+g:Dlabel("in="..inCpt..", out="..outCpt, 3, {})
+g:Show()
+\end{luadraw}
+\end{document}

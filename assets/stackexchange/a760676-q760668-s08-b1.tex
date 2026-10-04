@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/760676 (question 760668, score 8, block 1)
+% Source - https://tex.stackexchange.com/q/760667
+% Posted by PHL
+% Retrieved 2026-03-10, License - CC BY-SA 4.0
+
+%!TEX TS-program = lualatex
+\documentclass{article}
+\usepackage{luadraw}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\begin{luacode*}
+function do_cfoot()
+    local iteration = tex.count['c@page'] --https://tex.stackexchange.com/a/760670 (Jasper Habicht answer)
+    local g = graph:new{window={-5,5,-5,5},margin={0,0,0,0},size={1,1}}
+    local i = cpx.I
+    local rand = math.random
+    local A, B, C = 5*i, -5-5*i, 5-5*i -- triangle initial
+    local T, niv = {{A,B,C}}, iteration
+    for k = 1, niv do
+        T = concat( hom(T,0.5,A), hom(T,0.5,B), hom(T,0.5,C) )
+    end
+    for _,cp in ipairs(T) do
+        g:Filloptions("full", rgb(rand(),rand(),rand()))
+        g:Dpolyline(cp,true, "line width=0pt")
+    end
+    g:Sendtotex()
+end
+\end{luacode*}
+
+\cfoot{%
+\directlua{do_cfoot()}%You can use \directlua in a command argument
+}%
+
+\begin{document}
+bla blo bli
+\newpage
+bla blo bli
+\end{document}

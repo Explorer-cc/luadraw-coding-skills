@@ -1,0 +1,23 @@
+% source: https://tex.stackexchange.com/a/751257 (question 487294, score 4, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/487294/plot-surface-and-normal-vector-fields
+\begin{document}
+\begin{luadraw}{name=field_on_sphere}
+local g = graph3d:new{window3d={-2,2,-2,2,-2,2},adjust2d=true,bbox=false, size={12,12}}
+require 'luadraw_spherical'
+arrowBstyle = "-stealth"
+local field = {}
+g:Define_sphere({radius=1,color="SteelBlue",mode=mGrid,hiddenstyle="noline"} )
+for k= 0, 17 do
+    for l = 0, 9 do
+        table.insert(field,{sM(k*20,l*18), 2*sM(k*20,l*18)})
+    end
+end
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray"})
+g:DSpolyline(field,{arrows=1,color="Crimson"})
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

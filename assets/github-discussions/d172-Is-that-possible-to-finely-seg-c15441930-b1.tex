@@ -1,0 +1,27 @@
+% source: https://github.com/pfradin/luadraw/discussions/172#discussioncomment-15441930 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=clip3d}
+    local g = graph3d:new{
+        window={-5,5,-5,5},
+        size={10,10},
+        viewdir={10,80},
+    }
+    require 'luadraw_spherical'
+    Hiddenlines = true; Hiddenlinestyle = "dashed"; g:Linewidth(8)
+    g:Define_sphere({radius=5,show=false})
+    local S = sphere(Origin,5,36,20) -- default parameters
+    local C = parallelep(M(-4,-4,-4),8*vecI,8*vecJ,8*vecK)
+    local C1 = clip3d(S,C) 
+    local C2 = clip3d(C,S)
+    g:Dfacet( concat(C1,C2), {color="Chocolate",contrast=0.5, mode=mShadedOnly})
+    for _, facet in ipairs(getfacet(C,{1,2,3,4,6})) do
+        g:DScircle(facet2plane(facet)) --the plane of each facet of C intersects the sphere along a circle
+    end 
+    g:Dspherical()
+    g:Dcircle3d(4*vecJ,3,vecJ); g:Dcircle3d(4*vecK,3,vecK) -- to hide dashed parts of these circles
+    g:Show()
+\end{luadraw}
+\end{document}

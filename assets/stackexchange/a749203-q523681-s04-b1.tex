@@ -1,0 +1,36 @@
+% source: https://tex.stackexchange.com/a/749203 (question 523681, score 4, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/523681/how-can-i-draw-the-circle-is-inscribed-in-triangle-in-3d/749195#749195
+\begin{document}
+\begin{luadraw}{name=incircle}
+local i = cpx.I
+local g = graph3d:new{size={12,12},window3d={-3,3,-3,3,-3,3},adjust2d=true,viewdir={30,60},border=true}
+local A, B, C = M(-1.5,-2,1), M(2,0,0), M(0,2,-1) -- define a plane
+local n = pt3d.normalize( pt3d.prod(B-A,C-A) ) -- normal vector 
+local u = pt3d.normalize(B-A) -- first vector
+local v = pt3d.prod(n,u) -- second vector
+-- now we can do 2d geometry with complex number in the orthonormal coordinate system of the plane: (A,u,v)
+local a, b, c = 0, pt3d.abs(B-A), pt3d.dot(C-A,u) + i*pt3d.dot(C-A,v) -- affixes of points A, B and C in (A,u,v)
+-- incircle center
+local I = interD( bissec(b,a,c), bissec(a,b,c) ) -- intersection of interior bisector (complex number)
+local rI = cpx.abs( I-proj(I,{a,b-a}) ) -- radius
+-- circumcircle center
+local J = interD( med(a,b), med(b, c) )
+local rJ = cpx.abs(J-a) -- radius
+-- come back to 3d
+I = A + (I.re)*u + (I.im)*v
+J = A + (J.re)*u + (J.im)*v
+-- draw
+g:Labelsize("footnotesize")
+g:Dboxaxes3d( {grid=true, gridcolor="gray",fillcolor="LightGray"})
+g:Dpolyline3d( g:Plane2facet({A,n}), true, "fill=LightBlue, fill opacity=0.3")
+g:Dpolyline3d({A,B,C},true)
+g:Dcircle3d(I,rI,n); g:Dcircle3d(J,rJ,n)
+g:Ddots3d({A,B,C,I,J})
+g:Dlabel3d("$A$",A,{pos="N"},"$B$",B,{pos="S"},"$C$",C,{pos="SE"},"$I$",I,{pos="S"},"$O$",J,{})
+g:Show()
+\end{luadraw}
+\end{document}

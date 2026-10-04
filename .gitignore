@@ -1,0 +1,30 @@
+# LuaLaTeX and TeX build products
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.nav
+*.snm
+*.vrb
+*.xdv
+
+# Luadraw generated/cache outputs
+*.tkz
+*.dvi
+*.bbl
+*.blg
+
+# Skill validation output
+build/
+
+# Local Luadraw version trees and files
+luadraw-v*
+
+# Editor and runtime noise
+.DS_Store
+*.swp
+*.swo
+__pycache__/

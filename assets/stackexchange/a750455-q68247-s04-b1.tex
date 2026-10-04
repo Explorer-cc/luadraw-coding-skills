@@ -1,0 +1,50 @@
+% source: https://tex.stackexchange.com/a/750455 (question 68247, score 4, block 1)
+% https://tex.stackexchange.com/questions/68247/3d-axis-and-polyhedron-with-line-segment-towards-origin
+\documentclass{standalone}
+\usepackage{xcolor}
+\colorlet{darkcyan}{blue!70!black}
+\usepackage[3d]{luadraw}
+\begin{document}
+    \begin{luadraw}{name=dodecahedron}
+    local g = graph3d:new{ 
+        window={-5,5,-5,5},
+        viewdir={12,60}, 
+        size={10,10}, 
+        margin={0,0,0,0}
+    }
+    g:Linejoin("round")
+    Hiddenlinestyle = "dashed"
+    -- https://en.wikipedia.org/wiki/Regular_dodecahedron#Relation_to_the_golden_ratio
+    local phi = (1 + math.sqrt(5)) / 2 -- golden_ratio
+    local invphi = 1 / phi 
+    local r = 2.5
+    -- orange part (±1, ±1, ±1)
+    local A1,A2,B1,B2,C1,C2,D1,D2 = M(r,r,r), M(r,r,-r), M(r,-r,r), M(r,-r,-r), M(-r,-r,r), M(-r,-r,-r), M(-r,r,r), M(-r,r,-r)
+    -- green part (0, ±phi, ±invphi)
+    local P1,P2,P3,P4 = M(0,r*phi,r*invphi), M(0,r*phi,-r*invphi), M(0,-r*phi,r*invphi), M(0,-r*phi,-r*invphi)
+    -- blue part (±invphi, 0, ±phi)
+    local Q1,Q2,Q3,Q4 = M(r*invphi,0,r*phi), M(-r*invphi,0,r*phi), M(r*invphi,0,-r*phi),  M(-r*invphi,0,-r*phi)
+    -- pink part (±phi, ±invphi, 0)
+    local R1,R2,R3,R4 = M(r*phi,r*invphi,0), M(r*phi,-r*invphi,0), M(-r*phi,r*invphi,0), M(-r*phi,-r*invphi,0)
+    local dots = {A1,A2,B1,B2,C1,C2,D1,D2,P1,P2,P3,P4,Q1,Q2,Q3,Q4,R1,R2,R3,R4}
+    local ico = {
+        {Q1,Q2,C1,P3,B1},
+        reverse({C1,P3,P4,C2,R4}),--bad orientation
+        {B1,P3,P4,B2,R2},
+        {A1,Q1,B1,R2,R1},
+        {R1,R2,B2,Q3,A2},
+        reverse({C2,P4,B2,Q3,Q4}),--bad orientation
+        reverse({Q4,D2,R3,R4,C2}),--bad orientation
+        reverse({R4,R3,D1,Q2,C1}),--bad orientation
+        {Q2,Q1,A1,P1,D1},
+        {D1,P1,P2,D2,R3},
+        {D2,P2,A2,Q3,Q4},
+        reverse({A1,P1,P2,A2,R1})--bad orientation
+    }
+    g:Dscene3d( 
+        g:addFacet(ico,{color="cyan",backcull=true}) -- only visible facet
+        ,g:addPolyline(facetedges(ico),{width=18,hidden=true,color="darkcyan"})
+    )
+    g:Show()  
+    \end{luadraw}
+\end{document}

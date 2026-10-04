@@ -1,0 +1,40 @@
+% source: https://tex.stackexchange.com/a/749228 (question 749220, score 8, block 1)
+\documentclass[varwidth, border = 3pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749220/luadraw-factorization-of-a-code#749220
+\begin{document}
+\begin{luadraw}{}
+    local graphzone = graph3d:new{
+        window  = {-1.5, 7, -2.5, 3},
+        viewdir = {290,60},  -- first view
+        size    = {10, 10}
+    }
+    graphzone:Linejoin("round")
+    local genecurve = function(t)
+        return M(t, 2 - t/2, 0)
+    end
+    local cone = rotcurve(
+        genecurve, -0.2, 6.5,
+        {Origin, -vecI},
+        0, 360,
+        {grid = {25, 36}})
+    local draw = function() -- we write a function to create the graph
+        graphzone:Dfacet(
+            cone,
+            {color    = "orange",
+            contrast = 0.5})
+    end
+    draw()
+    graphzone:Savetofile("mesh-cone-1.tkz") -- no show here, just save
+    graphzone.currentexport = {""}; graphzone.export = graphzone.currentexport -- to clear the graph
+    graphzone:Setviewdir(240,60) -- second view
+    draw()
+    graphzone:Savetofile("mesh-cone-2.tkz") -- no show here, just save
+\end{luadraw}    
+
+\section*{1st point of view}
+\input{mesh-cone-1.tkz}%
+\section*{2nd point of view}
+\input{mesh-cone-2.tkz}%
+\end{document}

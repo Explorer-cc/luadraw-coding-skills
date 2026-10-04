@@ -1,0 +1,24 @@
+% source: https://tex.stackexchange.com/a/764066 (question 730348, score 6, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/730348/how-to-automatically-label-through-the-dodecagon-with-tikz-elegantly
+\begin{document}
+
+\begin{luadraw}{name=dodecagon}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{ size={12,12} }
+local L = ld.polyreg(0, Z(0,4), 12) -- dodecagon vertices
+local seg, labels = {}, {}
+for k, z in ipairs(L) do
+    local p = L[1+k%12] -- next
+    table.insert(seg,{z,p})
+    ld.insert(labels, {"$a_{1,"..(k-1).."}$", 1.15*z, {}, "$a_{"..(k%12).."}$",0.9*(z+p)/2,{}})
+end
+g:Rotate(-15)
+g:Dlabel( table.unpack(labels) ); g:Dpolyline(seg,"Circle-latex")
+g:Show()
+\end{luadraw}
+\end{document}

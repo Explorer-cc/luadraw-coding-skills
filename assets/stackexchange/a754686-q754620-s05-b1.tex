@@ -1,0 +1,53 @@
+% source: https://tex.stackexchange.com/a/754686 (question 754620, score 5, block 1)
+\documentclass[border=2pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fouriernc}
+%https://tex.stackexchange.com/questions/754620/plot-any-real-sequence-of-real-variables-as-in-geogebra-and-desmos
+\begin{luacode*}
+function Sequence(f,n1,n2,step)
+-- f is function f: x->f(x) where x and f(x) and real
+    step = step or 1
+    local ret = {}
+    for x = n1,n2, step do
+        local z = Z(x,evalf(f,x))
+        if z ~= nil then table.insert(ret,z) end
+    end
+    local x1,x2,y1,y2 = getbounds(ret)
+    x1 = math.floor(x1); x2 = math.ceil(x2)
+    y1 = math.floor(y1); y2 = math.ceil(y2)
+    local xstep, ystep = (x2-x1)/10, (y2-y1)/10
+    local win2d = {x1-1.5*step,x2+step/2,y1-ystep/2,y2+ystep/2}
+    -- make the graph
+    local g = graph:new{window= win2d, margin={0.75,0.5,0.5,0.5}, size={12,12,0}, bg="Beige"}
+    local A = Z(x1-step,y1)
+    g:Dgrid({A,Z(x2,y2)}, {unit={step,ystep}, gridcolor="lightgray"})
+    g:Daxes( {A,step,ystep}, {labelpos={"none","left"},arrows="-stealth"} )
+    for _,z in ipairs(ret) do
+        g:Dpolyline( {Z(z.re,A.im),z},"Crimson" ); g:Ddots(Z(z.re,A.im),"mark=+")
+        local ypos
+        if z.im>=0 then ypos = "E" else ypos = "W" end
+        g:Dlabel( "$"..strReal(z.re).."$",Z(z.re,A.im),{pos="S",dist=0.1},
+        "$"..strReal(z.im).."$",z,{pos=ypos,node_options="rotate=90",dist=0})
+    end
+    g:Ddots( ret )
+    g:Sendtotex()
+end
+\end{luacode*}
+
+\def\Sequence#1#2#3#4#5{\directlua{Sequence(function(#2) return #1 end,#3,#4,#5)}}%
+
+\begin{document}
+
+% first example
+\Sequence{1/n}{n}{0}{14}{1} % Note the value 0.
+
+% second example
+\Sequence{math.sin( math.pi/2*x^4/(1+x^4) )}{x}{0}{6}{1}
+
+% of course we could use lua instead of TeX command:
+%\directlua{%
+%local f = function(x) return math.sin( math.pi/2*x^4/(1+x^4) ) end
+%Sequence(f,0,6,1)
+%}%
+\end{document}

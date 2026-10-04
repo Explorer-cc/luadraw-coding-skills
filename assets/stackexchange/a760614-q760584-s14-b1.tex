@@ -1,0 +1,26 @@
+% source: https://tex.stackexchange.com/a/760614 (question 760584, score 14, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/760584/drawing-a-topological-surface-of-genus-three
+\begin{document}
+\begin{luadraw}{name=circles_on_torus}
+local g = graph3d:new{viewdir={30,60}, window={-4,4,-3,3}, size={12,12}, bbox=false}
+Hiddenlines = true
+local R, r, cos, sin, pi = 3, 1, math.cos, math.sin, math.pi
+local f = function(t) return M(0,R+r*cos(t),r*sin(t)) end
+local T = rotcurve(f,-pi,pi,{Origin,vecK}, 360,0, {grid={30,45}}) --torus
+local theta1, theta2, z1 = 0, 80, r/3 
+local I1 = g:Intersection3d(T, {Origin, Mc(1,theta1*deg+pi/2,0)}) --intersection with a vertical plane
+local I2 = g:Intersection3d(T, {Origin, Mc(1,theta2*deg+pi/2,0)}) -- with an other vertical plane
+local I3 = g:Intersection3d(T, {z1*vecK, vecK}) --intersection with an horizontal plane
+
+g:Dfacet(T, {usepalette={palGasFlame,"z"},edgecolor="gray", backcull=true})
+g:Dedges(I1, {width=8,color="cyan"})
+g:Dedges(I2, {width=8,color="ForestGreen"})
+g:Dedges(I3, {width=8,color="Navy"})
+g:Dcircle3d(r*vecK,R,vecK, "line width=0.8pt, orange")
+g:Show()
+\end{luadraw}
+\end{document}

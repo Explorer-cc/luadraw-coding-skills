@@ -1,0 +1,17 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: Cut sphere)
+\begin{luadraw}{name=cut_sphere}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{ viewdir={"central",0,65}, size={10,10}, bg="lightgray"}
+g:Linewidth(6)
+local O, P = Origin, {vecK, -vecK-vecJ}
+local c, r, n = ld.interPS(P, {O, 3})
+g:Dcut_sphere(O, 3, P, {color="orange", mode=ld.mBorder, edgecolor="Gold"})
+g:Dcircle3d(c,r,n, "Gold,left color=orange!80, right color=orange!10")
+g:Dplane({c,P[2]}, vecI,8,8,"fill=blue, fill opacity=0.3")
+g:Shift3d(-P[2])
+g:Dcut_sphere(O, 3, {P[1],-P[2]}, 
+    {color="orange", mode=ld.mBorder, edgecolor="Gold", visibletrace="Gold,line width=0.6", hiddentrace="dashed,Gold,line width=0.6"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,22 @@
+% source: https://github.com/pfradin/luadraw/discussions/298#discussioncomment-17855220 (pfradin, block 1)
+\documentclass[]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{amssymb}
+\begin{document}
+\begin{luadraw}{name=cutpolyline}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5}, size={10,10},margin={0,0,0,0}}
+g:Linewidth(6)
+local i = ld.cpx.I
+local P = g:Box2d() -- polygon representing the 2D window
+local D1 = ld.lineEq(1,-1,0,'<') -- x-y < 0
+local P1,P1n = ld.cutpolyline(P,D1,true) -- P1=solution, P1n not solution
+g:Daxes({0,1,1},{grid=true,gridcolor="LightGray",arrows="->",legend={"$x$","$y$"}})
+g:Filloptions("horizontal","blue"); g:Dpolyline(P1n,true,"draw=none")
+g:Filloptions("none","black",1); g:Linewidth(8)
+g:Dline(D1,"blue")g:Dlabel(
+"$x-y\\leqslant 0$",-3-3*i,{pos="N",dir={1+i,-1+i},dist=0.1,node_options="fill=white,fill opacity=0.8"})
+g:Show()
+\end{luadraw}
+\end{document}

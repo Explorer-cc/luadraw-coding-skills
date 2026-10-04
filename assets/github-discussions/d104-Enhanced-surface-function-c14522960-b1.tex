@@ -1,0 +1,59 @@
+% source: https://github.com/pfradin/luadraw/discussions/104#discussioncomment-14522960 (pfradin, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/751568/illustrating-the-complex-gamma-function-in-3d
+\begin{document}
+\begin{luadraw}{name=gamma_3d}
+local g = graph3d:new{window3d={-5,5,-5,5,0,6}, adjust2d=true,size={10,10},viewdir={-120,60}}
+local arguments, cle = {} -- table for the arguments
+
+local gamma = function(x,y) -- approximation of gamma
+-- gamma(z) = $\sum_{k=0}^{+\infty} \frac{(-1)^k}{k!(z+k)} + \int_1^{+\infty} t^{z-1}e^{-t}dt$
+    local den, sg, z = 1, 1, Z(x,y)
+    local S = 1/z
+    for k = 1,50 do
+        sg = -sg; den = den*k
+        S = S + sg/den/(z+k)
+    end
+    return S + int( function(t) return cpx.exp((z-1)*math.log(t)-t) end, 1,10)
+end
+
+local key = function(x,y) -- key calculus for the table arguments
+    return x.."/"..y
+end
+
+local  p = function(x,y) -- surface parameterization
+    local z = gamma(x,y)
+    cle = key(x,y)
+    arguments[cle] = cpx.arg(z) -- save argument
+    return M(x,y, cpx.abs(z))
+end
+
+--local rainbow = {Purple,Indigo,Blue,Green,Yellow,Orange,Red}
+--local rainbow = {LightSkyBlue,CornflowerBlue,LightCoral,IndianRed,DarkSalmon,YellowGreen,MediumSeaGreen}
+local rainbow = {Cyan,DodgerBlue,Magenta,Red,Orange,Gold,LimeGreen}
+--local rainbow = {LightCyan,LightSkyBlue,Plum,LightCoral,LightSalmon,Khaki,PaleGreen}
+
+local colorpos = function(f)  -- position in the color palette based on the argument of gamma(x,y)
+    local sum,n = 0,0
+    for _,A in ipairs(f) do
+        cle = key(A.x,A.y)
+        local arg = arguments[cle] -- vertices from the "cutfacet" have no precomputed argument
+        if arg ~= nil then sum = sum + arg; n = n+1 
+        end 
+    end
+    return (sum/n+math.pi)/(2*math.pi)
+end
+
+local s = surface(p, -4.25,5,-4,4,{50,50})
+s = cutfacet(s,{6*vecK,-vecK})  -- to keep only z <= 6
+s = g:Sortfacet(s)
+   
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="LightGray" })
+for _,f in ipairs(s) do
+    g:Dpolyline3d(f,true,"fill="..palette(rainbow,colorpos(f)))
+end
+g:Show()
+\end{luadraw}
+\end{document}

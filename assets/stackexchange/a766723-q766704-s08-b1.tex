@@ -1,0 +1,61 @@
+% source: https://tex.stackexchange.com/a/766723 (question 766704, score 8, block 1)
+\documentclass[]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/766704/drawing-a-rectangular-box-in-three-different-orientations-with-tikz
+\begin{document}
+\begin{luadraw}{name=opned_box}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local M, Z = pt3d.M, ld.cpx.Z
+local g = ld.graph3d:new{ window={-9,8,-8,8}, viewdir={55,70},size={12,12}}
+require 'luadraw_decorations'
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+
+local function drawbox(a,b,h)
+    local function mark(u,v,dir,dir2,val)
+        local sep = 0.6
+        dir = sep*pt3d.normalize(dir)
+        local A, B = u+dir, v+dir
+        g:Dpolyline3d({{A-dir/2,A+dir/2}, {B-dir/2,B+dir/2}}, "solid")
+        g:Dseg3d({A,B}, 
+            {draw_options="stealth-stealth", label="$"..ld.strReal(10*val,0).."$ cm", anchor1d=0.5, 
+             dir={B-A,dir2}, pos="S"})
+    end
+    local P = ld.parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+    local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+    local f = ld.poly2facet(P) -- conversion to facet
+    local M1, N = (G+H)/2, (F+E)/2
+    local P, Q = (G+F)/2, (H+E)/2
+    local face1={M1,H,E,N}
+    local face2={G,M1,N,F}
+    local face3={P,G,H,Q}
+    local face4={F,P,Q,E}
+    local d1 = {F,G-F}
+    local d2 = {H,H-E}
+    local d3 = {H,H-G}
+    local d4 = {F,E-F}
+    local f1 = ld.rotate3d(face2,130,d1) 
+    local f2 = ld.rotate3d(face1,-130,d2) 
+    local f3 = ld.rotate3d(face3,120,d3)
+    local f4 = ld.rotate3d(face4,-120,d4)
+    table.remove(f,2)
+    table.append(f, {f1,f2,f3,f4})
+    g:Dscene3d( g:addFacet(f,{color="Orange",contrast=0.5,edge=true}) )
+    local sep = 0.5
+    mark(M(a,b,0), M(0,b,0), vecJ, vecK, a)
+    mark(M(a,0,0), M(a,b,0), vecI, vecK, b)
+    mark(M(a,0,h), M(a,0,0), vecI, -vecI, h)
+end
+g:Shift(Z(0,3))
+drawbox(4.6,2.4,2.3)
+g:Shift(Z(-5,-8))
+drawbox(2.4,2.3,4.6)
+g:Shift(Z(10,1))
+drawbox(4.6,2.3,2.4)
+g:Show()
+\end{luadraw}
+\end{document} 

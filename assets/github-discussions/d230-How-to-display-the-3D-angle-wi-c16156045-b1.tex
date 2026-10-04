@@ -1,0 +1,104 @@
+% source: https://github.com/pfradin/luadraw/discussions/230#discussioncomment-16156045 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luacode*}
+function graph:Ddecoratedarc(B,A,C,r,sens,options)
+    options = options or {}
+    local sector_options = options.sector_options or "" -- fill or not the angular sector
+    local arc_options = options.arc_options or "" -- draw_options for the arc
+    local label = options.label or "" -- label text
+    local label_options = options.label_options or "" -- node_options for the label
+    local pos = options.pos or "auto" -- position of the label relative to the anchor point
+    local dist = options.dist or r -- distance between the label and the center A
+    local rotate = options.rotate or "none" -- or "auto" or "ortho", rotation of the label
+    local ticks = options.ticks or "none" -- or {nb, length, space, draw_options}, to draws marks along the arc (acute angle)
+    local showanchor = options.showanchor or false -- show the anchor point and the bissector line
+    
+    local S = arcb(B,A,C,r,sens) -- arc with Bézier curves
+    if S == nil then return end
+    local dir = {}
+    if sector_options ~= "" then
+        self:Dpath(concat(S,{A,"l","cl"}),"draw=none,"..sector_options)
+    end
+    self:Dpath(S,arc_options)
+    if label ~= "" then
+        local b, c = A+r*cpx.normalize(B-A), A+r*cpx.normalize(C-A)
+        local u = cpx.normalize((c+b)/2-A)
+        local direct = 1
+        if cpx.det(B-A,C-A) <= 0 then direct = -1 end
+        u = direct*sens*u
+        local anchor = A+dist*u
+        if rotate == "ortho" then 
+            if u.im < 0 then u = -u end
+            dir = {-cpx.I*u, u} 
+        elseif rotate == "auto" then
+            if u.re < 0 then u = -u end
+            dir = {u, cpx.I*u} 
+        end
+        if pos == "auto" then 
+            if rotate == "ortho" then 
+                pos = self:Poslab(anchor-A, self:Arg(-cpx.I*u)*rad) 
+            elseif rotate == "auto" then
+                pos = self:Poslab(anchor-A, self:Arg(u)*rad) 
+            else pos = self:Poslab(anchor-A,0)
+            end 
+        end
+        self:Dlabel(label, anchor, {pos=pos, node_options=label_options, dir=dir})
+        if showanchor then self:Dseg({A,anchor},"dashed"); self:Ddots(anchor) end
+    end
+    if type(ticks) == "number" then ticks = {ticks} end
+    if type(ticks) == "table" then
+        local n, length, space, d_options = table.unpack(ticks)
+        self:Dmarkarc(B,A,C,r,n,length,space,d_options)
+    end
+end
+\end{luacode*}
+
+\begin{luadraw}{name=decorated_arcs}
+local i = cpx.I
+local g = graph:new{window={-5,3,-3,5}}
+-- example 1
+g:Shift(Z(0,-2))    
+local b,a,c,r = 3, 0, 2.5+1.5*i, 2
+g:Dpolyline({b,a,c})
+g:Ddecoratedarc(b,a,c,r,1,
+    {label="angle", rotate="auto", 
+    sector_options="fill=Pink,opacity=0.5", 
+    arc_options="red,line width=0.8pt,-latex"
+    })
+-- example 2    
+g:Shift(Z(0,4))    
+b,a,c,r = 3, 0, 2.5+3*i, 2    
+g:Dpolyline({b,a,c})
+g:Ddecoratedarc(b,a,c,r,1,
+    {label="angle", rotate="ortho", 
+    sector_options="left color=white, right color=blue!50", 
+    arc_options="line width=0.8pt,latex-latex",
+    showanchor=true
+    })   
+-- example 3     
+g:Shift(Z(-3.5,0))       
+b,a,c,r = 3, 0, 1+3*i, 1.5    
+g:Dpolyline({b,a,c})
+g:Ddecoratedarc(b,a,c,r,-1,
+    {label="angle", dist=r/2, pos="center",
+    label_options="fill=white",
+    sector_options="pattern=north west lines,pattern color=gray", 
+    arc_options="line width=0.8pt,green"
+    })
+-- example 4
+g:Shift(Z(2,-4))        
+b,a,c,r = -3, 0, -1+2*i, 2    
+g:Dpolyline({b,a,c})
+g:Ddecoratedarc(b,a,c,r,-1,
+    {label="angle", dist=r+0.125, 
+    label_options="draw,inner sep=1pt",
+    arc_options="line width=0.8pt,blue,-Stealth",
+    ticks=3
+    })      
+g:Show()
+\end{luadraw}
+\end{document}

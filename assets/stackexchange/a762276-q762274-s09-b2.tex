@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/762276 (question 762274, score 9, block 2)
+% Source - https://tex.stackexchange.com/q/762274
+% Posted by minthao_2011
+% Retrieved 2026-04-26, License - CC BY-SA 4.0
+
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=sphere_clip3d_fixed2}
+local R, I = 3, 1.5*vecK
+local r = math.sqrt(9-1.5^2)
+local g = graph3d:new{window={-R-2, R+1, -R-1, R}, viewdir={110, 60}, size={10, 10}}
+Hiddenlinestyle = "dashed"
+require "luadraw_spherical"
+g:Define_sphere({radius = R, show=false})
+local P = {I, vecK}
+local ends = {}
+g:DScircle(P, {out=ends})
+local A, B = table.unpack(ends) -- we retrieve the two ends of the visible arc of the section
+local vector = 2*vecK + 5*vecJ 
+g:Dpath3d({A,Origin,B,R,1,g.Normal,"ca",I,A,r,-1,vecK,"ca"}, "ball color=orange") -- bottom
+g:Dcircle3d(I,r,vecK,'fill=orange!60')
+g:Dpath3d({A+vector,Origin+vector,B+vector,R,-1,g.Normal,"ca",I+vector,A+vector,r,-1,vecK,"ca"},"ball color=orange")
+g:Dcircle3d( I,r,vecK, Hiddenlinestyle); g:Dcircle3d( I+vector,r,vecK, Hiddenlinestyle)
+g:Show()
+\end{luadraw}
+\end{document} 

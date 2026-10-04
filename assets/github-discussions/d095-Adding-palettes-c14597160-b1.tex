@@ -1,0 +1,307 @@
+% source: https://github.com/pfradin/luadraw/discussions/95#discussioncomment-14597160 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+
+\begin{luacode*}
+function define_getcolor(F, pal, mode, default_color)
+-- F = list of facets
+-- pal = palette of colors (rgb tables)
+-- mode = "x", "y", or "z"
+-- returns the fonction : getcolor(facet)
+    default_color = default_color or White
+    local x1,x2,y1,y2,z1,z2 = getbounds3d(F)
+    local getcolor = function(f) -- f is a facet, returns the color of f
+        local A = isobar3d(f)
+        if mode == "x" then return palette(pal,(A.x-x1)/(x2-x1),true)
+        elseif mode == "y" then return palette(pal,(A.y-y1)/(y2-y1),true)
+        elseif mode == "z" then return palette(pal,(A.z-z1)/(z2-z1),true)
+        else return default_color
+        end
+    end
+    return getcolor
+end
+
+function graph3d:adjust_color(F,color,contrast,twoside) -- F = facet, contrast in [0,1], twoside=true/false
+-- adjust color based on facet normal vector (scalar product between the normal vector of the facet and the vector directed towards the observer.)
+-- returns a color, normal vector and coef
+    local coef, N, r, g, b = {}
+    local A, B, C, k, n, m, coef, ok, newcolor
+    k = 2; m = #F; ok = false
+    while (not ok) and (k < m) do
+        A, B, C = F[1], F[k], F[k+1]
+        N = pt3d.normalize(pt3d.prod(B-A,C-A))
+        coef = pt3d.dot(self.Normal,N)
+        ok = (coef ~= nil)
+        k = k+1
+    end
+    if ok then 
+        if math.abs(coef) < 1e-8 then coef = 0 end
+        local neg = twoside and (coef < 0)
+        local c = round(math.exp( math.log(math.abs(coef))/2.5*contrast),4)
+        if notDef(c) then c = 0 end
+        if type(color) == "string" then -- color must be a color name
+            if neg then
+                newcolor = color.."!50!white!"..strReal(100*c).."!black"
+            else
+                newcolor = color.."!"..strReal(100*c).."!black"
+            end
+        else 
+            r, g, b = table.unpack(color)
+            if neg then 
+                newcolor = rgb({c*(1+r)/2,c*(1+g)/2,c*(1+b)/2})
+            else
+                newcolor = rgb({c*r,coef*g,c*b})
+            end
+        end
+        return newcolor, N, coef
+    end
+end
+
+function graph3d:drawfacet(S,args) -- internal use, S is a list of already sorted facets
+    local oldfillstyle = self.param.fillstyle
+    local oldfillopacity = self.param.fillopacity
+    local oldfillcolor = self.param.fillcolor
+    local oldlinestyle = self.param.linestyle
+    local oldlineopacity = self.param.lineopacity
+    local oldlinecolor = self.param.linecolor
+    local oldlinewidth = self.param.linewidth
+    local coul = args.color
+    local getcolor
+    local usepalette = args.usepalette -- palette = {Pal, "x", or "y" or "z"}, Pal is a list of colors in RGB table format
+    if usepalette ~= nil then
+        local pal, mode = table.unpack(usepalette)
+        getcolor = define_getcolor(S,pal,mode,coul)
+    end
+ 
+    if (args.mode == mShadedOnly) and (args.opacity ~= 1)  then self:Linestyle("noline") end
+    if (args.mode ~= mShadedOnly) then self:Lineoptions(args.edgestyle,args.edgecolor,args.edgewidth) end
+    
+    -- dessin des facettes
+    if (usepalette == nil) and ((args.mode == mFlat) or (args.mode == mFlatHidden)) then -- facets of the same color defined by args.color
+        if type(coul) == "table" then coul = rgb(coul) end
+        self:Filloptions("full",coul,args.opacity)
+        self:Dpolyline3d(S,true)
+    elseif usepalette ~= nil then  -- color of each facet chosen from a palette
+        for _,F in ipairs(S) do
+            if (args.mode == mFlat) or (args.mode == mFlatHidden) then
+                coul = rgb(getcolor(F))
+            else
+                coul = self:adjust_color(F, getcolor(F),args.contrast,args.twoside)
+            end
+            self:Filloptions("full",coul,args.opacity)
+            if (args.mode == 5) then 
+                if (args.opacity == 1) then
+                    self:Lineoptions("solid",coul,1); self:Lineopacity(args.opacity)
+                    self:Dpolyline3d(F,true)
+                else
+                    self:Dpolyline3d(F,true)
+                end
+            else
+                self:Dpolyline3d(F,true)
+            end
+        end
+    else --modes 3, 4 ou 5 couleur des facettes uniques mais nuancées en fonction du vecteur normal
+        for _,F in ipairs(S) do
+            coul = self:adjust_color(F,args.color,args.contrast,args.twoside)
+            if coul ~= nil then
+                self:Filloptions("full",coul,args.opacity)
+                if (args.mode == mShadedOnly) then 
+                    if (args.opacity == 1) then
+                        self:Lineoptions("solid",coul,1); self:Lineopacity(args.opacity)
+                        self:Dpolyline3d(F,true)
+                    else
+                        self:Dpolyline3d(F,true)
+                    end
+                else
+                    self:Dpolyline3d(F,true)
+                end
+            end
+        end
+    end
+    self:Filloptions(oldfillstyle,oldfillcolor,oldfillopacity)
+    self:Lineoptions(oldlinestyle,oldlinecolor,oldlinewidth); 
+    self:Lineopacity(oldlineopacity)
+end
+
+function graph3d:Dmixfacet(...) --Dmixfacet(F1,args1, F2,args2, ...)
+-- dessine une liste de facettes F (avec coordonnées 3d)
+-- args est une table à 10 champs :
+-- args = {mode=0/1/2/3/4/5, contrast=1, backcull=true/false, edgestyle=defaut, edgecolor=default, edgewidth=defaut, twoside=true/false, color=White, opacity=1, usepalette=nil}    
+    --mode=0: arêtes seulement
+    --mode=1 et 2: faces peintes couleur unie+arêtes visibles
+    --mode=3 et 4 faces peintes couleur nuancée+arêtes visibles
+    --mode=5 faces peintes couleur nuancée pas d'arêtes
+    local mode = 3
+    local contrast = 1
+    local edgestyle = self.param.linestyle
+    local edgecolor = self.param.linecolor
+    local edgewidth = self.param.linewidth
+    local backcull = false
+    local twoside = true
+    local color = "white"
+    local opacity = 1
+    local S, face, args = {}
+    for k,F in ipairs{...} do
+        if k%2 == 1 then 
+            face = F
+            if not isID3d(self.matrix3d) then face = self:Mtransform3d(face) end -- on applique la matrice de transformation
+        else
+            args = F
+            if args.mode == nil then args.mode = mode else mode = args.mode end
+            if args.contrast == nil then args.contrast = contrast else contrast = args.contrast end
+            if args.edgestyle == nil then args.edgestyle = edgestyle else edgestyle = args.edgestyle end
+            if args.edgecolor == nil then args.edgecolor = edgecolor else edgecolor = args.edgecolor end
+            if args.edgewidth == nil then args.edgewidth = edgewidth else edgewidth = args.edgewidth end
+            if args.opacity == nil then args.opacity = opacity else opacity = args.opacity end
+            if args.backcull == nil then args.backcull = backcull else backcull = args.backcull end
+            if args.color == nil then args.color = color else color = args.color end
+            if args.twoside == nil then args.twoside = twoside else twoside = args.twoside end
+            if args.usepalette == nil then
+                args.getcolor = function(f)
+                    return args.color
+                end
+            else
+                local pal, mode = table.unpack(args.usepalette)
+                args.getcolor = define_getcolor(face,pal,mode,args.color)
+            end
+            if isPoint3d(face[1]) then face = {face} end
+            for _, f in ipairs(face) do
+                table.insert(f,args) -- chaque facette est accompagnée de ses arguments
+                table.insert(S,f)
+            end
+        end
+    end
+    local oldmatrix = self.matrix3d
+    self.matrix3d = ID3d
+    local oldfillstyle = self.param.fillstyle
+    local oldfillopacity = self.param.fillopacity
+    local oldfillcolor = self.param.fillcolor
+    local oldlinestyle = self.param.linestyle
+    local oldlineopacity = self.param.lineopacity
+    local oldlinecolor = self.param.linecolor
+    local oldlinewidth = self.param.linewidth  
+    local coul
+    S = self:Sortfacet(S)
+    for _,F in ipairs(S) do
+        args = table.remove(F)
+        self:Lineoptions(args.edgestyle,args.edgecolor,args.edgewidth)
+        -- dessin
+        if (args.mode == mWireframe) then -- arêtes seulement (mWireframe)
+            self:Filloptions("none")
+            self:Dpolyline3d(F,true)
+        elseif (args.mode == mFlat) or (args.mode == mFlatHidden) then --faces unies
+            coul = args.getcolor(F)
+            if type(coul) == "table" then coul = rgb(coul) end
+            self:Filloptions("full",coul,args.opacity)
+            self:Dpolyline3d(F,true)
+        else --mode = 3,4 ou 5 faces peintes
+            coul = self:adjust_color(F,args.getcolor(F),args.contrast,args.twoside)
+            if coul ~= nil then
+                self:Filloptions("full",coul,args.opacity)
+                if (not args.backcull) or (not neg) then 
+                    if args.mode == 5 then 
+                        if (args.opacity == 1) then
+                            self:Lineoptions("solid",coul,1); self:Lineopacity(args.opacity)
+                            self:Dpolyline3d(F,true)
+                        else
+                            self:Linestyle("noline")
+                            self:Dpolyline3d(F,true)
+                        end   
+                    else
+                        self:Dpolyline3d(F,true)
+                    end
+                end
+            end
+        end
+    end
+    self:Filloptions(oldfillstyle,oldfillcolor,oldfillopacity)
+    self:Lineoptions(oldlinestyle,oldlinecolor,oldlinewidth); self:Lineopacity(oldlineopacity)
+    self.matrix3d = oldmatrix
+end
+
+function graph3d:addFacet(facet,args)
+-- ajouter des facettes à la scène 3d
+-- facet : une facette ou une liste de facettes (avec points 3d)
+-- args table à 12 champs
+-- {color="white", opacity=1, boxed=false, backcull=false, edgewidth=6, edge=false, edgecolor="black", hidden=false, hiddenstyle="dotted", contrast=1, twoside=false, matrix=ID3d, usepalette=nil}
+    if facet == nil then return {{"nul"}} end
+    args = args or {}
+    if isPoint3d(facet[1]) then facet = {facet} end
+    local color = args.color or "White"
+    local opacity = args.opacity or 1
+    local backcull = args.backcull or false
+    local boxed = args.boxed or false
+    local contrast = args.contrast or 1
+    local twoside = args.twoside
+    local hidden = args.hidden
+    if hidden == nil then hidden = Hiddenlines end
+    local hiddenstyle = args.hiddenstyle or Hiddenlinestyle
+    if twoside == nil then twoside = true end
+    local edge = args.edge or false
+    local edgecolor = args.edgecolor or self.param.linecolor
+    local edgewidth = args.edgewidth or self.param.linewidth
+    local matrix = args.matrix or ID3d
+    matrix = composematrix3d(self.matrix3d,matrix)
+    local oldmatrix = self.matrix3d
+    self.matrix3d = ID3d
+    local F = facet
+    if not isID3d(matrix) then 
+        F = mtransform3d(F,matrix)
+    end
+    local x1,x2,y1,y2,z1,z2, getcolor 
+    if args.usepalette == nil then
+        getcolor = function(f)
+            return color
+        end
+    else
+        local pal, mode = table.unpack(args.usepalette)
+        getcolor = define_getcolor(F,pal,mode,color)
+    end    
+    local res = {}
+    local rep = {"facet"}
+    if boxed then 
+        if x1 == nil then x1,x2,y1,y2,z1,z2 = getbounds3d(F) end
+        local eps = 1e-4
+        x1 = x1-eps; x2 = x2+eps
+        y1 = y1-eps; y2 = y2+eps
+        z1 = z1-eps; z2 = z2+eps
+        local P = parallelep(M(x1,y1,z1),M(x2-x1,0,0),M(0,y2-y1,0),M(0,0,z2-z1))
+        insert(res, self:addWall(poly2facet(P),{matrix=ID3d}))
+    end
+    for _, face in ipairs(F) do
+        local coul,n,coef = self:adjust_color(face,getcolor(face),contrast,twoside)
+        if coul ~= nil then
+            if coef < 0 then n = -n  end -- n must be directed towards the observer
+            if (not backcull) or (coef > 0)  then            
+                table.insert(rep, {face,{face[1],n},coul,opacity})
+            end
+        end
+    end
+    if edge then
+        -- calcul des arêtes
+        insert(res, self:addPolyline(facetedges(F),{color=edgecolor, hidden=hidden, hiddenstyle=hiddenstyle, width=edgewidth, matrix=ID3d}))
+    end
+    table.insert(res,rep) -- rep = {"facet", liste de faces}
+    self.matrix3d = oldmatrix
+    return res 
+end
+\end{luacode*}
+
+
+ \begin{luadraw}{name=usepalette}
+local P,bbox = read_obj_file("../obj/nefertiti.obj")
+local g = graph3d:new{window3d=bbox,window={-7,5,-8,5},viewdir={35,60}, margin={0,0,0,0}, size={10,10}, bg="LightGray"}
+local pal1 = {Gray, SlateGray, LightSkyBlue, LightPink, Pink, LightSalmon, FireBrick}
+local pal2 = {Purple, Indigo, Blue, Green, Yellow, Orange, Red}
+local pal3 = {LightSkyBlue,CornflowerBlue,LightCoral,IndianRed,DarkSalmon,YellowGreen,MediumSeaGreen}
+local pal4 = {Cyan,DodgerBlue,Magenta,Red,Orange,Gold,LimeGreen}
+local pal5 = {LightCyan,LightSkyBlue,Plum,LightCoral,LightSalmon,Khaki,PaleGreen}
+g:Dpoly( shift3d(scale3d(P,0.5),-4*g:ScreenX()+2*g:ScreenY()), {usepalette={pal5,"z"}, mode=mShadedOnly})
+local s = surface(function(x,y) return M(x,y,x^2-y^2)  end,-2,2,-2,2)
+g:Setviewdir(60,60)
+g:Dfacet( shift3d(scale3d(s,0.75),2*g:ScreenX()-2*g:ScreenY()), {usepalette={pal4,"z"}, mode=mShaded})
+g:Show() 
+\end{luadraw}
+\end{document}

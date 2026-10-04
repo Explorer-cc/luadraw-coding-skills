@@ -1,0 +1,26 @@
+% source: https://github.com/pfradin/luadraw/discussions/240#discussioncomment-16633385 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[b]{esvect}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%\author{Huỳnh Văn Thơ}
+\begin{document}
+
+\begin{luadraw}{name=fill}
+local g = graph:new{window = {-1.5, 4.5, -4, 3.5}, size ={11,11}}
+local i = cpx.I 
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+--
+local f = function(x) return x*x - 2*x - 2 end
+local h = function(x) return 4 - x end
+local j = function(x) return 2*x - 2 end -- you have already defined a variable i!
+--
+g:Dcartesian(f, {x={-0.55,3.2}, draw_options="red, line width=0.8pt"})
+g:Dcartesian(h, {x={-0.55,3.2}, draw_options="blue, line width=0.8pt"})
+g:Dcartesian(j, {x={-0.55,3.2}, draw_options="green, line width=0.8pt"})
+local D1 = domain3(f,j,-1.5,4.5)
+local D = cutpolyline(D1, {4*i,-1+i}) -- we divide the domain D1 with the line representing h
+g:Dpolyline(D, "draw=none,fill=Pink,fill opacity=0.6")
+g:Show()
+\end{luadraw}
+\end{document}

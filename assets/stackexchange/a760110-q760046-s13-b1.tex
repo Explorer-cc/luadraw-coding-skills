@@ -1,0 +1,31 @@
+% source: https://tex.stackexchange.com/a/760110 (question 760046, score 13, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/760046/what-is-the-best-way-to-draw-a-potato-like-found-in-vector-analysis-continuum-m/760099#760099
+\begin{document}
+\begin{luadraw}{name=potatoe}
+local g = graph3d:new{size={10,10},window={-3.5,3.5,-5,5}, bg="lightgray", bbox=false, viewdir=perspective("yz")}
+local i = cpx.I
+local potatoe = { Z(3,0), "m", Z(3.0487,0.4064), Z(3.0975,0.8129), Z(2.9789,1.2118), "b", Z(2.8604,1.6107), Z(2.5747,2.0022), Z(2.2859,2.3843), "b", Z(1.9972,2.7664), Z(1.7055,3.1391), Z(1.3212,3.4458), "b", Z(0.9368,3.7525), Z(0.4598,3.993), Z(-0.0526,4.0256), "b", Z(-0.5649,4.0581), Z(-1.1126,3.8826), Z(-1.5565,3.5817), "b", Z(-2.0003,3.2809), Z(-2.3404,2.8548), Z(-2.5414,2.4142), "b", Z(-2.7424,1.9737), Z(-2.8043,1.5189), Z(-2.8821,1.1047), "b", Z(-2.9598,0.6905), Z(-3.0534,0.3169), Z(-3.0905,-0.0827), "b", Z(-3.1275,-0.4822), Z(-3.1079,-0.9077), Z(-2.9516,-1.3069), "b", Z(-2.7953,-1.706), Z(-2.5022,-2.0788), Z(-2.2424,-2.4797), "b", Z(-1.9825,-2.8806), Z(-1.7558,-3.3096), Z(-1.359,-3.6361), "b", Z(-0.9622,-3.9626), Z(-0.3953,-4.1865), Z(0.1487,-4.1211), "b", Z(0.6927,-4.0556), Z(1.2139,-3.7007), Z(1.5993,-3.3769), "b", Z(1.9847,-3.053), Z(2.2343,-2.7601), Z(2.4451,-2.2025), "b", Z(2.656,-1.6448), Z(2.828,-0.8224), Z(3,0), "b"}  
+local a,b,c,d,f = Z(0,3.75), Z(0,-3.95), Z(-3.08,0), Z(3,0), Z(0,4.5)
+local o, r, h = (c+d)/2, cpx.abs(d-c)/2, 0.45
+local e =  Mc(3.5,50*deg,0)
+local v = pt3d.normalize(e)
+local u = pt3d.normalize( pt3d.prod(v,vecK))
+local P = parallelep(e-h*u/2-h*v/1.5-h*vecK/2, h*u, 4*h*v/3, h*vecK) 
+
+g:Dpath(potatoe,"ball color=red!40")
+g:Dpolyline({a,5*i}, "-latex,thick"); g:Dpolyline({b,-5*i}, "thick")
+g:Dpolyline({-5*i,5*i}, "dashed")
+g:Dellipticarc(f-0.25,f,f+0.25,0.5,0.3,1,"->")
+g:Dellipticarc(c,o,d,r,r/3,1,"Maroon"); g:Dellipticarc(c,o,d,r,r/3,-1,"dashed,Maroon")
+g:Dpolyline3d({Origin,e},"Maroon,-latex,thick")
+g:Dpolyline3d({e,e-1.5*u},"WhiteSmoke,-latex,thick")
+g:Dpoly(P, {edgecolor="Maroon", mode=mWireframe})
+g:Dlabel( "$\\vec{\\omega}$", 5*i,{pos="W"}, "$\\vec{r}_{\\alpha}$", g:Proj3d(e)/2,{pos="N"},
+    "$m_{\\alpha}$", g:Proj3d(e+h*u/2-h*vecK/2),{pos="S"}, "$\\vec{v}_{\\alpha}$",g:Proj3d(e-u),{})
+g:Show()
+\end{luadraw}
+\end{document}

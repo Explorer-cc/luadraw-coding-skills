@@ -1,0 +1,63 @@
+% source: https://tex.stackexchange.com/a/759901 (question 759198, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{tikz}
+\usepackage{ifthen}
+%https://tex.stackexchange.com/questions/759198/improve-of-solid-efffect-of-stack-of-unit-cube-legos-solid-draw-with-hole-prot
+
+%% Definition of a unit cube; the TikZ code was generated with luadraw. Three parameters:
+%1- Position (x, y)
+%2- Position of the protrusion: top, left, or right
+%3- Color
+\def\unitcube#1#2#3{%
+\ifthenelse{\equal{#2}{top}}%
+{\begin{scope}[cm={1,0,0,1,#1}]}%then
+{%else
+    \ifthenelse{\equal{#2}{left}}%
+    {\begin{scope}[cm={0,-1,-1,0,#1}]}%then
+    {\begin{scope}[cm={0,-1,1,0,#1}]}%else right
+}%
+\begin{scope}[xshift=-5.5cm, yshift=-5.5cm]%centering
+\colorlet{mycolor}{#3!90!white}%
+\colorlet{mycolorprot}{#3!70!black}%
+\draw[even odd rule,color=mycolor!63.1!black,fill=mycolor!63.1!black] (5,6) -- (6,6) -- (5.6464,6.3536) -- (4.6464,6.3536)--cycle (5.4982,6.1768) .. controls (5.4639,6.2111) and (5.3585,6.2386) .. (5.2614,6.2386) .. controls (5.1642,6.2386) and (5.1139,6.2111) .. (5.1482,6.1768) .. controls (5.1826,6.1424) and (5.288,6.1149) .. (5.3851,6.1149) .. controls (5.4822,6.1149) and (5.5326,6.1424) .. (5.4982,6.1768);%
+\pgfsetstrokecolor{mycolorprot}%
+\pgfsetlinewidth{0.2pt}%
+\draw[fill,left color=mycolorprot!85,right color = mycolorprot!90,middle color=mycolorprot!65,shading angle=180] (5.067,5.7568) .. controls (5.0427,5.8497) and (5.0038,5.8887) .. (4.9795,5.8443) .. controls (4.9552,5.7999) and (4.9552,5.6897) .. (4.9795,5.5968) .. controls (5.0038,5.5038) and (5.0427,5.4649) .. (5.067,5.5093) .. controls (5.0913,5.5537) and (5.0913,5.6638) .. (5.067,5.7568);%
+\draw[fill,left color=mycolorprot!95,right color = mycolorprot!100,middle color=mycolorprot!70,shading angle=180] (4.8041,5.8623) -- (5.0041,5.8623) -- (4.9901,5.8577) -- (4.9781,5.8417) -- (4.969,5.8153) -- (4.9633,5.7802) -- (4.9614,5.7386) -- (4.9633,5.6932) -- (4.969,5.6467) -- (4.9781,5.6021) -- (4.9901,5.5622) -- (5.0041,5.5295) -- (5.0193,5.506) -- (5.0348,5.4933) -- (5.0496,5.4921) -- (4.8496,5.4921) -- (4.8348,5.4933) -- (4.8193,5.506) -- (4.8041,5.5295) -- (4.7901,5.5622) -- (4.7781,5.6021) -- (4.769,5.6467) -- (4.7633,5.6932) -- (4.7614,5.7386) -- (4.7633,5.7802) -- (4.769,5.8153) -- (4.7781,5.8417) -- (4.7901,5.8577)--cycle;%
+\draw[fill,left color=mycolorprot!95,right color = mycolorprot!100,middle color=mycolorprot!70,shading angle=180] (4.8733,5.7296) -- (4.8808,5.6837) -- (4.8846,5.6373) -- (4.8846,5.5935) -- (4.8808,5.5548) -- (4.8733,5.5239) -- (4.8627,5.5025) -- (4.8496,5.4921) -- (5.0496,5.4921) -- (5.0627,5.5025) -- (5.0733,5.5239) -- (5.0808,5.5548) -- (5.0846,5.5935) -- (5.0846,5.6373) -- (5.0808,5.6837) -- (5.0733,5.7296) -- (5.0627,5.7722) -- (5.0496,5.8088) -- (5.0348,5.8371) -- (5.0193,5.8553) -- (5.0041,5.8623) -- (4.8041,5.8623) -- (4.8193,5.8553) -- (4.8348,5.8371) -- (4.8496,5.8088) -- (4.8627,5.7722)--cycle;%
+\pgfsetstrokecolor{black}%
+\pgfsetlinewidth{0.4pt}%
+\draw[even odd rule,color=mycolor!63.1!black,fill=mycolor!63.1!black] (5,5) -- (4.6464,5.3536) -- (4.6464,6.3536) -- (5,6)--cycle (4.7614,5.7386) .. controls (4.7614,5.8358) and (4.7889,5.8861) .. (4.8232,5.8518) .. controls (4.8576,5.8174) and (4.8851,5.712) .. (4.8851,5.6149) .. controls (4.8851,5.5178) and (4.8576,5.4674) .. (4.8232,5.5018) .. controls (4.7889,5.5361) and (4.7614,5.6415) .. (4.7614,5.7386);%
+\pgfsetstrokecolor{mycolorprot}%
+\pgfsetlinewidth{0.2pt}%
+\draw[fill,left color=mycolorprot!85,right color = mycolorprot!90,middle color=mycolorprot!65,shading angle=135] (5.553,5.6945) .. controls (5.4844,5.7631) and (5.3742,5.7631) .. (5.3055,5.6945) .. controls (5.2369,5.6258) and (5.2369,5.5156) .. (5.3055,5.447) .. controls (5.3742,5.3783) and (5.4844,5.3783) .. (5.553,5.447) .. controls (5.6217,5.5156) and (5.6217,5.6258) .. (5.553,5.6945);%
+\draw[fill,left color=mycolorprot!95,right color = mycolorprot!100,middle color=mycolorprot!70,shading angle=135] (5.6627,5.4356) -- (5.6416,5.3971) -- (5.6115,5.3652) -- (5.5745,5.3417) -- (5.5328,5.3281) -- (5.489,5.3253) -- (5.4459,5.3336) -- (5.4062,5.3522) -- (5.3724,5.3802) -- (5.3017,5.4509) -- (5.3355,5.423) -- (5.3752,5.4043) -- (5.4183,5.3961) -- (5.4621,5.3988) -- (5.5038,5.4124) -- (5.5408,5.4359) -- (5.5709,5.4678) -- (5.592,5.5063) -- (5.6029,5.5488) -- (5.6029,5.5926) -- (5.592,5.6351) -- (5.5709,5.6736) -- (5.5408,5.7056) -- (5.6115,5.6348) -- (5.6416,5.6029) -- (5.6627,5.5644) -- (5.6736,5.5219) -- (5.6736,5.4781)--cycle;%
+\draw[fill,left color=mycolorprot!95,right color = mycolorprot!100,middle color=mycolorprot!70,shading angle=135] (5.4459,5.6664) -- (5.489,5.6747) -- (5.5328,5.6719) -- (5.5745,5.6583) -- (5.6115,5.6348) -- (5.5408,5.7056) -- (5.5038,5.7291) -- (5.4621,5.7426) -- (5.4183,5.7454) -- (5.3752,5.7371) -- (5.3355,5.7185) -- (5.3017,5.6905) -- (5.2759,5.655) -- (5.2598,5.6142) -- (5.2543,5.5707) -- (5.2598,5.5272) -- (5.2759,5.4864) -- (5.3017,5.4509) -- (5.3724,5.3802) -- (5.3466,5.4157) -- (5.3305,5.4565) -- (5.325,5.5) -- (5.3305,5.5435) -- (5.3466,5.5843) -- (5.3724,5.6198) -- (5.4062,5.6478)--cycle;%
+\pgfsetstrokecolor{black}%
+\pgfsetlinewidth{0.4pt}%
+\draw[even odd rule,color=mycolor!95.64!black,fill=mycolor!95.64!black] (5,5) -- (6,5) -- (6,6) -- (5,6)--cycle (5.675,5.5) .. controls (5.675,5.5971) and (5.5971,5.675) .. (5.5,5.675) .. controls (5.4029,5.675) and (5.325,5.5971) .. (5.325,5.5) .. controls (5.325,5.4029) and (5.4029,5.325) .. (5.5,5.325) .. controls (5.5971,5.325) and (5.675,5.4029) .. (5.675,5.5);%
+\pgfsetstrokecolor{mycolorprot}%
+\draw[fill,left color=mycolorprot!95,right color = mycolorprot!100,middle color=mycolorprot!70,shading angle=90] (5.5088,6.1562) .. controls (5.5088,6.1238) and (5.4262,6.107) .. (5.3232,6.1184) .. controls (5.2202,6.1299) and (5.1376,6.165) .. (5.1376,6.1974) -- (5.1376,6.3974) -- (5.1376,6.3974) .. controls (5.1376,6.365) and (5.2202,6.3299) .. (5.3232,6.3184) .. controls (5.4262,6.307) and (5.5088,6.3238) .. (5.5088,6.3562)--cycle;%
+\draw[fill,left color=mycolorprot!85,right color = mycolorprot!90,middle color=mycolorprot!65,shading angle=90] (5.4907,6.333) .. controls (5.5351,6.3573) and (5.4962,6.3962) .. (5.4032,6.4205) .. controls (5.3103,6.4448) and (5.2001,6.4448) .. (5.1557,6.4205) .. controls (5.1113,6.3962) and (5.1503,6.3573) .. (5.2432,6.333) .. controls (5.3362,6.3087) and (5.4463,6.3087) .. (5.4907,6.333);%
+\end{scope}%
+\end{scope}%
+}%
+
+\begin{document}
+
+\begin{tikzpicture}
+\unitcube{(-2,0)}{right}{Gold}
+\unitcube{(-1,0)}{right}{blue!50!white}
+\unitcube{(0,0)}{right}{Crimson}
+
+\unitcube{(2,0)}{top}{violet}
+\unitcube{(2,1)}{top}{green}
+\unitcube{(2,2)}{top}{teal}
+
+\unitcube{(0,2)}{left}{cyan!30!white}
+\unitcube{(-1,2)}{left}{Maroon}
+\unitcube{(-2,2)}{left}{orange}
+\end{tikzpicture}
+
+\end{document}

@@ -1,0 +1,76 @@
+% source: https://github.com/pfradin/luadraw/discussions/125#discussioncomment-14718603 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+\documentclass{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\colorlet{coneCol}{blue!50!black!75}
+\colorlet{sideCol}{blue!75!black}
+
+\begin{luadraw}{name = hyperbola-section}
+local height      =  5
+local radius      =  3
+local vec_cone    = height*vecK
+local width_line  =  16
+local section_col = "red"
+local cone_col    = "coneCol"   --   <---- KO
+local side_col    = "sideCol"
+
+local graphview = graph3d:new{
+  window  = {-radius - 1, radius + 1, -height - 1, height + 1},
+  viewdir = {120, 60},
+  size    = {12, 12}
+}
+
+graphview:Lineoptions(solid, side_col, width_line)
+
+Hiddenlinestyle = "dashed"
+
+local cone_1 = cone(
+  Origin, vec_cone, radius,
+  100
+)
+
+local cone_2 = cone(
+  Origin,  -vec_cone, radius,
+  100
+)
+
+local plane     = {M(1, 0, 0), vecI}
+local section_1 = graphview:Intersection3d(cone_1, plane)
+local section_2 = graphview:Intersection3d(cone_2, plane)
+
+graphview:Dcone(
+  Origin, vec_cone, radius,
+  {
+    color = cone_col
+  })
+
+graphview:Dcone(
+  Origin, -vec_cone, radius,
+  {
+    color = cone_col
+  })
+
+graphview:Dedges(
+  section_1,
+  {
+    hidden = true,
+    color = section_col
+  })
+
+graphview:Dedges(
+  section_2,
+  {
+    hidden = true,
+    color = section_col
+  })
+
+graphview:Show()
+\end{luadraw}
+
+\end{document}

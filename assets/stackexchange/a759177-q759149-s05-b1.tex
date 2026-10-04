@@ -1,0 +1,69 @@
+% source: https://tex.stackexchange.com/a/759177 (question 759149, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/759149/add-a-half-sphere-and-part-of-a-sphere-in-a-tikzpicture
+\begin{document}
+\begin{luadraw}{name=part_of_sphere}
+local g = graph3d:new{ window={-3,3,-3,3}, size={12,12}, bg="lightgray!30", viewdir=perspective("yz")}
+local a = 2
+local radius = 0.35
+local P = parallelep(M(-a,-a,-a), 2*a*vecI, 2*a*vecJ, 2*a*vecK)
+
+local Dhalf_sphere= function(center,radius, dir1, color)
+    local s = sphere(center, radius)
+    s = cutfacet(s,{center,dir1})
+    local Vi, Hi = g:Classifyfacet(s)
+    g:Dpolyline3d( border(Vi),"ball color="..color)
+    if pt3d.dot(dir1,g.Normal) <=0 then 
+        color = g:adjust_color( circle3d(center,radius,-dir1)[1],color,1,true)
+        g:Dcircle3d(center,radius,dir1,"fill="..color)
+    end
+end
+
+local Deighth_sphere= function(center,radius, dir1, dir2, dir3, color)
+    local s = sphere(center, radius)
+    s = clip3d(s,P)
+    local sv = g:Classifyfacet(s)
+    local color2 = color.."!70!black"
+    if pt3d.dot( pt3d.prod(dir1,dir2),g.Normal) >= 0 then
+        color2 = g:adjust_color({center,center+dir1,center+dir2},color,1,true)
+        g:Dpath3d( {center+dir1,center,center+dir2,radius,1,"ca",center,"l","cl"}, "fill="..color2)
+    end
+    if pt3d.dot( pt3d.prod(dir3,dir1),g.Normal) >= 0 then
+        color2 = g:adjust_color({center,center+dir3,center+dir1},color,1,true)
+        g:Dpath3d( {center+dir3,center,center+dir1,radius,1,"ca",center,"l","cl"}, "fill="..color2)
+    end
+    if pt3d.dot( pt3d.prod(dir2,dir3),g.Normal) >= 0 then
+        color2 = g:adjust_color({center,center+dir2,center+dir3},color,1,true)
+        g:Dpath3d( {center+dir3,center,center+dir2,radius,1,"ca",center,"l","cl"}, "fill="..color2)
+    end
+    g:Dpolyline3d( border(sv),"ball color="..color)
+end
+
+local color="orange"
+g:Linewidth(2)
+
+Dhalf_sphere(a*vecK, radius,-vecK, color); Dhalf_sphere(-a*vecK, radius,vecK, color)
+Dhalf_sphere(a*vecJ, radius,-vecJ, color); Dhalf_sphere(-a*vecJ, radius,vecJ, color)
+Deighth_sphere(M(-a,-a,-a),radius,vecI,vecJ,vecK,color)
+Dhalf_sphere(a*vecI, radius,-vecI, color); Dhalf_sphere(-a*vecI, radius,vecI, color)
+
+Deighth_sphere(M(a,a,-a),radius,-vecJ,-vecI,vecK,color)
+Deighth_sphere(M(a,-a,-a),radius,vecJ,vecK,-vecI,color)
+Deighth_sphere(M(a,-a,a),radius,vecJ,-vecI,-vecK,color)
+Deighth_sphere(M(-a,-a,a),radius,vecI,vecJ,-vecK,color)
+Deighth_sphere(M(-a,a,a),radius,-vecJ,vecI,-vecK,color)
+Deighth_sphere(M(-a,a,-a),radius,vecI,-vecJ,vecK,color)
+Deighth_sphere(M(a,a,a),radius,-vecI,-vecJ,-vecK,color)
+
+g:Dpoly(P, {mode=mWireframe, edgewidth=8})
+g:Linewidth(4)
+g:Dpolyline3d({{M(0,-a,-a), M(0,a,-a), M(0,a,a), M(0,-a,a)}, 
+    {M(a,0,-a), M(a,0,a), M(-a,0,a), M(-a,0,-a)}, 
+    {M(-a,-a,0), M(a,-a,0), M(a,a,0), M(-a,a,0)}},
+    true, "dashed")
+g:Show()
+\end{luadraw}
+\end{document}

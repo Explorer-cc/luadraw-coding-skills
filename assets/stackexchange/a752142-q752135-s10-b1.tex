@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/752142 (question 752135, score 10, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/752135/draw-circumscribed-sphere-and-inscribed-sphere-of-regular-tetrahedron
+\begin{document}
+\begin{luadraw}{name=regular_tetra_spheres}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Origin = pt3d.M, pt3d.Origin
+local sqrt = math.sqrt
+local g = ld.graph3d:new{ viewdir={40,60},bbox=false, size={10,10}}
+require 'luadraw_spherical'
+local a = 4
+local A,B,C,D = M(0,0,a*sqrt(6)/3), M(a*sqrt(3)/6,-a/2,0), M(a*sqrt(3)/6,a/2,0), M(-a*sqrt(3)/3,0,0)
+local I1,r1 = ld.circumsphere(A,B,C,D)
+proj3d = ld.proj3d -- bug in insphere function V3.4 (ld. is missing)
+local I2,r2 = ld.insphere(A,B,C,D)
+proj3d = nil
+local T = ld.tetra(B,A-B,C-B,D-B)
+local Tv, Th = g:Classifyfacet(T)
+local Pabc, Pacd = ld.plane(A,B,C), ld.plane(A,C,D)
+local p1, p2 = ld.proj3d(I2,Pabc), ld.proj3d(I2, Pacd)
+local O, H = I2, ld.proj3d(Origin, ld.plane(B,D,C))
+g:Define_sphere({center=I1, radius=r1, color="orange", opacity=0.4})
+g:Dfacet( Th ,{color="Pink"})
+g:Dsphere(I2,r2,{mode=2, color="LightBlue", opacity=0.8})
+g:Dpolyline3d({{p1,I2,p2},{A,H}},"dashed")
+g:Ddots3d({O,I2,H})
+g:Dfacet( Tv ,{color="Pink",opacity=0.6})
+g:Dcrossdots3d( {{p1,Pabc[2]},{p2, Pacd[2]}},nil,0.5 )
+g:Linewidth(1)
+g:DScircle(ld.plane(A,D,C))
+g:Dspherical()
+g:Dballdots3d({A,B,C,D},nil,0.75)
+g:Dlabel3d("$A$",A,{pos="N"},"$B$",B,{pos="W"},"$C$",C,{pos="S"},"$D$",
+    D,{pos="E"}, "$O$",O,{pos="W"}, "$H$",H,{} )
+
+local a, o, h = table.unpack( g:Proj3d({A,O,H}) )
+local d = 3
+g:Dpolyline({{a,a+d},{h,h+d},{o,o+d}},"dashed,gray,thick")
+g:Dpolyline( {a+d,o+d}, "<->"); g:Dlabel("$\\frac{\\sqrt{6}}{4}a$",(a+o)/2+d,{pos="E"})
+g:Dpolyline( {o+d,h+d}, "<->"); g:Dlabel("$\\frac{\\sqrt{6}}{12}a$",(o+h)/2+d,{pos="E"})
+g:Show() 
+\end{luadraw}
+\end{document}

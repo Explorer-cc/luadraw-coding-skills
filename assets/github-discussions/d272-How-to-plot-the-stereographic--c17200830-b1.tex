@@ -1,0 +1,68 @@
+% source: https://github.com/pfradin/luadraw/discussions/272#discussioncomment-17200830 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=stereographic_curve}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, M, vecI, vecJ, vecK = pt3d.Origin, pt3d.M, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window3d={-5,5,-2,2,-2,2},window={-10,10,-10,10},size={10,10}, viewdir={10,60}} 
+g:Linewidth(4)
+require 'luadraw_spherical'
+local sM =  ld.sM
+local C, R = Origin, 2
+local a = -R
+local N = R*vecK
+local Plane = ld.planeEq(0,0,1,-a)
+
+g:Define_sphere( {center=C,radius=R, color="SlateGray!50",edgestyle="noline",show=true} ) 
+
+function ld.projstereo_Sfacet(L, sphere, N, h, close) -- stereographic projection of a spherical facet
+-- L is a list of 3D points on the sphere, 
+-- the "segments" joining two consecutive points are arcs of a great circle (spherical facet).
+    local C, R = table.unpack(sphere)
+    close = close or false
+    local B, A, D = ld.toSphere(L[1])
+    local ret = {ld.projstereo(B, {C,R}, N, h)}
+    local n, p = #L
+    if close then p = n+1 else p = n end
+    for k = 2, p do
+        A = B; B = ld.toSphere( L[1+(k-1)%n] )
+        D = ld.toSphere((A+B)/2)
+        local a, b, c = table.unpack( ld.projstereo({A,B,D}, {C,R}, N, h) )
+        if pt3d.N1( pt3d.prod(b-a,c-a) ) < 1e-8 then -- a, b,c are aligned
+            ld.insert(ret, {b, "l"})
+        else
+            local I, r, n = ld.circumcircle3d(a, b, c)
+            local apath = ld.arc3db(a,I,b,r,1) -- path
+            table.remove(apath,1)
+            ld.insert(ret, apath)
+        end
+    end
+    return ret
+end
+
+g:Dplane(Plane,vecJ,15,15)
+
+ld.Hiddenlines = true; ld.Hiddenlinestyle="dashed"
+
+local P, V, W = sM(60,65), sM(15,60), sM(40,110)
+local PP, VV, WW = table.unpack( ld.projstereo({P,V,W},{C,R}, N, a) )
+g:DSbigcircle({R*vecI,R*vecJ})
+g:DSbigcircle({R*vecI,R*vecK})
+g:DSbigcircle({R*vecJ,R*vecK})
+g:DSfacet( {V,P,W}, {fill="blue!30"})
+
+g:DSseg({N,PP},{color="blue"})
+g:DSseg({N,VV},{color="blue"})
+g:DSseg({N,WW},{color="blue"})
+
+g:Dpath3d( ld.projstereo_Sfacet({V,P,W}, {C,R}, N, a, true), "fill=blue!30")
+g:DSstars({N,P,V,W}, {fill="black"})
+g:Dspherical()
+g:Ddots3d({PP,VV,WW})
+g:Show()
+\end{luadraw}
+\end{document}

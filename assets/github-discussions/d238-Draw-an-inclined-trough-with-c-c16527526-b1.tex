@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/238#discussioncomment-16527526 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+
+\begin{document}
+
+\begin{luadraw}{name=half_cylinder_with_holes}
+local g = graph3d:new{viewdir=perspective("central",25,60,20), window={-8.5,6,-8.5,4}}
+local r, L = 2, 9
+local A, B = -L/2*vecI, L/2*vecI
+local Cyl = cylinder(A, r, B, 50, true)
+Cyl = cutfacet(Cyl, {Origin, -vecK})
+local Cyl1, Cyl2 = g:Classifyfacet(Cyl)
+local tile = concat(border(Cyl2)[1],{"l"})
+local holes = {A-r*vecK+vecI, "m", A-r*vecK+1.25*vecI, vecK, "c", A-r*vecK+2*vecI, "m", A-r*vecK+2.5*vecI, vecK, "c", A-r*vecK+3.5*vecI, "m", A-r*vecK+4.25*vecI, vecK, "c", A-r*vecK+5.5*vecI, "m", A-r*vecK+6.5*vecI, vecK, "c"}
+local legs_options={color="Brown", hiddenstyle="noline"}
+-- drawing
+g:Dplane({-2*vecK,vecK},vecJ,9,12,"left color=SlateGray, right color=SlateGray!30")
+--legs
+g:Dcylinder( M(11*L/24,-1.25,-2),0.2, M(11*L/24,-1.25,-1),legs_options)
+g:Dcylinder( M(11*L/24,1.25,-2),0.2, M(11*L/24,1.25,-1),legs_options)
+g:Dcylinder( M(-11*L/24,-1.25,-2),0.2, M(-11*L/24,-1.25,0.5),legs_options)
+g:Dcylinder( M(-11*L/24,1.25,-2),0.2, M(-11*L/24,1.25,0.5),legs_options)
+g:Rotate3d(15, {L/2*vecI, vecJ})
+--holes
+g:Dpoly(cylinder(A-r*vecK+1.25*vecI, 0.25,  A-(r+0.2)*vecK+1.25*vecI,35,true), {color="Brown",mode=mShadedOnly,twoside=false})
+g:Dpoly(cylinder(A-r*vecK+2.5*vecI, 0.5,  A-(r+0.2)*vecK+2.5*vecI,35,true), {color="Brown",mode=mShadedOnly,twoside=false})
+g:Dpoly(cylinder(A-r*vecK+4.25*vecI, 0.75,  A-(r+0.2)*vecK+4.25*vecI,35,true), {color="Brown",mode=mShadedOnly,twoside=false})
+g:Dpoly(cylinder(A-r*vecK+6.5*vecI, 1,  A-(r+0.2)*vecK+6.5*vecI,35,true), {color="Brown",mode=mShadedOnly,twoside=false})
+--half cylinder with holes
+g:Dpath3d( concat(tile,holes), "left color=Brown, right color=Brown!50, middle color=Brown!10, shading angle=55, even odd rule")
+g:Dpolyline3d( shift3d(border(Cyl1),0.2*vecJ), true,"fill=Brown!50")
+g:Dpath3d( {A-r*vecJ,"m", A-(r+0.2)*vecJ, B-(r+0.2)*vecJ, B-r*vecJ, "l", "cl", B-r*vecJ, "m", B, B+r*vecJ, r, 1, vecI, "ca", B+(r+0.2)*vecJ, "l", B, B-(r+0.2)*vecJ, r+0.2, -1, vecI, "ca", "cl", B+r*vecJ, "m", A+r*vecJ, A+(r+0.2)*vecJ,B+(r+0.2)*vecJ,"l","cl"}, "fill=Brown!50")
+-- spheres
+g:Dsphere(M(-1.125,3.5,-1),1,{color="Orange",mode=mShadedOnly})
+g:Dsphere(M(1.35,3.5,-1.25),0.75,{color="Orange",mode=mShadedOnly})
+g:Dsphere(M(3,3.5,-1.5),0.5,{color="Orange",mode=mShadedOnly})
+g:Dsphere(M(2,2.5,-1.75),0.25,{color="Orange",mode=mShadedOnly})
+g:Show()
+\end{luadraw}   
+\end{document}

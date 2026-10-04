@@ -1,0 +1,37 @@
+% source: https://tex.stackexchange.com/a/761442 (question 761440, score 8, block 1)
+% Source - https://tex.stackexchange.com/q/761440
+% Posted by PHL, modified by community. See post 'Timeline' for change history
+% Retrieved 2026-03-31, License - CC BY-SA 4.0
+
+%!TEX TS-program = lualatex
+\documentclass[a4paper]{article}
+%\usepackage[ignoreall, margin=-0cm, marginparsep=0cm]{geometry}
+\usepackage{luadraw}
+\usepackage{eso-pic}
+\usepackage{lipsum}
+
+\begin{luacode*}
+local g = graph:new{
+    margins={0,0,0,0}
+    , size={18,18} 
+    }
+g:Linecolor("lightgray")
+for j= 1, 5 do
+    for k=1,10*j do
+        g:Dcircle(Zp(j,k*math.pi/(5*j)),1)
+    end
+end
+g:Savetofile("mybackground.tkz")
+\end{luacode*}
+
+\AddToShipoutPictureBG{%
+\AtPageCenter{%
+        \put(-9cm,-9cm){\input{mybackground.tkz}}% 9cm = half width and half height of the picture
+    }}
+\begin{document}
+
+\lipsum[1-2]
+\newpage
+\lipsum[1-2]
+
+\end{document}

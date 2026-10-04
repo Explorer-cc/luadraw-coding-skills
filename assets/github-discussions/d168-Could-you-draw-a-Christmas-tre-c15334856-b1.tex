@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/168#discussioncomment-15334856 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fouriernc}
+%https://...
+\begin{document}
+\begin{luadraw}{name=christmas_tree}
+local i, exp, pi = cpx.I, cpx.exp, math.pi
+local g = graph:new{window={-2,2,-0.1,3.8}, bg="lightgray", size={12,12} } 
+local A, B, C = 0, 8*i, 7*i/3
+local b = { 0.18+3.25*i, 0.3333+3.1227*i, 0.4974+2.9374*i, 0.7302+2.6411*i, 0.6138+2.3024*i, 1.0847+2.2019*i, 0.9312+1.7045*i, 0.6614+1.297*i, 1.6085+1.5246*i, 1.5344+1.0748*i, 0.3492+1.9638*i, 1.1746+0.6355*i, 1.4127+0.4874*i, 0.2169+2.4718*i, 0.2328+1.1171*i }
+g:Dpath( {-2+0.5*i,0.66+i,1.66,2+0.5*i,"b",2-0.1*i,-2-0.1*i,"l","cl"}, "draw=none, fill=Snow")
+-- tree
+local L= {{A,B}}
+for k = 1, 6 do
+    L = concat( 
+            ftransform(L, function(z) return (z-A)/3+A end),
+            ftransform(L, function(z) return exp(i*pi/6.5)/2*(z-A)+A end),
+            ftransform(L, function(z) return exp(-i*pi/6.5)/2*(z-A)+A end),
+            ftransform(L, function(z) return 2*z/3+C end)
+            )
+end
+g:Setmatrix( {Z(0,0),Z(1,0),Z(0,0.5)})
+g:Dpolyline(L, "DarkGreen, line width=1.2pt")
+g:IDmatrix()
+-- balls
+for _,z in ipairs(b) do
+    g:Dcircle( z-0.1*i,0.05, "ball color="..rgb(math.random(),math.random(),math.random()))
+    g:Dcircle( -cpx.bar(z)-0.1*i,0.05, "ball color="..rgb(math.random(),math.random(),math.random()))
+end
+-- snow
+for y = -0.15, 3.8,0.125  do
+   for x = -1.85, 2, 0.25 do
+        if math.random()<0.5 then g:Dcircle(x+i*y,0.0225,"draw=none,fill=Snow") end
+   end
+end 
+g:Show()
+\end{luadraw}
+\end{document}

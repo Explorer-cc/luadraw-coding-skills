@@ -1,0 +1,80 @@
+% source: https://github.com/pfradin/luadraw/discussions/346#discussioncomment-18664344 (pfradin, block 1)
+\documentclass[12pt]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com
+\usepackage{fourier-otf}
+\usepackage{luacas}
+\usepackage[vietnamese]{babel}
+\usepackage{float}
+\usepackage[top=15mm,bottom=20mm,left=2cm,right=2cm]{geometry}
+
+\def\quadsolve#1{%a b c m n
+% First, the calculations are performed, 
+% and the results are stored in luadraw variables: param, x1, x1t, y1t, x2, x2t, y2t, fstr.
+\begin{CAS}
+vars('x')
+local a, b, c, m, n = table.unpack( #1 )
+local A, B, C = a*m, 2*a*n, b*n-m*c
+local P = Poly({C,B,A})
+local r = ZTable( roots(P) )
+local func = (a*x^2+b*x+c)/(m*x+n)
+local temp = tostring(r[1]) %expression of r[1] as a string
+luadraw.x1 = load("return "..temp)() %numerical evaluation of r[1]
+luadraw.x1t = "$"..r[1]:tolatex().."$" %r[1] in LaTeX format
+temp = tostring(r[2]) % expression of r[2] as a string
+luadraw.x2 = load("return "..temp)() %numerical evaluation of r[2]
+luadraw.x2t = "$"..r[2]:tolatex().."$" % r[2] in LaTeX format
+luadraw.y1t = "$"..func:substitute({[x]=r[1]}):expand():simplify():tolatex().."$" %f(x1) in LateX format
+luadraw.y2t = "$"..func:substitute({[x]=r[2]}):expand():simplify():tolatex().."$" %f(x2) in LateX format
+luadraw.fstr = "$y="..func:expand():simplify():tolatex().."$" %expression of f(x) in LaTeX format
+\end{CAS}
+\directlua{luadraw.param = #1}% list {a, b, c, m, n}
+}%
+
+
+\begin{document}
+
+\quadsolve{ {1,4,5,1,1} }% {a, b, c, m, n} 
+\begin{luadraw}{name=test}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+local a, b, c, m, n = table.unpack( ld.param ) -- Retrieval of the values ​​of a, b, c, m, and n
+local f = function(x) return (a*x^2 + b*x + c)/(m*x + n)  end
+local h = function(x) return b/m - (a*n)/m^2 + (a*x)/m end
+local k = function(x) return 0 end
+local x0 = -n/m
+local y0 = h(x0) 
+local t = 5
+local xmin, xmax, ymin, ymax= x0 - t, x0 + t,y0 - t, y0 + t
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax},size = {10, 10}, margin={1,0.5,0.5,0.5}}  
+g:Linewidth(8)
+local R = { {x=ld.x1, xt=ld.x1t, yt=ld.y1t}, {x=ld.x2, xt=ld.x2t, yt=ld.y2t} } 
+if R[1].x > R[2].x then R[1], R[2] = R[2], R[1] end
+local Critic = {}
+for k = 1,2  do
+    local x = R[k].x
+    local xt = R[k].xt
+    local y = f(x)
+    local yt = R[k].yt
+    table.insert(Critic, Z(x,y))
+    g:Dpolyline({{Z(x, 0), Z(x, y)}}, "dashed, color = cyan")
+    g:Dpolyline({{Z(0, y), Z(x, y)}}, "dashed, color = cyan")
+  end
+g:Dlabel(R[1].xt, Z(R[1].x, 0), {pos = "N"}) 
+g:Dlabel(R[1].yt, Z(0, f(R[1].x)), {pos = "E"}) 
+g:Dlabel(R[2].xt, Z(R[2].x, 0), {pos = "NE"}) 
+g:Dlabel(R[2].yt, Z(0, f(R[2].x)), {pos = "W"}) 
+g:Dlabel("$" .. ld.strReal(x0) .. "$", Z(x0, 0), {pos = "SW"})
+g:Dlabel("$O$", Z(0, 0), {pos = "SW"})
+g:Dpolyline({{Z(x0,ymin),Z(x0,ymax)}},"color = blue") 
+g:Daxes({0,1,1}, {grid=false, arrows="-Stealth", legend={"$x$","$y$"}, labelpos={"none","none"}, xyticks={0,0}})
+--g:Dpolyline(Critic, "color = green")
+g:Ddots({Z(x0, y0)})
+g:Ddots(Critic, "color = red, fill = red")
+g:Dcartesian(f, {x={xmin, xmax}, nbdots=200,discont=true,draw_options="red"}) 
+g:Dcartesian(h, {draw_options="blue, thick"})
+g:Dlabel(ld.fstr, Z((xmax+xmin)/2, ymax), {pos = "N"}) --luacas expression
+g:Show()
+\end{luadraw}
+\end{document} 

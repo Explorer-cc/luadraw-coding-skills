@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/759064 (question 759057, score 16, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/759057/wrapping-a-circle-on-a-torus
+\begin{document}
+\begin{luadraw}{name=torus}
+local g = graph3d:new{window={-5,6,-5,6},size={10,10},bbox=false, margin={0,0,0,0},bg="lightgray",viewdir=perspective("central",30,60,20)}
+local cos, sin, pi = math.cos, math.sin, math.pi
+local R, r = 2.75, 1
+local f = function(t) return M(0,R+r*cos(t),r*sin(t)) end
+local C, wall = rotcurve(f,-pi,pi,{Origin,vecK}, 360,0, {grid={30,45},addwall=2})
+local c = circle3d(M(R,0,0),r+0.01,vecJ)
+local circle_options = {width=12, color="Teal", hidden=true}
+g:Dscene3d(
+    g:addWall(wall), -- addition of partition walls
+    g:addFacet( C, {usepalette={palAutumn,"z"}, backcull=true}),
+    g:addPolyline( rotate3d(c,20,{Origin,vecK}),circle_options ),
+    g:addPolyline( rotate3d(c,-130,{Origin,vecK}),circle_options),
+    g:addAxes( Origin, {color="Blue",width=8,arrows=1})
+)
+g:Show()
+\end{luadraw}
+\end{document}

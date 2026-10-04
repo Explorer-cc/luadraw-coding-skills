@@ -1,0 +1,20 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Cube cut by a plane (cutpoly), with \emph{close)
+\begin{luadraw}{name=cutpoly}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window3d={-3,3,-3,3,-3,3}, window={-4,4,-3,3},size={10,10}}
+local P = ld.parallelep(M(-1,-1,-1),2*vecI,2*vecJ,2*vecK)
+local A, B, C = M(0,-1,1), M(0,1,1), M(1,-1,0)
+local plane = {A, pt3d.prod(B-A,C-A)}
+local P1 = ld.cutpoly(P,plane)
+local P2 = ld.cutpoly(P,plane,true)
+g:Lineoptions(nil,"Gold",8)
+g:Dpoly( ld.shift3d(P1,-2*vecJ), {color="Crimson",mode=ld.mShadedHidden} )
+g:Dpoly( ld.shift3d(P2,2*vecJ), {color="Crimson",mode=ld.mShadedHidden} )
+g:Dlabel3d(
+    "close=false", M(2,-2,-1), {dir={vecJ,vecK}},
+    "close=true", M(2,2,-1), {} )
+g:Show()
+\end{luadraw}

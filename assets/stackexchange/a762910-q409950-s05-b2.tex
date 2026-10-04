@@ -1,0 +1,65 @@
+% source: https://tex.stackexchange.com/a/762910 (question 409950, score 5, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/409950/pgfplot-3d-opacity-and-appearance
+
+% function to read data, returns triangulated facets and edges
+\begin{luacode*}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+function ld.read_table(data,options)
+    options= options or {}
+    local nbdiv = options.nbdiv or 10
+    local x, y, z = options.x or 1, options.y or 2, options.z or 3
+    local scale= options.scale or 1
+    local vertices = {}
+    local index = 1
+    for _ = 1, nbdiv do
+        local lg = {}
+        for _ = 1, nbdiv do
+            table.insert(lg, M(data[index][x], data[index][y], scale*data[index][z]) )
+            index = index+1
+        end
+        table.insert(vertices, lg)
+    end
+    local facets, edges = {}, {}
+    for k = 1, nbdiv-1 do --construction of facets with triangulation
+        for j = 1, nbdiv-1 do
+            local a, b, c, d = vertices[k][j], vertices[k+1][j], vertices[k+1][j+1], vertices[k][j+1]
+            if pt3d.abs(d-b) < pt3d.abs(c-a) then
+                table.insert(facets,{a,b,d}); table.insert(facets,{b,c,d})
+            else
+                table.insert(facets,{a,b,c}); table.insert(facets,{a,c,d})
+            end
+            table.insert(edges, {a,b,c,d})
+        end
+    end
+    return facets, edges
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=read_data_povray}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+local g = ld.graph3d:new{window3d={-5,5,-5,5,0,2}, adjust2d=true, 
+    size={12,8,0}, viewdir={250,75}, bg="lightgray", bbox=false}
+g:Labelsize("footnotesize")
+require 'luadraw_povray'
+local data = ld.read_csv_file("data.csv", {header=false, sep=" "})
+local S1, edges1 = ld.read_table(data,{nbdiv=11})
+local S2, edges2 = ld.read_table(data, {z=4, nbdiv=11})
+-- drawing
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="white", zstep=0.5})
+g:Pov_new()
+g:Pov_facet( S1, {color=ld.Cyan, opacity=0.8}) 
+g:Pov_facet( S2, {color=ld.Red, opacity=0.8})
+g:Pov_polyline( ld.concat(edges1,edges2) )
+g:Pov_exec(); g:Pov_show()
+g:Show()
+\end{luadraw}
+\end{document}

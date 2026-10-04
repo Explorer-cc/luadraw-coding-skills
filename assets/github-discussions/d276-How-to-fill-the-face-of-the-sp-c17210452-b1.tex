@@ -1,0 +1,54 @@
+% source: https://github.com/pfradin/luadraw/discussions/276#discussioncomment-17210452 (pfradin, block 1)
+% https://tex.stackexchange.com/q/569439
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+
+\begin{document}
+\begin{luadraw}{name=sphere-cone}
+local ld = luadraw
+local pt3d,deg = ld.pt3d,ld.deg
+local M, Ms = pt3d.M, pt3d.Ms
+local O, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+
+require 'luadraw_spherical'
+
+local g = ld.graph3d:new{
+    window = {-2,12.5,-2,7},
+    size={12,12},
+    viewdir={20,75}
+}
+local C,R,L = M(3,6,5), 3.1, 17 --M(1.8,7.2,5.4), 3.1, 17
+local theta_start, theta_end = 60.0*deg, 71.0*deg
+local phi_start, phi_end = 58.5*deg, 66.0*deg
+local P1 = Ms(L,theta_start,phi_start)
+local P2 = Ms(L,theta_end,phi_start)
+local P3 = Ms(L,theta_start,phi_end)
+local P4 = Ms(L,theta_end,phi_end)
+
+local function hit(d)
+    local A, B = ld.interDS({O,d},{C,R})
+    if pt3d.dot(A-O,d) > pt3d.dot(B-O,d) then A, B = B, A end
+    return A, B
+end
+
+local A1, B1 = hit(P1)
+local A2, B2 = hit(P2)
+local A3, B3 = hit(P3)
+local A4, B4 = hit(P4)
+
+g:Define_sphere({center=C, radius=R, color="white",opacity=0.6, edgestyle="noline", arrowBstyle="-stealth"})
+
+g:DSpolyline({{O,P1},{O,P2},{O,P3},{O,P4}}, {color="gray",style="solid",arrows=1})
+g:DSfacet({A1,A2,A4,A3},{fill="teal",fillopacity=0.8,width=1,style="solid"})
+g:DSfacet({B1,B3,B4,B2},{fill="teal",fillopacity=0.8,width=1,style="solid"})
+g:Dspherical()
+
+g:Dpolyline3d({{O,4.3*vecI},{O,4.3*vecJ},{O,4.3*vecK}}, "line width=0.6,-stealth")
+g:Dpolyline3d({P1,P2,P4,P3}, true)
+g:Dfacet({{A1,A2,B2,B1},{A2,A4,B4,B2},{A4,A3,B3,B4},{A3,A1,B1,B3}}, {mode=5, color="teal", opacity=0.3})
+g:Dlabel3d("$x$",4.55*vecI,{pos="SW"},"$y$",4.55*vecJ,{pos="E"},"$z$",4.55*vecK,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

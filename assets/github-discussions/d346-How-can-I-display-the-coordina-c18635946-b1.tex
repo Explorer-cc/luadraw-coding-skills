@@ -1,0 +1,125 @@
+% source: https://github.com/pfradin/luadraw/discussions/346#discussioncomment-18635946 (pfradin, block 1)
+\documentclass[12pt]{article}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com
+\usepackage{fourier-otf}
+\usepackage{luacas}
+\usepackage[vietnamese]{babel}
+\usepackage{float}
+\usepackage[top=15mm,bottom=20mm,left=2cm,right=2cm]{geometry}
+
+\def\quadsolve#1#2#3#4#5{%
+\begin{CAS}
+vars('x')
+local a, b, c = #1, #2, #3
+local m, n = #4, #5
+local A, B, C = a*m, 2*a*n, b*n-m*c
+local P = Poly({C,B,A})
+r = ZTable( roots(P) )
+func = (a*x^2+b*x+c)/(m*x+n)
+y1 = func:substitute({[x]=r[1]}):expand():simplify()
+y2 = func:substitute({[x]=r[2]}):expand():simplify()
+\end{CAS}
+\def\solone{\fetch{r[1]}}% x1 (numerical)
+\def\soltwo{\fetch{r[2]}}% x2 (numerical)
+\def\soloneT{\print{r[1]}}% x1 (symbolic for latex)
+\def\soltwoT{\print{r[2]}}% x2 (symbolic for latex)
+\def\yone{\print{y1}}% f(x1) (symbolic for latex)
+\def\ytwo{\print{y2}}% f(x2) (symbolic for latex)
+\def\fstr{\print{func:expand():simplify()}}% function (symbolic for latex)
+}%
+
+
+\begin{document}
+
+% Here are the calculus with a, b, c, m, n = -1, 2, -7, -1, 1
+\quadsolve{1}{4}{5}{1}{1}% <-- calculus first
+\begin{luadraw}{name=case1}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+local a, b, c, m, n = 1, 4, 5, 1, 1
+local f = function(x) return (a*x^2 + b*x + c)/(m*x + n)  end
+local h = function(x) return b/m - (a*n)/m^2 + (a*x)/m end
+local k = function(x) return 0 end
+local x0 = -n/m
+local y0 = h(x0) 
+local t = 5
+local xmin, xmax, ymin, ymax= x0 - t, x0 + t,y0 - t, y0 + t
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax},size = {10, 10}, margin={1,0.5,0.5,0.5}}  
+g:Linewidth(8)
+local R = { {x=\solone, xt="$\\soloneT$", yt="$\\yone$"},  {x=\soltwo, xt="$\\soltwoT$", yt="$\\ytwo$"} }
+if R[1].x > R[2].x then R[1], R[2] = R[2], R[1] end
+local Critic = {}
+for k = 1,2  do
+    local x = R[k].x
+    local xt = R[k].xt
+    local y = f(x)
+    local yt = R[k].yt
+    table.insert(Critic, Z(x,y))
+    g:Dpolyline({{Z(x, 0), Z(x, y)}}, "dashed, color = cyan")
+    g:Dpolyline({{Z(0, y), Z(x, y)}}, "dashed, color = cyan")
+  end
+g:Dlabel(R[1].xt, Z(R[1].x, 0), {pos = "N"}) 
+g:Dlabel(R[1].yt, Z(0, f(R[1].x)), {pos = "E"}) 
+
+g:Dlabel(R[2].xt, Z(R[2].x, 0), {pos = "NE"}) 
+g:Dlabel(R[2].yt, Z(0, f(R[2].x)), {pos = "W"}) 
+g:Dlabel("$" .. ld.strReal(x0) .. "$", Z(x0, 0), {pos = "SW"})
+g:Dlabel("$O$", Z(0, 0), {pos = "SW"})
+g:Dpolyline({{Z(x0,ymin),Z(x0,ymax)}},"color = blue") 
+g:Daxes({0,1,1}, {grid=false, arrows="-Stealth", legend={"$x$","$y$"}, labelpos={"none","none"}, xyticks={0,0}})
+
+--g:Dpolyline(Critic, "color = green")
+g:Ddots({Z(x0, y0)})
+g:Ddots(Critic, "color = red, fill = red")
+g:Dcartesian(f, {x={xmin, xmax}, nbdots=200,discont=true,draw_options="red"}) 
+g:Dcartesian(h, {draw_options="blue, thick"})
+
+local function buildNumerator(a, b, c)
+    local str = ""
+    -- Handle ax^2 term
+    if a ~= 0 then
+        if a == 1 then str = "x^2"
+        elseif a == -1 then str = "-x^2"
+        else str = ld.strReal(a) .. "x^2" end
+    end
+    -- Handle bx term
+    if b ~= 0 then
+        local sign = (b > 0 and str ~= "") and "+" or ""
+        if b == 1 then str = str .. sign .. "x"
+        elseif b == -1 then str = str .. "-x"
+        else str = str .. sign .. ld.strReal(b) .. "x" end
+    end
+    -- Handle constant term c
+    if c ~= 0 then
+        local sign = (c > 0 and str ~= "") and "+" or ""
+        str = str .. sign .. ld.strReal(c)
+    end
+    if str == "" then str = "0" end
+    return str
+end
+local function buildDenominator(m, n)
+    local str = ""
+    -- Handle mx term
+    if m ~= 0 then
+        if m == 1 then str = "x"
+        elseif m == -1 then str = "-x"
+        else str = ld.strReal(m) .. "x" end
+    end
+    -- Handle constant term n
+    if n ~= 0 then
+        local sign = (n > 0 and str ~= "") and "+" or ""
+        str = str .. sign .. ld.strReal(n)
+    end
+    if str == "" then str = "1" end -- Prevents division by zero or empty string
+    return str
+end
+local numerator = buildNumerator(a, b, c)
+local denominator = buildDenominator(m, n)
+local func_str = string.format("$y = \\frac{%s}{%s}$", numerator, denominator)
+g:Dlabel(func_str, Z(xmax, y0), {pos = "W"})
+g:Dlabel("$y=\\fstr$", Z((xmax+xmin)/2, ymax), {pos = "N"}) -- luacas expression
+g:Show()
+\end{luadraw}
+\end{document} 

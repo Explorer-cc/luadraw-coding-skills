@@ -1,0 +1,34 @@
+% source: https://github.com/pfradin/luadraw/discussions/67#discussioncomment-14330300 (pfradin, block 1)
+\begin{luadraw}{name = nefertiti-palette-color.luadraw}
+local file = "obj/nefertiti.obj"
+local polyhedron, window_def = read_obj_file(file)
+local graphview = graph3d:new{
+  window3d = window_def,
+  window = {-5,5,-7,5},
+  --adjust2d = true,
+  viewdir  = {35,60}, --{-110, -20},
+  size     = {10, 10},
+}
+graphview:Linejoin("round")
+local facet_colors = {"Blue", "Green", "Yellow", "Orange"}
+local S = graphview:Sortpolyfacet(polyhedron) -- on trie les facettes
+local A, B, C
+local N, angle,color
+
+for _,f in ipairs(S) do  -- parcours des facettes triées
+  A,B,C = table.unpack(f)
+  N = pt3d.normalize(pt3d.prod(B - A, C - A))
+  angle = math.abs(angle3d(N, vecK)*rad) -- angle3d renvoie des radians
+  if 180 >= angle and angle > 135  then
+    color = facet_colors[1]
+  elseif 135 >= angle and angle > 90 then
+    color = facet_colors[2]
+  elseif 90 >= angle and angle > 45 then
+    color = facet_colors[3]
+  else
+    color = facet_colors[4]
+  end
+  graphview:Dpolyline3d(f,true,"fill="..color)
+end
+graphview:Show()
+\end{luadraw}

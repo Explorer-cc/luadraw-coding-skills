@@ -1,0 +1,30 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Sequence $u_{n+1)
+\begin{luadraw}{name=sequence}
+local ld = luadraw
+local cpx = ld.cpx
+local g = ld.graph:new{window={-0.1,1.7,-0.1,1.1},size={10,10,0}}
+local i, pi, cos = cpx.I, math.pi, math.cos
+local f = function(x) return cos(x)-x end
+local ell = ld.solve(f,0,pi/2)[1]
+local L = ld.sequence(cos,0.2,5) -- u_{n+1}=cos(u_n), u_0=0.2
+local seg, z = {}, L[1]
+for k = 2, #L do
+    table.insert(seg,{z,L[k]})
+    z = L[k]
+end -- seg is a list of segments (staircases)
+local styleA = "\\tikzset{->-/.style={decoration={markings, mark="
+local styleB = "at position #1 with {\\arrow{Stealth}}}, postaction={decorate}}}"
+g:Writeln(styleA..styleB)
+g:Daxes({0,1,1}, {arrows="-Stealth"})
+g:DlineEq(1,-1,0,"line width=0.8pt,ForestGreen")
+g:Dcartesian(cos, {x={0,pi/2},draw_options="line width=1.2pt,Crimson"})
+g:Dpolyline(seg,false,"->-=0.65,blue")
+g:Dlabel("$u_0$",0.2,{pos="S",node_options="blue"})
+g:Dseg({ell, ell*(1+i)},1,"dashed,gray")
+g:Dlabel("$\\ell\\approx"..ld.round(ell,3).."$", ell,{pos="S"})
+g:Ddots(ell*(1+i)); g:Labelcolor("Crimson")
+g:Dlabel("${\\mathcal C}_{\\cos}$",1+i*cos(1),{pos="E"})
+g:Labelcolor("ForestGreen"); g:Labelangle(g:Arg(1+i)*180/pi)
+g:Dlabel("$y=x$",0.4+i*0.4,{pos="S",dist=0.1})
+g:Show()
+\end{luadraw}

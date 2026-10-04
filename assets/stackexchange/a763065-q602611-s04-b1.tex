@@ -1,0 +1,56 @@
+% source: https://tex.stackexchange.com/a/763065 (question 602611, score 4, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/602611/faster-way-of-generating-stacked-2d-plots-in-3d
+
+% function to create data
+\begin{luacode*}
+local ld = luadraw
+function ld.create_data(n) -- create data files data1.cvs, data2.csv, ...
+    for k = 1, n do
+        local file = io.open("data"..k..".csv", "w")
+        file:write("x, y\n")
+        local f = function(x) return math.exp(-(x+4/(n-1)*(k-1)-6)^(2*k)) end
+        for _, z in ipairs( ld.cartesian(f,0,10,100)[1] ) do
+            file:write( ld.strReal(z.re)..", "..ld.strReal(z.im).."\n")
+        end
+        file:close()
+    end
+end
+\end{luacode*}
+
+\begin{document}
+
+\begin{luadraw}{name=2D-plot-to-3D, exec=true}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Z, M = cpx.Z, pt3d.M
+
+local g = ld.graph3d:new{window3d={0,10,0,1,0,1}, window={-1,15,-4,10}, 
+    size={12,12,0}, viewdir={"central",-55,60,25}}
+g:Setmatrix3d({ M(0,0,0), M(1,0,0), M(0,8,0), M(0,0,8)} )
+ 
+local nb = 10
+local colors = ld.getpalette(ld.palRainbow,nb)
+
+--ld.create_data(nb) --uncomment this line the first time to create the files
+
+local function read_data(n) -- function to read then data<n>.csv file
+    local data = ld.read_csv_file("data"..n..".csv", {header=true})
+    local R = {}
+    for _, row in ipairs(data) do
+        table.insert(R, M(row[1], 1.05-n/nb, row[2]) ) -- conversion from 2D to 3D (x<-x, z<-y)
+    end
+    return R
+end
+-- drawing
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray", zstep=0.1, ystep=0.1, xstep=2})
+g:Linewidth(8)
+for k = 1, nb do
+    g:Dpolyline3d(read_data(k), "color="..colors[nb+1-k])
+end
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,53 @@
+% source: https://github.com/pfradin/luadraw/discussions/347#discussioncomment-18727946 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+    \begin{luadraw}{name=surfaces-pov}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    local Origin, vecI, vecJ, vecK, Z = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, ld.cpx.Z
+    local g = ld.graph3d:new{
+        window3d = {-2,2,-2,2,-1,2.5},
+        window = {-2.25,2.25,-1.5,2},
+        viewdir = {130,55},
+        size = {10,10}
+    }
+    local sin, cos, pi = math.sin, math.cos, math.pi
+    require "luadraw_povray"
+    
+    function ld.graph3d:Pov_show(filename) -- patch
+        if filename == nil then
+            local n = #ld.graph_name
+            filename = string.sub(ld.graph_name,1,n-3).."png"
+        end
+        self:Dimage(filename, Z(self.Xmin,self.Ymin), 
+            {pos="NE", matrix={Z(0,0), Z(1/g.Xscale,0), Z(0,1/g.Yscale)}, graphics_options="width="..self:Graphwidth().."cm, height="..self:Graphheight().."cm"})
+    end
+    
+    local curve = function(t)
+        return cos(t) * vecJ + sin(t) * vecK
+    end
+    local surface = function(s, t)
+        return s * vecI + curve(t)
+    end
+    local P = curve(pi / 2)
+    local normal = pt3d.normalize(P - ld.dproj3d(P, {Origin, vecI}))
+    local C = P - normal / 2
+    local transversePlane = {C, vecI}
+    local axialPlane = ld.plane(C, C + vecI, C + normal)
+    g:Rotate(20) -- not work ???    
+    g:Pov_new{imagescale=2}
+    g:Pov_surface(surface, -1.35, 1.35, 0, pi, {color = {0.66,0.24,0.27}, opacity = 0.5})
+    g:Pov_facet(ld.plane2rectangle(transversePlane, vecJ, 3.5, 2), {color = {0.32,0.69,0.40}, opacity = 0.4, edge = true})
+    g:Pov_facet(ld.plane2rectangle(axialPlane, vecI, 3.5, 2), {color = {0.48,0.65,0.35}, opacity = 0.4, edge = true})
+    g:Pov_facet(ld.plane2rectangle({P, normal}, vecI, 2, 2), {color = {0.73,0.77,0.62}, opacity = 0.4, edge = true})
+    g:Pov_polyline(ld.parametric3d(curve, 0, pi, 50), {color = {0,0,0}, width = 8})
+    g:Pov_polyline({P - 1.35 * vecI, P + 1.35 * vecI}, {color = {0,0,0}, width = 8})
+    g:Pov_polyline({P, P + normal}, {color = {0.78,0,0}, width = 10, arrows = 1})
+    g:Pov_exec()
+    g:Pov_show()
+    g:Show()
+    \end{luadraw}
+\end{document}

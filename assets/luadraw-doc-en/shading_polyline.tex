@@ -1,0 +1,29 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-shadedforms.tex (demo: Shaded polyline)
+\begin{luadraw}{name=shading_polyline}
+local ld = luadraw
+local cpx = ld.cpx
+local i, Z = cpx.I, cpx.Z
+
+local g = ld.graph:new{size={10,10},bg="lightgray", margin={0,0,0,0}}
+require 'luadraw_shadedforms'
+-- first example diff. equation y'= x^2+y^2-1 (=f(x,y))
+local x1,x2,y1,y2 = -3,3,-3,3
+local A = Z(0,1/2) -- initial condition
+local f = function(x,y) 
+    return x^2+y^2-1
+end
+local S = ld.odesolve(f, A.re, A.im, x1, x2, 150) -- S is a matrix {X,Y}
+local L = {} -- to convert {X,Y} into the complex numbers list L
+for k = 1, #S[1] do table.insert(L, Z(S[1][k],S[2][k])) end 
+L = ld.clippolyline(L,-2.5,2.4,y1,y2)[1] -- L is the solution curve
+g:Dshadedpolyline(L, ld.palRainbow, {values=f, width=12}) -- solution drawn with rainbow color map using function f
+-- second example
+L = ld.polar(function(t) return 2*math.cos(3*t) end, -math.pi, math.pi)
+local f = function(x,y) return cpx.abs(Z(x,y)) end -- here the value will be the modulus
+g:Shift(2-2.5*i)
+g:Dshadedpolyline(L, ld.palAutumn, {values=f, width=12})
+-- third example
+g:Shift(-4.5+5*i)
+g:Dshadedpolyline( ld.polyreg(0,2,8), ld.palGasFlame, {values="y", width=24, close=true})
+g:Show()
+\end{luadraw}

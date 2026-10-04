@@ -1,0 +1,21 @@
+% source: https://tex.stackexchange.com/a/761794 (question 760736, score 4, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/760736/how-to-create-lines-perfectly-lie-on-a-circle-shape-with-tikz
+\begin{document}
+\begin{luadraw}{name=q760736}
+local g = graph:new{window={-4.5,5,-3,5}, size={10,10}}
+require 'luadraw_decorations'
+local R, O = 3, Z(1,1) 
+local U, V = O+Zp(R,70*deg), O+Zp(R,-50*deg)
+local S, T = rotate(U,170,O), rotate(V,246,O)
+local P = (3*T-U)/2
+g:Dcircle(O,R); g:Ddots({S,V,U,T,O,P}); g:Dpolyline({T,S,V,U,P})
+g:Ddecoratedarc(S,V,U,0.5,-1, {label="$85^\\circ$", node_options="inner sep=0"})
+g:Ddecoratedarc(V,S,T,0.5,1, {label="$123^\\circ$", node_options="inner sep=1pt"})
+g:Dlabel("$P$",P,{pos="W"},"$S$",S,{pos="S"},"$V$",V,{},"$U$",U,{pos="NE"},"$T$",T,{pos="NW"},"$M$",O,{pos="N"})
+g:Show()
+\end{luadraw}   
+\end{document}

@@ -1,0 +1,30 @@
+% source: https://tex.stackexchange.com/a/750260 (question 520844, score 3, block 1)
+\documentclass[border=2pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/520844/change-cone-width
+\begin{document}
+\begin{luadraw}{name=change_cone_width}
+local g = graph3d:new{window={-3,5,-1,5},viewdir={270,65},size={10,10}}
+g:Linejoin("round"); g:Linewidth(5);  Hiddenlinestyle = "dashed"
+local O = Origin
+local r1,h= 2,4
+local r2=r1/2
+local T =  M(r2,0,0)
+local C1 = cone(Origin,h*vecK,r1,50,true)
+local C2 = cone(T,h*vecK,r2,50,true)
+local V1 = g:Classifyfacet(C1)
+local V2 = g:Classifyfacet(C2)
+g:Dscene3d(
+    g:addPoly(C1,{color="orange",contrast=0.5}), 
+    g:addPoly(C2,{color="green"}),
+    g:addPolyline(border(V2),{width=4,hidden=true})
+    )
+g:Dcircle3d(Origin+h*vecK,r1,vecK); g:Dcircle3d(T+h*vecK,r2,vecK)
+g:Dpolyline3d({{M(-r1-r2, 0, h),M(r1+r2, 0, h)},{M(-r1-r2, 0, h/3),M(r1+r2, 0, h/3)}},"dashed")    
+g:Dlabel3d("$O=1$",M(r1+r2,0,h),{pos="E"})
+g:Dlabel3d("$0<O<1$",M(r1+r2,0,2*h/3),{pos="E"},"$O=0$",M(r1+r2,0,h/3),{pos="E"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,21 @@
+% source: https://github.com/pfradin/luadraw/discussions/126#discussioncomment-14728275 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/356121/how-to-draw-these-polyhedrons
+\begin{luadraw}{name=cvx_hull2d}
+local g = graph:new{window={-3,5,-5,5},bbox=false,viewdir={80,70},size={10,10}} --<-- graph
+Hiddenlinestyle = "dashed"; Hiddenlines = true
+local i = cpx.I
+local A, B, C= 4*i, -2+2*i, 5+2*i
+local D = (A+B+C)/3  
+local K = cvx_hull2d({B,C,D,A})
+g:Labelcolor("blue") 
+g:Dlabel("$A$",A, {pos="NW",dist=0.1}, "$B$",B, {pos="SW"}, "$C$", C, {pos="S" },  "$D$", D, {pos="SW"})
+g:Dpolyline(K, {color="LightBlue"})  --<-- wrong instruction here
+g:Ddots({A,B,C,D})
+g:Show()
+\end{luadraw} 
+\end{document} 

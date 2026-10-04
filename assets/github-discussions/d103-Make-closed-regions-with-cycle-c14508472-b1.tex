@@ -1,0 +1,34 @@
+% source: https://github.com/pfradin/luadraw/discussions/103#discussioncomment-14508472 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/751630/tikz-3dplot-fails-to-create-closed-region-with-cycle-and-fill-it
+\begin{luadraw}{name=half_cylinder}
+local g = graph3d:new{window={-8,6,-8,8},viewdir={30,65},size={12,12}}
+Hiddenlinestyle = "dashed"
+local a  = 10
+local P1 = parallelep(Origin, a/2*vecI,a/2*vecJ,a/2*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P1.vertices)
+local P,Q,R = M(a/2,0,a/8), M(a/3,a/2,0), M(0,a/8,a/2)
+local Q1 = proj3d(Q,{E,vecK})
+local M = (F+R)/2
+local Q2 = 2*M-Q1
+local N = (P+R)/2
+local Q2 = 2*M-Q1
+local Q3 = 2*(N)-(Q)
+local d1={Q,Q-Q3}
+local d2 ={Q1,Q1-Q2}
+local X = interDD(d1,d2)
+Hiddenlines = true
+g:Dscene3d(
+    g:addPoly(P1,{edge=true, color="LightBlue",edgewidth=4}),
+    g:addFacet({P,Q,R,Q3}, {color="green",edge=true,opacity=1}),
+    g:addFacet({P,Q1,R,Q2}, {color="orange",edge=true,opacity=1}),
+    g:addPolyline({{Q1,Q,Q3},{P,R},{Q1,Q3},{Q1,Q2},{P,Q1,R,Q2,P}})
+)
+g:Ddots3d({A,B,C,D,E,F,G,H,P,Q,R,Q1,Q2,Q3,M,N,X})
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",F,{}, "$G$",G,{}, "$H$",H,{},"$P$",P,{pos="W"},"$Q$",Q,{pos="S"}, "$Q'$",Q1,{pos="N"},"$R$",R,{pos="N"},"$Q'''$",Q3,{pos="N"},"$Q''$",Q2,{pos="W"},"$M$",M,{pos="N"},"$N$",N,{pos="N"}) 
+ g:Show()
+\end{luadraw}
+\end{document}

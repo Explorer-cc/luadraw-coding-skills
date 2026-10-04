@@ -1,0 +1,26 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Sphere inscribed in an octahedron with the center projected onto the faces)
+\begin{luadraw}{name=sphere_octaedre}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local poly = require "luadraw_polyhedrons"
+local g = ld.graph3d:new{ window3d={-3,3,-3,3,-3,3}, size={10,10}}
+local P = poly.octahedron(Origin,M(0,0,3)) -- polyhedron defined in the luadraw_polyhedrons module
+P = ld.rotate3d(P,-10,{Origin,vecK}) -- rotate3d on a polyhedron returns a polyhedron
+local V, H = g:Classifyfacet(P) -- V for visible facets, H for hidden
+local S = ld.map(function(p) return {ld.proj3d(Origin,p),p[2]} end, ld.facet2plane(V) )
+-- S contains the list of: {projected, normal vector} (projected from Origin onto the visible faces)
+local R = pt3d.abs(S[1][1]) -- sphere radius
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="LightGray"})
+g:Dfacet(H, {color="blue",opacity=0.9}) -- drawing of non-visible facets
+g:Dsphere(Origin,R,{mode=ld.mBorder,color="orange"}) -- drawing of the sphere
+g:Dballdots3d(Origin,"gray",0.75) -- center of the sphere
+for _,D in ipairs(S) do -- segments connecting the origin to the projected
+    g:Dpolyline3d( {Origin,D[1]},"dashed,gray")
+end
+g:Dfacet(V,{opacity=0.4, color="LightBlue"}) -- visible facets of the octahedron
+g:Dcrossdots3d(S,nil,0.75) -- drawing of the projections on the faces
+g:Dpolyline3d( {M(0,-3,3), M(0,0,3), M(-3,0,3)},"gray")
+g:Show()
+\end{luadraw}

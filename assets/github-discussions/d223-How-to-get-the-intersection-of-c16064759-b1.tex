@@ -1,0 +1,49 @@
+% source: https://github.com/pfradin/luadraw/discussions/223#discussioncomment-16064759 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier}
+\begin{document}
+    \begin{luadraw}{name=spherical_geometry}
+    local g = graph3d:new{window={-5, 5, -5, 5}, viewdir={30, 65}, size={12, 12}}
+    require 'luadraw_spherical'
+    Hiddenlines = true; Hiddenlinestyle = "dashed"; Insidelabelcolor = "black"
+    local O,R = Origin,4
+    g:Define_sphere({radius=R, show=true,opacity=0.9})
+    local Pz, Px, Py = sM(0,0), sM(0,90), sM(90,90)
+    local theta = 55
+    local A, B = sM(theta, 90), Py
+    local D = sM(90,65)
+    local M = 0.7 * D
+    local N = pxy(M)
+    -- calculus of C and  K
+    local d = interPP( plane(O,Px,D), plane(O,A,Pz) )
+    local C = R*pt3d.normalize(d[2]) -- d[2] is a direction vector of the line d.
+    local K = pxy(C)
+    
+    g:Linestyle("dashed")
+    for _, arc in ipairs({{Pz, Px}, {Pz, D}, {Px, A}, {Px, C}, {Pz, A}}) do
+        g:DSarc(arc, 1)
+    end
+    g:DSpolyline({{Px,O,Pz},{O,B},{M, N, K}})
+   
+    g:Linestyle("solid"); Hiddenlinestyle = "solid"
+    g:DSpolyline({{M, C, K}, {C, O, A}, {O, D}})
+    g:DSfacet({A,B,D,C})
+    g:DSdots({O,A,C,D,K}) 
+    g:DSstars({Pz, Px, Py}, {color="magenta",fill="magenta", scale=0.75}) 
+    g:Dspherical()
+    g:Ddots3d({M,N},"teal") 
+    g:Dlabel3d(
+        "$O$", O, {pos="W"}, 
+        "$A$", A, {pos="S"}, 
+        "$B$", B, {pos="E"}, 
+        "$C$", C, {pos="NW"}, 
+        "$D$", D, {pos="NE"}, 
+        "$M$", M, {pos="N"}, 
+        "$N$", N, {pos="NE"},
+        "$K$", K, {pos="W"}
+    )
+    g:Show()
+    \end{luadraw}
+\end{document}

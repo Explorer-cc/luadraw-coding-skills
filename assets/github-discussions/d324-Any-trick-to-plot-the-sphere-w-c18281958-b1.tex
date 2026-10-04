@@ -1,0 +1,37 @@
+% source: https://github.com/pfradin/luadraw/discussions/324#discussioncomment-18281958 (pfradin, block 1)
+\documentclass[tikz]{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=sphere_tetra}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local M, Mc, Ms = pt3d.M, pt3d.Mc, pt3d.Ms
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{
+    window3d = {-5,5,-5,5,-5,5},window = {-5,5,-5,5},
+    viewdir = {35,75},size = {10,10}
+}
+local cuboid = ld.parallelep(M(-3,-3,-3),M(6,0,0),M(0,6,0),M(0,0,6))
+local T1,T2,T3,T4 = M(3,3,3),M(-3,-3,3),M(-3,3,-3),M(3,-3,-3)
+local Dsphere_cap = function(T1,T2,T3)
+    local P_norm = pt3d.prod(T2-T1,T3-T1)
+    local P = {T1,P_norm}
+    local I1, r1 = ld.interPS(P,{Origin,3})
+    local w, n = pt3d.normalize(P_norm), g.Normal
+    g:Dpath3d({T1,T2,T3,"l","cl"}, "fill=Gray")
+    local A1, A2 = ld.interDS(ld.interPP(P,{Origin, n}),{Origin, 3})
+    local cap = {A1,"m",I1,A2,r1,-1,w,"ca",Origin,A1,3,1,n,"ca"}
+    g:Beginclip( cap ) --<- change here
+        g:Dsphere(Origin, 3, {color="orange", mode=ld.mBorder})
+    g:Endclip()
+end
+Dsphere_cap(T1,T2,T3)
+Dsphere_cap(T4,T2,T1) 
+Dsphere_cap(T1,T3,T4)
+g:Dpolyline3d({{T1,T2},{T1,T3},{T1,T4}},"blue,very thick")
+g:Dpoly(cuboid, {mode=ld.mWireframe, hiddenstyle="noline", edgecolor="blue", edgewidth=8})
+g:Show()
+\end{luadraw}
+\end{document}

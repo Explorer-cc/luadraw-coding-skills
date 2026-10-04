@@ -1,0 +1,28 @@
+% source: https://tex.stackexchange.com/a/766036 (question 766027, score 10, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/766027/how-to-draw-visualize-simulate-to-show-the-diffence-between-the-two-almost-ident
+\begin{document}
+\begin{luadraw}{name= visualize_difference}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window={-1.5,1.1,-0.1,1.1}, size={12,12} }
+local exp, ln, cos, pi, sqrt = math.exp, math.log, math.cos, math.pi, math.sqrt
+local y1 = function(x) return ln(sqrt(2)*cos(x)+sqrt(cos(2*x))) end
+local y2 = function(x) return ln(1+sqrt(2))*sqrt( 1-(4*x/pi)^2) end
+local diff = function(x) return 250*math.abs( exp(y1(x)) - exp(y2(x)) ) end
+
+g:Daxes({0,0.2,0.2}, {arrows="-Latex"})
+g:Dcartesian(y1, {x={-pi/4,pi/4}, nbdots=100, nbdiv=10, draw_options="green,line width=2"})
+g:Dcartesian(y2, {x={-pi/4,pi/4}, nbdots=100, nbdiv=10, draw_options="black,line width=0.4"})
+g:Dcartesian(diff, {x={-pi/4,pi/4}, nbdots=100, nbdiv=10, draw_options="red,thick"})
+g:Dlabel("$y_1(x)=\\ln(\\sqrt{2}\\cos(x)+\\sqrt{\\cos(2x)})$", Z(-1.5,1),{pos='E',node_options="green"},
+"$y_2(x)=\\ln(1+\\sqrt 2)\\sqrt{ 1-\\left( \\frac{4x}{\\pi}\\right)^2}$", Z(-1.5,0.85),{node_options="black"},
+    "diff$(x)=250\\times\\left| e^{y_1(x)} - e^{y_2(x)} \\right|$", Z(0.1,1),{node_options="red"}
+)
+g:Show()
+\end{luadraw}
+\end{document}

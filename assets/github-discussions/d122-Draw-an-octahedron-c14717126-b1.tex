@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/122#discussioncomment-14717126 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/356121/how-to-draw-these-polyhedrons
+\begin{luadraw}{name=octahedron}
+local g = graph3d:new{window={-3,5,-5,3},bbox=false,viewdir={80,70},size={10,10}}
+g:Linewidth(4); Hiddenlinestyle = "dashed"; Hiddenlines = true
+require 'luadraw_polyhedrons'
+local T,S,A,F =  octahedron(Origin,M(0,2,0),true)
+local v = 9*vecJ
+local B,C,D,S1,S2 = -vecI, vecI-vecJ, 0.5*vecI+2*vecJ, 2.5*vecK, -2*vecK
+local bipyramid = facet2poly( cvx_hull3d({B,C,D,S1,S2}) )
+
+g:Dscene3d(
+    g:addFacet(F, {color="Crimson",opacity=0.8}),
+    g:addPolyline(A, {color="Gold", width=8}),
+    g:addPoly(shift3d(bipyramid,v), {edge=true,color="LightBlue"})
+)
+g:Show()
+\end{luadraw} 
+\end{document} 

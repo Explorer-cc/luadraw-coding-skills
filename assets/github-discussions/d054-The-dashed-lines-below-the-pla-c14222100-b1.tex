@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222100 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=cone_in_sphere}
+local g = graph3d:new{window={-5,5,-2,5.5},viewdir={30,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local R = 4
+local v = 5
+local a = (v * R * math.sqrt(2)) / (v + math.sqrt(2) * R)
+local O, K, T = M(0,0,0), M(-a/2,-a/2,0),M(0,0,v) -- K was not correct
+g:Dcone(T,-v*vecK,R,{color="orange"})
+local P = parallelep(K,a*vecI,a*vecJ,a*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+g:Dpoly(P,{mode=0,edgestyle=Hiddenlinestyle})
+g:Ddots3d({O,T})
+g:Dlabel3d("$O$",O,{pos="S"},"$T$",T,{pos="N"})
+local E1, F1, G1, H1 = proj3dO(E,{Origin,vecK},E-T), proj3dO(F,{Origin,vecK},F-T), proj3dO(G,{Origin,vecK},G-T), proj3dO(H,{Origin,vecK},H-T)
+g:Ddots3d({E1,F1,G1,H1})
+g:Dpolyline3d( {{T,E1},{T,F1},{T,G1},{T,H1}}, "dotted")
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/148#discussioncomment-14976053 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fouriernc}
+\begin{document}
+%
+\begin{luadraw}{name=central_projection}
+local g = graph3d:new{window3d={-5,8,-5,8,-3,5},adjust2d=true, bbox=false,viewdir={30,60},size={10,10}}
+g:Linewidth(6); Hiddenlinestyle = "dashed"; Hiddenlines = true
+local a, z0 = 2, -3
+local light = M(-5,-5,5)
+local proj = function(A)
+    return proj3dO(A,{z0*vecK,vecK},A-light)
+end
+local P = parallelep(M(-a,-a,-a)/2,a*vecI,a*vecJ,a*vecK)
+P = rotate3d(P, 25, {M(a/2,-a/2,-a/2),M(-1,1,1)})
+local shade = cvx_hull3d( ftransform3d(P.vertices,proj) )[1] -- here we know that the shade is convex
+local faisceau = pyramid(shade,light,true)
+g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray"})
+g:Dballdots3d(light,"Yellow",4)
+g:Dpolyline3d( shade, true, "draw=none,fill=DarkGray,fill opacity=0.9") 
+g:Dpoly(P, {color="cyan", opacity=0.8})
+g:Dpoly( faisceau, {color="yellow",opacity=0.3, contrast=0.5,mode=mShadedOnly} )
+for _,A in ipairs(shade)do
+    g:Dseg3d({light,A},"dotted,yellow")
+end
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,48 @@
+% source: https://github.com/pfradin/luadraw/discussions/193#discussioncomment-15835273 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+\documentclass[border = 3pt]{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usetikzlibrary{shadings} %% this is needed for Dshadedrectangle and Dshadedregion
+
+\begin{document}
+
+\begin{luadraw}{name = vector-field-two-grids}
+require 'luadraw_palettes'
+require 'luadraw_shadedforms'
+require 'luadraw_fields'
+
+local f = function(x, y)
+  return {1, x^2 + y^2 - 1}
+end
+
+local f_modulus = function(x, y)
+  local A = f(x, y)
+
+  return cpx.abs(Z(A[1],A[2]))
+end
+
+local xmin, xmax, ymin, ymax = -3, 3, -3, 3
+
+local graphview = graph:new{
+  window = {xmin - 0.5, xmax + 0.5, ymin - 0.5, ymax + 0.5},
+  size   = {10, 10},
+  bbox   = false
+}
+
+graphview:Dshadedrectangle(   
+  xmin, xmax, ymin, ymax, 
+  palJet,
+  {
+    values     = f_modulus,
+    bar        = "right",
+    baroptions = {addvalues = {0.5,1.5,2.5,3.5}}
+  }
+)
+
+graphview:Show()
+\end{luadraw}
+
+\end{document}

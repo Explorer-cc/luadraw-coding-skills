@@ -1,0 +1,66 @@
+% source: https://github.com/pfradin/luadraw/discussions/233#discussioncomment-16197966 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luacode*}
+require "luadraw_povray"
+   
+function full_name()
+    local lfs = require "lfs"
+    local cwd = lfs.currentdir()
+    local n = #graph_name
+    local name = string.sub(graph_name,1,n-4)
+    name = cwd..'/'..name
+    if os.type == "windows" then
+        name = string.gsub(name, "/", "\\")
+    end
+    return name    
+end
+
+local old_exec = graph3d.Pov_exec
+function graph3d:Pov_exec()
+    local oldcachedir = cachedir
+    cachedir = ""
+    old_exec(self,full_name())
+    cachedir= oldcachedir
+end
+\end{luacode*}
+
+\begin{luadraw}{name=intersection_surf}
+
+    local g = graph3d:new{
+        window3d={0,1,0,1,0,2}, 
+        window={-0.25,1.5,-0.5,2.25}, 
+        size={10,10,0}, viewdir={-50,60}
+    }
+    local sqrt = math.sqrt
+    local f = function(x,y,z) return x^3+y^3-z end
+    local h = function(x,y,z) return (x*sqrt(1-y^2)+y*sqrt(1-x^2))^3-z end
+    local L = implicit(function(x,y) return f(x,y,0)-h(x,y,0) end,0.01,1,0.01,1,{25,25})
+    L = map(function(z) return M(z.re,z.im,z.re^3+z.im^3) end, L[1]) -- intersection curve
+    -- using povray
+    g:Pov_new()  -- begin a new povray session
+    g:Pov_implicit("pow(x,3)+pow(y,3)-z", f, {color=SteelBlue})
+    g:Pov_implicit(
+        "z-pow(x*sqrt(1-y*y)+y*sqrt(1-x*x),3)", h, {
+            color=Crimson, 
+            containedby={M(0,0,0),M(0.999,0.999,2)}
+        }
+    ) 
+    g:Pov_exec()
+    -- drawing
+    g:Dboxaxes3d({grid=true, gridcolor="gray",fillcolor="lightgray",xyzstep=0.5, drawbox=true})
+    g:Pov_show() --Pov-Ray image
+    g:Dpolyline3d(L, "line width=1.2pt,dotted,Navy") --we draw the curve over the image
+    local d = 0.1
+    g:Dsquare(Z(-0.25,2.25), Z(-0.25,2.25-d),1,"draw=none,fill=Crimson") 
+    g:Dsquare(Z(-0.25,2.25-2*d), Z(-0.25,2.25-3*d),1,"draw=none,fill=SteelBlue") 
+    g:Dlabel("$z=(x\\sqrt{1-y^2}+y\\sqrt{1-x^2})^3$", Z(-0.25+d,2.25-d/2) , {pos="E"},
+    "$z=x^3+y^3$", Z(-0.25+d,2.25-5*d/2),{}) 
+    g:Show()
+\end{luadraw}
+
+\end{document}

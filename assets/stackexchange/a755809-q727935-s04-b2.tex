@@ -1,0 +1,57 @@
+% source: https://tex.stackexchange.com/a/755809 (question 727935, score 4, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/727935/given-a-normal-vector-is-it-possible-to-re-orient-tikz-arrows-and-node-letters
+\begin{luacode*}
+function central(theta,phi,d) -- central projection, experimental
+    theta = theta or 30
+    phi = phi or 60
+    d = d or 15
+    d = math.abs(d)
+    local cos, sin, tet, ph = math.cos, math.sin, theta*deg, phi*deg
+    local cosTheta, sinTheta, cosPhi, sinPhi = cos(tet), sin(tet), cos(ph), sin(ph)
+    local N = M(cosTheta*sinPhi,sinTheta*sinPhi,cosPhi)
+    Cam = d*N -- camera
+    
+    function graph3d:Proj3d(L) -- we redefine Proj3d
+        local f = function(A)
+            if isPoint3d(A) then
+                local den = pt3d.dot(Cam-A,N)
+                if math.abs(den) > 1e-17 then
+                    local k = d/den
+                    local A1 = Cam-k*(Cam-A)
+                    return Z( cosTheta*A1.y-sinTheta*A1.x, -cosPhi*cosTheta*A1.x-cosPhi*sinTheta*A1.y+sinPhi*A1.z)
+                end
+            else return A
+            end
+        end
+        L = self:Mtransform3d(L) -- we apply the 3D matrix of the graph
+        return ftransform3d(L,f) -- we return the projection on screen
+    end 
+    return {theta, phi}
+end
+\end{luacode*}
+
+\begin{document}
+
+\begin{luadraw}{name=write_on_planes}
+require 'luadraw_compile_tex'
+local g = graph3d:new{ window3d={-7,5,-5,5,-5,5}, window={-12,12,-12,5},bbox=true,size={12,12}, viewdir=central(0,60) }
+
+local O1 =  -4*vecK
+local P1 = {O1,vecK} -- a second plane
+local U1, V1 = -vecI, -vecJ -- two directions in plane P1
+
+local text = "Euler Theorem \\(e^{i\\pi}=-1\\)"
+local L = compile_tex(text, "essai") -- compile with shell-escape the first time to create "essai.eps" file
+local L1 = g:Compiled_tex2path3d(L,{scale=3, anchor=O1+3*V1-U1, dir={U1,V1}})
+g:Labelsize("Large")
+
+g:Dplane(P1, vecJ,15,17,'fill=LightBlue')
+g:Dlabel3d(text, O1-3*V1-3*U1, {dir={U1,V1},node_options="draw,red"}) -- normal text on P1
+g:Dcompiled_tex3d(L1, {drawbox=true}) -- projected text on P1
+g:Show()
+\end{luadraw}
+\end{document}

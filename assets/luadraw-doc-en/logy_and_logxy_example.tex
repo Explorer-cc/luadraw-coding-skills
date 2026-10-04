@@ -1,0 +1,43 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-log-axes.tex (demo: Logarithmic x-axis and logarithmic xy-axis)
+\begin{luadraw}{name=logy_and_logxy_example}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local  exp = math.exp
+
+local g = ld.graph:new{ window={-10,10,-5,5}, size={18,10,0} }
+require 'luadraw_log_axes'
+g:Beginlogview("logy", -1, 5, 0.2, 200, { viewport={0.25,10,-5,4.5},
+    nbsubdiv = {1,1},
+    legendsep = {-0.5,-0.5},
+    legend = {"The line $(AB)$ and the curve $y=\\exp(x)$ coincide.",""}
+})
+local L = ld.cartesian(exp, -1, 5)
+local A, B = Z(-1,exp(-1)), Z(5,exp(5))
+g:Dlogline(A,B, "Pink,line width=2.4pt")
+g:Dlogpolyline(L,"blue") 
+g:Dlogdots({A,B})
+g:Dloglabel("$A$", A, {pos="SE"}, "$B$", B, {pos="NW"})
+g:Endlogview()
+
+g:Beginlogview("logxy", 9, 100, 7e2, 1e6, { viewport={-10,-0.25,-5,4.5},
+    nbsubdiv = {8,1},
+    xaddloglabels={100},
+    legendsep = {-0.5,-0.75},
+    yexponent=2,
+    yaddloglabels={1e6}, 
+    labelangle={-90,0}, labelstyle={"E","W"},
+    legend = {"The line $(AB)$ and the curve $y=x^3$ coincide.",""}
+})
+local L = ld.cartesian(function(x) return x^3 end, 9, 100)
+local A, B = Z(10,1e3), Z(90,729e3)
+g:Dlogline(A,B, "Pink,line width=2.4pt")
+g:Dlogpolyline(L,"blue") 
+g:Dlogdots({A,B})
+g:Dloglabel("$A$", A, {pos="SE"}, "$B$", B, {pos="NW"})
+g:Endlogview()
+-- drawing on the "normal" 2D window
+g:Dlabel("$y=\\mathrm{e}^x$ with a logarithmic y-axis",Z(5,4.5),{pos="N"},
+  "$y=x^3$ with logarithmic $xy$-axis.",Z(-5,4.5),{})
+g:Show()
+\end{luadraw}

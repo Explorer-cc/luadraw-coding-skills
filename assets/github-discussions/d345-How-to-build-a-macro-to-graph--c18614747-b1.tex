@@ -1,0 +1,32 @@
+% source: https://github.com/pfradin/luadraw/discussions/345#discussioncomment-18614747 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=case3}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+local a, b, c, m, n = -1, -1, 2, 1, 1
+local f = function(x) return (a*x^2 + b*x + c)/(m*x + n)  end
+local h = function(x) return b/m - (a*n)/m^2 + (a*x)/m end
+local k = function(x) return 0 end
+local x0 = -n/m
+local y0 = h(x0) 
+local t = 4
+local xmin, xmax, ymin, ymax= x0 - t, x0 + t,y0 - t, y0 + t
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax},size = {8, 8}}  
+local Roots = ld.solve(f, xmin, xmax) -- approximate solutions in [xmin, xmax] of f(x)=0
+g:Linewidth(8)
+g:Ddots({Z(x0, y0)})
+g:Dpolyline({{Z(x0,ymin),Z(x0,ymax)}},"color = blue") 
+g:Daxes({0,1,1}, {grid=false, arrows="-Stealth", legend={"$x$","$y$"}, legendpos={1,1}, legendsep={0,0},
+    myxlabels = {-2,"$-2$",-1,"$-1$",1,"$1$"},myylabels = {2,"$2$", 3, "$3$"}, labelshift={-0.25,0},
+    labelpos={"bottom","right"}})
+g:Ddots(Critic, "color = red, fill = red")
+g:Dcartesian(f, {x={xmin, xmax}, nbdots=200,discont=true,draw_options="red"}) 
+g:Dcartesian(h, {draw_options="blue, thick"})
+g:Show()
+\end{luadraw}
+\end{document}

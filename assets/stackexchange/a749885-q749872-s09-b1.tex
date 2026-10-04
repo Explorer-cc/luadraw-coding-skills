@@ -1,0 +1,16 @@
+% source: https://tex.stackexchange.com/a/749885 (question 749872, score 9, block 1)
+\documentclass[border=5mm]{standalone}% compile with lualatex only
+\usepackage{luadraw}%https://github.com/pfradin/luadraw
+\begin{document}
+\begin{luadraw}{name=test}
+local g= graph:new{window={-2.5,2.5,-4,2},size={10,10}}
+g:Linewidth(24); g:Linejoin("round")
+local i = cpx.I
+local a,u,v = {1,i,-1,0}, 1+i,1-i
+local b = hom(a,1.45)
+local C = {1,1+u,1+v,1,"b",i,"l",i+u,i-v,i,"b",-1,"l",-1-v,-1-u,-1,"b",-i,"l","cl"}
+g:Dpath(C); g:Ddots(b)  -- first part
+g:Setmatrix({-2*i,1,-i}); g:Dpath(C); g:Ddots(b) -- second part
+g:Show()
+\end{luadraw}
+\end{document}

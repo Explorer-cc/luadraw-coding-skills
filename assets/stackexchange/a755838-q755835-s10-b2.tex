@@ -1,0 +1,32 @@
+% source: https://tex.stackexchange.com/a/755838 (question 755835, score 10, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/755835/the-method-of-marching-cubes-for-implicit-surfaces-is-very-slow-and-does-not
+\begin{document}
+\begin{luadraw}{name=marching_cube}
+local ld = luadraw --V3.4
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local d, dw = 1.1, 1.2
+local g = ld.graph3d:new{ window3d={-dw,dw,-dw,dw,-dw,dw}, viewdir={40,70}, adjust2d=true, size={12,12} }
+require 'luadraw_povray'
+
+local function pow(u,p) return u^p end
+local function f(x,y,z)
+    return pow(2.92*(x-1)*x*x*(x+1)+1.7*y*y,2) * pow(y*y-0.88,2) + pow(2.92*(y-1)*y*y*(y+1)+1.7*z*z,2) * pow(z*z-0.88,2) + pow(2.92*(z-1)*z*z*(z+1)+1.7*x*x,2) * pow(x*x-0.88,2)-0.04
+end
+-- use POV-Ray
+g:Pov_new({imagescale=2})
+g:Pov_implicit("pow(2.92*(x-1)*x*x*(x+1)+1.7*y*y,2)*pow(y*y-0.88,2)+pow(2.92*(y-1)*y*y*(y+1)+1.7*z*z,2)*pow(z*z-0.88,2)+pow(2.92*(z-1)*z*z*(z+1)+1.7*x*x,2)*pow(x*x-0.88,2)-0.04",f, 
+    {containdeby={M(-d,-d,-d),M(d,d,d)}, usepalette={ld.palRainbow,"z",{-d,d}} })
+g:Pov_axes(Origin, {arrows=1, color=ld.Gold})
+g:Pov_exec()
+--drawing
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", xgradlimits={-1,1}, ygradlimits={-1,1}, zgradlimits={-1,1}})
+g:Pov_show() 
+g:Show()
+\end{luadraw}
+\end{document}

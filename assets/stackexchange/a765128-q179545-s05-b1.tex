@@ -1,0 +1,42 @@
+% source: https://tex.stackexchange.com/a/765128 (question 179545, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/179545/plotting-3d-polyhedra-which-package?rq=1
+\def\shortcuts{%
+local ld = luadraw
+local pt3d, Z = ld.pt3d, ld.cpx.Z
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+}%
+\begin{document}
+\begin{luadraw}{name=surface}
+\shortcuts
+local g = ld.graph3d:new{window3d={-1,1,-1,1,0,2}, adjust2d=true, viewdir={"central",30,60}, size={10,10}}
+
+local function f(x,y)
+    return -math.min(x,0)-math.min(x,y,0)
+end
+
+local S = ld.cartesian3d(f, -1,1,-1,1)
+g:Dboxaxes3d( {grid=true, gridcolor="gray", fillcolor="lightgray", xyzstep=0.5} )
+g:Dfacet(S, {clip=true, opacity=0.6, color="Crimson"})
+g:Dlabel("$f(x,y)=-\\mathrm{min}(x,0)-\\mathrm{min(x,y,0)}$", 
+    Z((g:Xinf()+g:Xsup())/2,g:Yinf()), {pos="N"})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=polyhedron}
+\shortcuts
+local g = ld.graph3d:new{window3d={-1,1,-1,1,0,2}, adjust2d=true, viewdir={"central",30,60}, size={10,10}}
+local box = g:Box3d() -- current 3D window (polyhedron)
+local planes = { {Origin, vecK}, {Origin, M(0,1,1)}, {Origin, M(2,0,1)}, {Origin, M(1,1,1)} } --conditions
+for _, P in ipairs(planes) do box = ld.cutpoly(box,P,true) end
+
+g:Dboxaxes3d( {grid=true, gridcolor="gray", fillcolor="lightgray", xyzstep=0.5} )
+g:Dpoly(box, {opacity=0.6, color="Crimson"} )
+g:Dlabel("$z \\geqslant-\\mathrm{min}(x,0)-\\mathrm{min(x,y,0)}$", 
+    Z((g:Xinf()+g:Xsup())/2,g:Yinf()), {pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,22 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-compile-tex.tex (demo: Example with \emph{compile\_tex)
+\begin{luadraw}{name=compile_tex2d}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+
+local g = ld.graph:new{bbox=false}
+require 'luadraw_compile_tex'
+local i = cpx.I
+local text = "\\[\\int_0^{+\\infty} e^{-\\frac{x^2}2}dx = \\frac{\\sqrt{2\\pi}}2\\]" -- text to compile
+-- compile with -shell-escape the first time to create the file
+local L = ld.compile_tex(text,"gauss_integral",true) -- with true the lines (strokes) are changed into strips
+g:Shift(2*i) -- a first drawing
+g:Dcompiled_tex(L,0,{scale=2,hollow=true, drawbox=true, draw_options="fill=pink", dir={1-i/4,i}}) -- we draw L
+
+g:Shift(-4*i) -- a second drawing
+L = ld.compiled_tex2polyline(L,{3,3}) --L is converted to a polygonal line
+local f = function(z) return Z(z.re,z.im+math.sin(z.re*1.5)) end  -- this function produces sinusoidal waves
+L = ld.ftransform(L,f) -- we apply f to L
+g:Dpath( ld.polyline2path(L), 'draw=none,fill=blue') -- we draw L as a path
+g:Show()
+\end{luadraw}

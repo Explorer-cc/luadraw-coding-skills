@@ -1,0 +1,31 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Symmetric of the orthocenter)
+\begin{luadraw}{name=orthocentre}
+local ld = luadraw
+local cpx = ld.cpx
+local g = ld.graph:new{window={-5,5,-5,5},bg="cyan!30",size={10,10}}
+local i = cpx.I
+local A, B, C = 4*i, -2-2*i, 3.5
+local h1, h2 = ld.perp({B,C-B},A), ld.perp({A,B-A},C) -- altitudes of the triangle
+local A1, F = ld.proj(A,{B,C-B}), ld.proj(C,{A,B-A}) -- projected
+local H = ld.interD(h1,h2) -- orthocenter
+local A2 = 2*A1-H -- symmetric to H with respect to BC
+g:Dpolyline({A,B,C},true, "draw=none,fill=Maroon,fill opacity=0.3") -- background of the triangle
+g:Linewidth(6); g:Filloptions("full", "blue", 0.2)
+g:Dangle(C,A1,A,0.25); g:Dangle(B,F,C,0.25) -- right angles
+g:Linecolor("black"); g:Filloptions("full","cyan",0.5)
+g:Darc(H,C,A2,1); g:Darc(B,A,A1,1) -- arcs
+g:Filloptions("none","black",1) -- The opacity is restored to 1
+g:Dmarkarc(H,C,A1,1,2); g:Dmarkarc(A1,C,A2,1,2) -- markers
+g:Dmarkarc(B,A,H,1,2)
+g:Linewidth(8); g:Linecolor("black")
+g:Dseg({A,B},1.25); g:Dseg({C,B},1.25); g:Dseg({A,C},1.25) -- sides
+g:Linecolor("red"); g:Dcircle(A,B,C) -- circle
+g:Linecolor("blue"); g:Dline(h1); g:Dline(h2) -- altitudes of the triangle
+g:Dseg({A2,C}); g:Linecolor("red"); g:Dseg({H,A2}) -- segments
+g:Dmarkseg(H,A1,2); g:Dmarkseg(A1,A2,2) -- markers
+g:Labelcolor("blue") -- for the label
+g:Dlabel("$A$",A, {pos="NW",dist=0.1}, "$B$",B, {pos="SW"}, "$A_2$",A2,{pos="E"},
+"$C$", C, {pos="S" }, "$H$", H, {pos="NE"}, "$A_1$", A1, {pos="SW"})
+g:Linecolor("black"); g:Filloptions("full"); g:Ddots({A,B,C,H,A1,A2})
+g:Show()
+\end{luadraw}

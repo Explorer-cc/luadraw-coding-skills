@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/314#discussioncomment-18090466 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=band}
+local ld = luadraw
+local M, Z = luadraw.pt3d.M, luadraw.cpx.Z
+local g = luadraw.graph3d:new{viewdir={30,60}, size={12,12}, window={-3,3,-1.5,1}}
+local B1 = {M(1.33,-2,0),"m",M(1.33,-0.5,-1),M(1.33,-0.5,-1),M(1.33,1,0),"b"}
+local B2 = {M(1.66,-2,0),"m",M(1.66,-0.5,-1),M(1.66,-0.5,-1),M(1.66,1,0),"b"}
+local C1 = ld.path3d(B1,50)[1]
+local C2 = ld.path3d(B2,50)[1]
+local S = {} -- surface
+for k = 1, #C1-1 do
+    table.insert(S, {C1[k],C1[k+1],C2[k+1],C2[k]}) -- create facets
+end
+
+g:Dfacet(S, {color="gray", mode=ld.mShadedOnly})
+g:Dpath3d({M(1.33,-2,0),M(1.33,-0.5,-1),M(1.33,-0.5,-1),M(1.33,1,0),"b",M(1.66,1,0),"l",M(1.66,-0.5,-1),M(1.66,-0.5,-1),M(1.66,-2,0),"b","cl"})
+
+g:Shift(0.5)
+g:Setviewdir(-95,80)
+g:Dscene3d( 
+    g:addFacet(S, {color="gray"}), 
+    g:addPolyline( ld.concat(C1,ld.reverse(C2)), 
+        {close=true, hidden=true, hiddenstyle="dashed"} )
+    )
+g:Show()
+\end{luadraw}
+\end{document}

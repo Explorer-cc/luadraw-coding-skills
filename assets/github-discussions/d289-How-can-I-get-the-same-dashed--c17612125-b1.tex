@@ -1,0 +1,30 @@
+% source: https://github.com/pfradin/luadraw/discussions/289#discussioncomment-17612125 (pfradin, block 1)
+\documentclass[border=3pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=cylinder-cone-sphere}
+local ld = luadraw
+
+local pt3d = ld.pt3d
+local M, Mc, O, vecK = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK
+local sqrt = math.sqrt
+local Rsphere = 5
+local Rcone = 2 * sqrt(2) * Rsphere / 3
+local hcone = 4 / 3 * Rsphere
+local B = M(0, 0, -Rsphere / 3) 
+local T = M(0, 0, hcone - Rsphere / 3)
+local Rcylinder = 2 * Rcone / 3
+local hcylinder = hcone / 3
+local H_cyl = M(0, 0, -Rsphere / 3 + hcylinder) 
+
+local g = ld.graph3d:new{window={-Rsphere-1,Rsphere+1,-Rsphere-1,Rsphere+1},viewdir={70,60},size={12,12}}
+ld.Hiddenlinestyle = "dashed" -- after the declaration of graph g
+
+g:Dcylinder(B, Rcylinder, H_cyl, {color="red"}) 
+g:Dcone(B, Rcone, T, {color="green", opacity=0.3})
+g:Dsphere(O, Rsphere, {color="blue", opacity=0.3, mode=ld.mBorder})
+g:Show()
+\end{luadraw}
+\end{document}

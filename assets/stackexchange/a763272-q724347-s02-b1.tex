@@ -1,0 +1,49 @@
+% source: https://tex.stackexchange.com/a/763272 (question 724347, score 2, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=sphere}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    local M = pt3d.M
+    local Origin,vecI,vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local sin, cos = math.sin, math.cos
+    
+    local interBcircles = function(C1, C2, radius)
+        -- C1 = {A1, A2}, C2 = {A3, A4} --fours points on the sphere
+        local P1 = ld.plane(C1[1],C1[2],M(0,0,0))
+        local P2 = ld.plane(C2[1],C2[2],M(0,0,0))
+        local D = ld.interPP(P1,P2)
+        local u = pt3d.normalize(D[2]) -- director vector of intersection
+        return {radius*u, -radius*u}
+    end
+
+    require "luadraw_spherical"
+    local R = 4
+    local g = ld.graph3d:new{window3d = {-6, 6, -6, 6, -6, 6},viewdir = {-40, 70}}
+    ld.Hiddenlines = true;ld.Hiddenlinestyle = "dashed"
+
+    g:Define_sphere{
+        radius = R,
+        color = "white",
+        mode = ld.mBorder,
+        edgecolor = "black",
+        insidelabelcolor = "black!70"
+    }
+    -- a big circle is defined by two points on the sphere (not aligned with the center).
+    local C1, C2, C3 = {R*vecI, R*vecJ}, {R*vecJ, M(-R * cos(35 * ld.deg), 0, R * sin(35 * ld.deg))}, {R*vecI, R*vecK}
+    local I1, I2 = table.unpack( interBcircles(C1,C2,R) ) -- intersection between C1 and C2
+    local I3, I4 = table.unpack( interBcircles(C1,C3,R) )
+    local I5, I6 = table.unpack( interBcircles(C2,C3,R) )
+
+    g:DSbigcircle(C1, {color = "black"})
+    g:DSbigcircle(C2, {color = "red"})
+    g:DSbigcircle(C3, {color = "green"})
+    g:DSstars({I1,I2,I3,I4,I5,I6})
+    
+    g:Dspherical()
+    g:Show()
+\end{luadraw}
+\end{document}

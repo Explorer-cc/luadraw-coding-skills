@@ -1,0 +1,77 @@
+% source: https://github.com/pfradin/luadraw/discussions/71#discussioncomment-14325524 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+    \begin{luadraw}{name=icosaedre}
+    local g = graph3d:new{ 
+        window={-2.25,2.25,-2.25,2},
+        viewdir={5,108}, 
+        size={10,10}, 
+        margin={0,0,0,0}
+    }
+    g:Linejoin("round"); g:Linewidth(5); Hiddenlinestyle = "dashed"
+C0 = (1 + math.sqrt(5)) / 4
+C1 = (3 + math.sqrt(5)) / 4
+P = {}
+P.vertices = {
+  M( 0.0,  0.5,   C1),
+  M( 0.0,  0.5,  -C1),
+  M( 0.0, -0.5,   C1),
+  M( 0.0, -0.5,  -C1),
+  M(  C1,  0.0,  0.5),
+  M(  C1,  0.0, -0.5),
+  M( -C1,  0.0,  0.5),
+  M( -C1,  0.0, -0.5),
+  M( 0.5,   C1,  0.0),
+  M( 0.5,  -C1,  0.0),
+ M(-0.5,   C1,  0.0),
+ M(-0.5,  -C1,  0.0),
+ M(  C0,   C0,   C0),
+ M(  C0,   C0,  -C0),
+ M(  C0,  -C0,   C0),
+ M(  C0,  -C0,  -C0),
+ M( -C0,   C0,   C0),
+ M( -C0,   C0,  -C0),
+ M( -C0,  -C0,   C0),
+ M( -C0,  -C0,  -C0) }
+
+P.facets ={
+{  0,  2, 14,  4, 12 },
+{  0, 12,  8, 10, 16 },
+{  0, 16,  6, 18,  2 },
+{  7,  6, 16, 10, 17 },
+{  7, 17,  1,  3, 19 },
+{  7, 19, 11, 18,  6 },
+{  9, 11, 19,  3, 15 },
+{  9, 15,  5,  4, 14 },
+{  9, 14,  2, 18, 11 },
+{ 13,  1, 17, 10,  8 },
+{ 13,  8, 12,  4,  5 },
+{ 13,  5, 15,  3,  1 } }
+for k = 1, #P.facets do  -- add 1 to each index
+    P.facets[k] = map(function(i) return i+1  end, P.facets[k])
+end
+local F = getfacet(P,1) -- first facet of P
+local A, B, C = table.unpack(F)  -- first three points of F
+local R = pt3d.abs(A) 
+local S = sphere(Origin,R,200,200) -- 40000 facets !
+local P1 = {A, pt3d.prod(B-A,C-A)}
+local I1 = g:Intersection3d(S,P1) -- I1 is not a circle, but an object of type edges
+local I2 = {} -- creation of I2, object of type edges too
+I2. visible = map(function(A) return -A end, I1.hidden[1]) -- not very practical I admit
+I2. hidden = map(function(A) return -A end, I1.visible[1])
+local H = proj3d(Origin,P1)
+local r = pt3d.abs(H)
+g:Dlabel3d("$O$",Origin,{pos="S"})
+g:Ddots3d({Origin})
+g:Dedges(I1, {hidden=true})
+g:Dedges(I2, {hidden=true})
+g:Linecolor("red")
+g:Dcircle3d(Origin,r,g.Normal,"dashed")
+g:Linecolor("blue")
+g:Dpoly(P,{mode=0,edgestyle=Hiddenlinestyle})
+g:Dsphere(Origin,R,{color="orange", mode=2, opacity=0.3})
+g:Show() 
+    \end{luadraw}
+\end{document} 

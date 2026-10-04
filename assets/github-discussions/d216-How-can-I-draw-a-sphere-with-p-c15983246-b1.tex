@@ -1,0 +1,32 @@
+% source: https://github.com/pfradin/luadraw/discussions/216#discussioncomment-15983246 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/496776/triangle-on-3d-sphere
+\begin{luadraw}{name=triangle-on-3d-sphere}
+local R=4
+local pi = math.pi
+local g = graph3d:new{window={-R-1,R+1,-R-1,R+1},viewdir={40,70},size={10,10}}
+g:Linewidth(6); Hiddenlinestyle = "dashed";Hiddenlines = true
+require 'luadraw_spherical'
+arrowBstyle = "-stealth"
+local k = R+1
+local O = Origin
+local theta = 30*deg
+local A, C = Ms(R,-theta,pi/2), Ms(R,theta,pi/2)
+local B, D = table.unpack( rotate3d({A,C}, 90, {(A+C)/2, vecI}) )
+local P = prism({A,B,C,D},-(A+C))
+
+g:Define_sphere({center=O, radius=R}) 
+g:DScircle({M(0,0,0),vecK},{color="red"}) 
+g:DScircle({M(0,0,0),vecJ},{color="blue"}) 
+g:DSpolyline( facetedges(P))
+g:Dspherical()
+g:Dlabel3d("$O$",O,{pos="S"}, "$A$", A, {}, "$B$",B,{}, "$C$", C, {pos="E"}, "$D$", D, {})
+g:Ddots3d({O, A, B, C, D})
+
+g:Show()
+\end{luadraw} 
+\end{document} 

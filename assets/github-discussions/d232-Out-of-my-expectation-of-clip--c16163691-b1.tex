@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/232#discussioncomment-16163691 (pfradin, block 1)
+% https://github.com/pfradin/luadraw/issues/123
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier}
+\begin{document}
+\begin{luadraw}{name=saddle}
+local g = graph3d:new{
+    window3d={-2,2,-2,2,0,8}, 
+    viewdir={30,75},
+    adjust2d=true,size={15,15}
+}
+local f = function(x,y) return x^2+y^2 end
+local S = cartesian3d(f, 3, -3, -3, 3, {25,25}) -- I swapped the limits for x
+g:Dboxaxes3d{grid=true}
+g:Dfacet(S, {
+    usepalette={palRainbow,"z"}, 
+    --mode=mShaded, --default value
+     clip=true
+})
+g:Show()
+\end{luadraw}
+\end{document}

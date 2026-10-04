@@ -1,0 +1,47 @@
+% source: https://tex.stackexchange.com/a/762051 (question 762044, score 8, block 1)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+\begin{luacode*}
+nbimages = 36
+\end{luacode*}
+
+% images creation
+\begin{luacode*}
+local g = graph3d:new{bg="Beige",size={10,10}}
+
+-- declarations
+local A, B, C, D, E, r = M(0,1,3), M(0,2,3.5), M(0,1,1), M(0,3.5,1), M(0,3.5,3), 0.25
+local theta = linspace(0,360,nbimages+1) 
+
+-- create the image number k, this function must be global
+function makeframe(k) -- do not modify this line
+    -- draw image number k here
+    g:Rotate3d(theta[k], {Origin, vecK} ) -- rotation around the z-axis
+    g:Dpolyline3d({Origin, 4*vecK, M(0,4,4), 4*vecJ}, true, "dashed, line width=0.8pt")
+    g:Dpolyline3d({A,B}, "DarkGreen,line width=1.2pt")
+    g:Dpolyline3d({C,D,E}, "Brown,line width=1.2pt")
+    for _,N in ipairs({A,B,C,D,E}) do
+        g:Dcircle3d( N,r,vecI, "gray,fill=lightgray")
+    end
+    g:Dlabel3d("selected $E_t^*$", 2*vecJ, {pos="S", dir={vecJ,vecK}})
+    g:IDmatrix3d()
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\def\nb{\directlua{tex.print(nbimages)}}
+\def\makeframe#1{\directlua{makeframe(#1)}}%
+
+\begin{document}
+
+\begin{animateinline}[poster=first,controls,loop]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

@@ -1,0 +1,38 @@
+% source: https://github.com/pfradin/luadraw/discussions/186#discussioncomment-15670413 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+
+\begin{luadraw}{name=sphere}
+    local g = graph3d:new{
+        window3d={-4,5,-4,4,-4,5},
+        window={-3,5.5,-8,3},
+        size={10,10}, bg = "Bisque",
+        viewdir= perspective("central",40,70)
+    }
+    local f = function(t) return M(0,t,0.17*t^2-4) end
+    local P = rotcurve(f,0,3,{Origin,vecK},360,0, {grid={10,40}})
+    local S = {Origin, 4}
+    local a, b, c = table.unpack(map(toPoint3d,polyreg(0,3,3)))
+    local d, e, F = 0.75*vecK, 2*vecK, 5*vecK
+    local a1, b1, c1 = (2*e+a)/3, (2*e+b)/3, (2*e+c)/3
+    local F1 = rotate3d( shift3d(F,-9*vecK), 45,{Origin,M(1,1,1)})
+    g:Shift3d(F1-F)
+    g:Dpolyline3d( {{d,F},{a,e},{b,e},{c,e},{a1,d,b1},{c1,d}}, "line width=3pt,SlateGray")
+    g:IDmatrix3d()
+    g:Rotate3d(45,{Origin,M(1,1,1)})
+    local head = 2*vecK
+    a = f(2.75)
+    b, c = rotate3d(a,120,{Origin,vecK}), rotate3d(a,240,{Origin,vecK})
+    g:Dfacet(P,{hiddenstyle="solid", color="LightBlue", edgecolor="LightGray"})
+    g:Dpolyline3d({{head,a},{head,b},{head,c}}, "double=gray,double distance=2pt")
+    g:Dcylinder(head,vecK/2,0.25, {color="SlateGray",hiddenstyle="noline"})
+    local I = -2.5*vecK
+    local L = reverse( g:Proj3d(border(P))[1] )
+    g:Beginclip( polyline2path(L), true)
+        g:Dcircle3d(I+0.125*M(1,1/2,0),3,vecK,"fill=gray")
+    g:Endclip()
+    g:Show()
+\end{luadraw}
+\end{document}

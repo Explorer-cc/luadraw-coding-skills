@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/107#discussioncomment-14544282 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=Fibonacci_spiral}
+local g = graph3d:new{size={14,14}, window3d={0,35,0,55,0,90}, adjust2d=true,bbox=false}
+local spiral = function(A,C,r)
+    local p = function(t)
+        return rotate3d(A,t,{C,-vecK})+r*t/90*vecK
+    end
+    return parametric3d(p,0,90,20)
+end
+local C1 = { parallelep(Origin,34*vecI,34*vecJ,34*vecK), spiral(34*vecI,34*(vecI+vecJ),34) }
+local C2 = { parallelep(M(0,34,34),21*vecI,21*vecJ,21*vecK), spiral(M(0,34,34),M(21,34,34),21) }
+local C3 = { parallelep(M(21,42,55),13*vecI,13*vecJ,13*vecK), spiral(M(21,55,55),M(21,42,55),13) }
+local C4 = { parallelep(M(26,34,68),8*vecI,8*vecJ,8*vecK), spiral(M(34,42,68),M(26,42,68),8) }
+local C5 = { parallelep(M(21,34,76),5*vecI,5*vecJ,5*vecK), spiral(M(26,34,76),M(26,39,76),5) }
+local C6 = { parallelep(M(21,39,81),3*vecI,3*vecJ,3*vecK), spiral(M(21,39,81),M(24,39,81),3) }
+local C7 = { parallelep(M(24,40,84),2*vecI,2*vecJ,2*vecK), spiral(M(24,42,84),M(24,40,84),2) }
+local C8 = { parallelep(M(25,39,86),vecI,vecJ,vecK), spiral(M(26,40,86),M(25,40,86),1) }
+for _,P in ipairs{C1,C2,C3,C4,C5,C6,C7,C8} do
+    g:Dpolyline3d(P[2],"red,line width=0.8pt"); g:Dpolyline3d(pxy(P[2]),"red,line width=0.8pt") -- spiral and its projection on xy-plane
+    g:Dpoly(P[1],{mode=mShaded,color="LightGray",opacity=0.5})  --cube
+    g:Dpolyline3d(pxy(getfacet(P[1],1)),true) -- projection on xy-plane
+end 
+g:Show()
+\end{luadraw}
+\end{document}

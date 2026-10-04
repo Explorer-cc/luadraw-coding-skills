@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/159#discussioncomment-15175370 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\begin{document}
+
+\begin{luadraw}{name=parallelep}
+local g = graph3d:new{ window={-8,8,-8,8},bbox=false, viewdir={-30,70} }
+Hiddenlinestyle = "dashed";Hiddenlines = true
+
+-- data
+local a, b, h = 3, 6, 5
+local BAC = 60
+local EAC = 60
+local EAB = 60
+local A = Origin
+
+-- Calculation of B, C and D
+local B = -a*vecI
+local C1 = rotate3d(B,BAC, {A,vecK})
+local D1 = C1+B-A
+local Delta = pt3d.dot(B-A,D1-B)^2-a^2*(a^2-b^2)
+local D = B + (-pt3d.dot(B-A,D1-B)+math.sqrt(Delta))/a^2*(D1-B)
+local C = D-B+A
+
+-- Calculation of E 
+local u, v = pt3d.normalize(C-A), pt3d.normalize(B-A) 
+-- we assume then E-A = x*u+y*v+z*vecK
+local uv = pt3d.dot(u,v)
+local alpha, beta, det = h*math.cos(EAC*deg), h*math.cos(EAB*deg), 1-uv^2
+local x, y = (alpha-beta*uv)/det, (beta-alpha*uv)/det
+local norm = pt3d.abs2(x*u+y*v)
+local z = math.sqrt(h^2-norm)
+local E = A+x*u+y*v+z*vecK
+
+-- drawing
+local P = parallelep(A,B-A,C-A,E-A)
+g:Dpoly(P, {color="orange", mode=mShadedHidden})
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",E+B-A,{}, "$H$",D+E-A,{},"$G$",C+E-A,{})
+
+-- verification in the terminal
+print( angle3d(C-A,E-A)*rad, angle3d(B-A,E-A)*rad, angle3d(C-A,B-A)*rad, pt3d.abs(B-A), pt3d.abs(D-A), pt3d.abs(E-A) )
+
+g:Show()
+\end{luadraw}
+\end{document} 

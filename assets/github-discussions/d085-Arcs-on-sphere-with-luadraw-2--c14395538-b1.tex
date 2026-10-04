@@ -1,0 +1,17 @@
+% source: https://github.com/pfradin/luadraw/discussions/85#discussioncomment-14395538 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=DSarc}
+local g = graph3d:new{size={10,10},bbox=false}
+Hiddenlinestyle = "dashed"; Hiddenlines = true
+require 'luadraw_spherical'
+
+local P, Q = sM(-20,90), sM(70,90) -- spherical coordinates in degrees
+g:Define_sphere({mode=mGrid,edgecolor="LightGray",color="SlateGray",hiddenstyle="noline"})
+g:DSarc({P,Q},1,{color="red", width=8,arrows=1})
+g:Dspherical()
+g:Show()
+\end{luadraw} 
+\end{document} 

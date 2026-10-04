@@ -1,0 +1,31 @@
+% source: https://github.com/pfradin/luadraw/discussions/53#discussioncomment-14203101 (pfradin, block 1)
+% !TEX TS-program = lualatex
+
+\documentclass[border = 3pt]{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name = stairway}
+    local graphview = graph3d:new{
+        window3d = {-5, 5, -5, 5, -5, 5},
+        adjust2d = true,
+        viewdir  = {-45, 65},
+    }
+    graphview:Linejoin("round")
+    graphview:Dboxaxes3d()
+    local cube = parallelep(M(-5, -5, -5), vecI, vecJ, vecK)
+    for i = 0, 4 do
+        for j = 4, 0, -1 do -- <- c'est là que l'ordre n'était pas le bon
+            for k = 0, 4 - i do 
+                graphview:Dpoly(
+                    shift3d(cube, i*vecI + j*vecJ + k*vecK),    
+                    {color = "Crimson", mode = 4})
+            end
+        end
+    end
+    graphview:Show()
+\end{luadraw}
+\end{document}

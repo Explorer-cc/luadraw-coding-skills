@@ -1,0 +1,35 @@
+% source: https://github.com/pfradin/luadraw/discussions/273#discussioncomment-17201398 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\usepackage{siunitx}
+\begin{document}
+
+\begin{luadraw}{name=cone1}
+local ld = luadraw -- version 3.1
+local cpx, pt3d = ld.cpx, ld.pt3d
+local vecI,vecJ, vecK =pt3d.vecI, pt3d.vecJ ,pt3d.vecK
+local cos, sin, pi = math.cos,math.sin, math.pi
+local g = ld.graph3d:new{window={-10,10,-13,9},viewdir={30,70},size={12,12}}
+ld.Hiddenlinestyle= "dashed"
+local r = 9
+local h = 12
+local M = pt3d.M
+local O,P = M(0,0,0), M(r*cos(80),r*sin(80),0) -- 80 radians ?
+local A = -h*vecK
+local B = A+h*vecK
+local u = pt3d.normalize( pt3d.prod(vecK,g.Normal) )
+local C, D = B+r*u, B-r*u -- points of tangency
+--cone
+g:Dcone(A,h*vecK,r)
+--hemisphere
+g:Dpath3d( {D, "m", B, C, r, 1, vecK, "ca", B, D, r, 1, g.Normal,"ca"},"fill=white") -- < change here
+g:Dcircle3d(A+h*vecK,r,vecK,"dashed")
+g:Dpolyline3d({{B,A,P,B}},"dashed")
+g:Dlabel3d("$h$",(O+A)/2,{pos="E"})
+g:Dlabel3d("$r=\\SI{9}{cm}$",(O+P)/2,{dir={vecJ,-vecI},pos="S"})
+g:Dlabel3d("$\\ell=\\SI{15}{cm}$", (A+C)/2, {dir={C - A, vecK}, pos="S", dist=0.5})
+g:Show()
+\end{luadraw}
+\end{document} 

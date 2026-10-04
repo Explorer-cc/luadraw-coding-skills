@@ -1,0 +1,34 @@
+% source: https://tex.stackexchange.com/a/750320 (question 742746, score 4, block 2)
+% Source - https://tex.stackexchange.com/a/750320
+% Posted by nidarfp
+\documentclass[10pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/742746/pgfplots-3d-schoolbook-style-grid-tick-marks
+\begin{document}
+\tikzset{>=latex}%
+
+\begin{luadraw}{name=German_schoolbooks}
+local g = graph3d:new{window={-5.5,5.5,-5.5,5.5},size={10,10}, viewdir=perspective("yz",math.sqrt(2)/2,45)}
+local i = cpx.I
+defaultlabelshift = 0
+defaultlegendsep = 0
+-- y-axis and z-axis
+g:Daxes(nil,-- (valeur par défaut) {0,1,1}
+    {   arrows="->",
+        nbsubdiv={1,1},
+        originpos={"none","none"},
+        legend={"$x_2$","$x_3$"},
+        grid=true,
+        gridcolor="lightgray"
+    })
+-- x axis
+g:Dgradline({0,(-1-i)/2}, {arrows="->", limits={-9.5,9.5}, tickdir=i, originpos="none", labelpos="top", legend="$x_1$", labelstyle="S"})
+-- 3D drawing
+local P = parallelep( Origin, 3*vecI, 4*vecJ, 2*vecK)
+g:Dcircle3d( Origin, 4, vecK, "line width=0.8pt, ForestGreen")
+g:Dpoly(P, {color="Salmon",opacity=0.7})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/171#discussioncomment-15403664 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}
+\begin{document}
+
+\begin{luadraw}{name=arc2d}
+local i = cpx.I
+local g = graph:new{bbox=false}
+
+local a, b, c, r = 0, -2+3*i, 3+i, 1
+g:Dhline({a,b},"gray,dashed"); g:Dhline({a,c},"gray,dashed")
+g:Ddots({a,b,c}); g:Dlabel("$b$",b,{pos="W"},"$a$",a,{pos="S"},"$c$",c,{pos="S"})
+g:Dseg({a,a-r},"<->,line width=0.2pt"); g:Dlabel("$r$",-r/2,{pos="N"})
+-- instruction Darc
+g:Darc(b,a,c,r,1,"red,line width=0.8pt,->")  -- The value 1 indicates the counterclockwise direction.
+g:Show()
+\end{luadraw}
+\end{document} 

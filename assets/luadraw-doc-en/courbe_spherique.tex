@@ -1,0 +1,19 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: Viviani window)
+\begin{luadraw}{name=courbe_spherique}
+local ld = luadraw
+local cpx, pt3d = ld.cpx, ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Ms = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, pt3d.Ms
+
+local g = ld.graph3d:new{window={-4.5,4.5,-4.5,4.5},viewdir={30,60},margin={0,0,0,0},size={10,10}}
+require 'luadraw_spherical'
+g:Linewidth(6); ld.Hiddenlinestyle = "dotted"
+ld.Hiddenlines = false; 
+local C = ld.cylinder(M(1.5,0,-3.5),1.5,M(1.5,0,3.5),35,true)
+local L = ld.parametric3d( function(t) return Ms(3,t-math.pi/2,t) end, -math.pi,math.pi) -- the curve
+g:Define_sphere({arrowBstyle = "-stealth"})
+g:DSpolyline(ld.facetedges(C),{color="gray"}) -- drawing cylinder
+g:DSpolyline({{-5*vecI,5*vecI},{-5*vecJ,5*vecJ},{-5*vecK,5*vecK}},{arrows=1}) --axes
+ld.Hiddenlines=true; g:DScurve(L,{width=12,color="blue"}) -- curve with hidden part
+g:Dspherical()
+g:Show()
+\end{luadraw}

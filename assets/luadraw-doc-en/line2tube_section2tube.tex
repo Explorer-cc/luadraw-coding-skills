@@ -1,0 +1,18 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Example with line2tube and section2tube)
+\begin{luadraw}{name=line2tube_section2tube}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-5,6,-4.5,8}, viewdir={45,60}, margin={0,0,0,0}, size={10,10}}
+local L1 = ld.map(pt3d.toPoint3d,ld.polyreg(0,3,6)) -- regular hexagon in the xOy plane, with center O and vertex M(3,0,0)
+local L2 = ld.shift3d(ld.rotate3d(L1,90,{Origin,vecJ}),3*vecJ)
+local L3 = ld.shift3d(ld.reverse(L1),6*vecK)
+L3[6] = L3[5]-2*vecK -- modification of the last point
+local section = ld.shift3d({M(2,0,0.5),M(4,0,0.5),M(4,0,-0.5),M(2,0,-0.5)},6*vecK)
+local T1 = ld.line2tube(L1,1,{nbfacet=8,close=true}) -- tube 1 closed
+local T2 = ld.line2tube(L2,1,{nbfacet=8}) -- tube 2 not closed
+local T3 = ld.section2tube(section, L3,{hollow=true})
+g:Dmixfacet( T1, {color="Crimson",opacity=0.8}, T2, {color="SteelBlue"}, T3, {color="ForestGreen"} )
+g:Show()
+\end{luadraw}

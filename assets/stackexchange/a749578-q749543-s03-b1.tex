@@ -1,0 +1,26 @@
+% source: https://tex.stackexchange.com/a/749578 (question 749543, score 3, block 1)
+\documentclass[12pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/749543/how-to-draw-a-parabola-with-arrows
+\begin{document}
+\begin{luadraw}{name=}
+local i = cpx.I
+local g = graph:new{size={12,12}}
+g:Writeln("\\tikzset{->-/.style={decoration={markings, mark=at position #1 with {\\arrow{Stealth}}},postaction={decorate}}}")
+local b, c, d, e = 4*i, -0.5+i/2, -2-i,-4-2*i
+local a = (b+e)/2-i*(b-e)
+local er = i*(e-b)/2
+local ar = (e-b)/4
+local br = sym(er,med(e,b))
+local path1 = {b,b+br,a-ar,a,"b"} -- bezier curve between b and a
+local path2 = {a,a+ar,e+er,e,"b"}-- bezier curve between a and e
+g:Daxes({-4.5-4.5*i,1,1},{limits={{-4.5,5},{-4.5,5}}, labelpos={"none","none"}})
+g:Ddots({a,b,c,d,e})
+g:Dpolyline({{c,b},{d,c},{e,d}},"->-=0.5")  -- list of segments
+g:Dpath(path1,"->-=0.5"); g:Dpath(path2,"->-=0.5")
+g:Dlabel("$a$",a,{pos="SE"},"$b$",b,{pos="N"},"$c$",c,{pos="E"},"$d$",d,{pos="S"},"$e$",e,{pos="W"})
+g:Show()
+\end{luadraw}
+\end{document}

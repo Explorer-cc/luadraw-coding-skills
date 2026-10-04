@@ -1,0 +1,22 @@
+% source: https://github.com/pfradin/luadraw/discussions/83#discussioncomment-14453053 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=toan}
+local g = graph3d:new{window={-2,21,-3,12}, viewdir={-30,70}, size={20,20},border=true}
+g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local a, b, h,k = 6, 20, 5,8
+local O,A,F,E,M = Origin,a*vecI,M(a,0,h),M(0,0,h),M(a/2,0,k)
+local C,B,G,H = table.unpack(shift3d({O,A,F,E},b*vecJ))
+local P = prism({O,A,F,M,E},b*vecJ)
+g:Dscene3d(
+    g:addPoly(P,{edge=true,color="Orange"}), 
+    g:addPolyline({{E,F},{H,G}})
+)
+g:Ddots3d({O,A,F,E,C,B,G,H})
+g:Dlabel3d("$O$",O,{pos="NE"},"$A$",A,{pos="NE"}, "$B$",B,{pos="S"}, "$C$",C,{},"$E$",E,{pos="N"},"$F$",F,{},"$G$",G,{},"$H$",H,{} )
+g:Show()
+\end{luadraw}
+\end{document}

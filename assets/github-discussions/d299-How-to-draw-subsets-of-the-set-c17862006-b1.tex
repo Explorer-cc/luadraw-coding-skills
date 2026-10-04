@@ -1,0 +1,40 @@
+% source: https://github.com/pfradin/luadraw/discussions/299#discussioncomment-17862006 (pfradin, block 1)
+\documentclass[border=5mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw} 
+\usepackage{amsmath,amssymb}
+
+\begin{document}
+\begin{luadraw}{name=interval}
+local ld = luadraw
+local cpx = ld.cpx
+local Z = cpx.Z
+local g = ld.graph:new{ window = {-6, 8, -2, 5}, size = {12, 8}, bbox = false }
+local wd = 0.25
+local inf = math.huge
+
+local function interval(x1,x2,y,left,right,legend)
+    local u1,u2,v1,v2 = table.unpack( g:Getview() )
+    left = "$\\mathbf{"..left.."}$"
+    right = "$\\mathbf{"..right.."}$"
+    if x1 > x2 then x1, x2 = x2, x1 end
+    if x1 == -inf then x1 = u1 end
+    if x2 == inf then x2 = u2 end
+    if x1 > u1 then
+        g:Drectangle(Z(u1,y-wd/2), Z(x1,y-wd/2), Z(x1,y+wd/2), "draw=none,pattern=north east lines,pattern color=gray")
+        g:Dlabel(left, Z(x1,y), {}, "$"..x1.."$", Z(x1,y), {pos="S",dist=0.1})
+    end
+    if x2 < u2 then
+        g:Drectangle(Z(x2,y-wd/2), Z(u2-0.3,y-wd/2), Z(u2-0.3,y+wd/2), "draw=none,pattern=north east lines,pattern color=gray")
+        g:Dlabel(right, Z(x2,y), {}, "$"..x2.."$", Z(x2,y), {pos="S",dist=0.1})
+    end
+    g:Dlabel(legend, Z((x1+x2)/2,y), {pos="N"})
+    g:Dline({Z(x1,y),1}, "thick,-Stealth")
+end
+
+interval(-3,2,3,"[","]","$A = [-3; 2]$")
+interval(0,7,1,"(","]","$B = (0; 7]$")
+interval(-inf,-1,-1,"",")","$C = (-\\infty;-1)$")
+g:Show()
+\end{luadraw}
+\end{document}

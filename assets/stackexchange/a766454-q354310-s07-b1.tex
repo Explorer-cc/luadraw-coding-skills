@@ -1,0 +1,43 @@
+% source: https://tex.stackexchange.com/a/766454 (question 354310, score 7, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://ctan.org/pkg/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/354310/using-pst-solides3d-to-cut-an-object-multiple-times
+\begin{document}
+\begin{luadraw}{name=torus_multiple_cuts}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{ window3d={-3,3,-4,4,-3,3}, adjust2d=true, viewdir={"central",30,60,25}, size={12,12} }
+local cos, sin, pi = math.cos, math.sin, math.pi
+local R, r = 2.5, 1
+local x0 = R-r
+local f = function(t) return M(0,R+r*cos(t),r*sin(t)) end
+local P1 = {M(x0,0,0), -vecI} -- first plane
+local P2 = {Origin, vecI + vecK} -- second plane slanted at 45 degrees
+local C = ld.rotcurve(f, -pi, pi, {Origin, vecK}, 360, 0, {grid={71,51}}) -- torus
+local C1 = ld.cutfacet(C, P1)   
+local C2 = ld.cutfacet(C1, P2)  
+local P11, P12 = ld.cutfacet( g:Plane2facet(P1), P2)
+-- Cartesian equation of the torus : (x^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x^2+y^2) = 0
+-- Intersection with P2 : (x^2+y^2+x^2+R^2-r^2)^2-4*R^2*(x^2+y^2)=0 (implicit curve)
+local h = function(x,y) return (x^2+y^2+x^2+R^2-r^2)^2-4*R^2*(x^2+y^2) end
+local I = ld.implicit(h,-4,4,-4,4,{50,50}) -- 2D polygonal line (list of lists of complex numbers)
+local section2 = ld.ftransform(I, function(z) return M(z.re,z.im,-z.re) end) -- conversion to 3D coordinates
+-- Intersection with P1 :  (x0^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x0^2+y^2)=0 (implicit curve)
+h = function(y,z) return (x0^2+y^2+z^2+R^2-r^2)^2-4*R^2*(x0^2+y^2) end
+I = ld.implicit(h,-4,4,-3,3,{50,50}) -- 2D polygonal line (list of lists of complex numbers)
+local lemniscate = ld.ftransform(I,function(z) return M(x0,z.re,z.im) end) -- conversion to 3D coordinates
+-- drawing
+g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray", drawbox=true})
+g:Dfacet(P12, {color="Pink", edge=true, opacity=0.4})
+g:Dfacet(g:Plane2facet(P2), {color="LightBlue", edge=true, opacity=0.8})
+g:Dpolyline3d(section2,"Navy,line width=2.4")
+g:Dfacet(C2, {usepalette={ld.palRainbow,"z"}, edgecolor="gray", contrast=0.5})
+g:Dfacet(P11, {color="Pink", edge=true, opacity=0.4})
+g:Dpolyline3d(lemniscate,"Navy,line width=1.2pt")
+g:Show()
+\end{luadraw}
+\end{document}

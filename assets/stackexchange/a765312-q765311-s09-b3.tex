@@ -1,0 +1,37 @@
+% source: https://tex.stackexchange.com/a/765312 (question 765311, score 9, block 3)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/765311/how-can-i-draw-the-plane-and-intersection-curve-on-a-one-sheet-hyperboloid-in-ti
+\begin{document}
+
+\begin{luadraw}{name=hyperboloid_plane2, exec=true, auto=false}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local pi = math.pi
+local g = ld.graph3d:new{ window3d={-3,3,-3,3,-2,2}, window={-5.5,5,-5,4}, 
+    viewdir={"central",45,60}, size={12,12}}
+local P = {M(0,0,1), M(2,0,1)} -- plane 2x+z=1
+local r = function(u,v) return math.cosh(u) end
+local z = function(u,v) return math.sinh(u) end
+local S = ld.cylindrical_surface(r,z,-2,2,-pi,pi,{25,51}) -- hyperboloid
+S = ld.clip3d(S,g:Box3d()) -- to clip S with the current 3D window
+local I = g:Intersection3d(S, P)
+local hOptions = "draw=none,left color=Crimson!20, right color=Crimson!50, fill opacity=0.8"
+local vOptions = "draw=none,left color=Crimson!80, right color=Crimson, middle color=Crimson!50, fill opacity=0.9"
+local S1, S2 = ld.cutfacet(S,P) -- front and behind P
+local S2v, S2h = g:Classifyfacet(S2) -- v=visible, h=hidden
+local S1v, S1h = g:Classifyfacet(S1)
+-- drawing
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="lightgray"})
+g:Dpolyline3d( ld.border(S2h), hOptions) -- part of S behind P
+g:Dpolyline3d( ld.border(S2v), vOptions)
+g:Dfacet( g:Plane2facet(P), {color="blue", opacity=0.6}) -- P
+g:Dpolyline3d( ld.concat(I.visible,I.hidden), "Gold,line width=1.2") -- intersection
+g:Dpolyline3d( ld.border(S1h), hOptions) -- part of S front of P
+g:Dpolyline3d( ld.border(S1v), vOptions)
+g:Show()
+\end{luadraw}
+\end{document}

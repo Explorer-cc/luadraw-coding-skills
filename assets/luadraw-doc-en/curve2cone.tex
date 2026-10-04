@@ -1,0 +1,15 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Elliptical Cone Example)
+\begin{luadraw}{name=curve2cone}
+local ld = luadraw
+local O, M = ld.pt3d.Origin, ld.pt3d.M
+local cos, sin, pi = math.cos, math.sin, math.pi
+local g = ld.graph3d:new{ window3d={-2,2,-4,4,-3,3}, window={-5.5,5.5,-5.5,5},
+    size={10,10}, viewdir="central"}
+local f = function(t) return M(2*cos(t),4*sin(t),-3) end -- ellipse in the plane z=-3
+local C, bord = ld.curve2cone(f,-pi,pi,O,{nbdiv=2, ratio=-1})
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray"})
+g:Dpolyline3d(bord[1],"red,line width=2.4pt") -- bottom edge
+g:Dfacet(C, {mode=ld.mShadedOnly,color="LightBlue"}) -- cone
+g:Dpolyline3d(bord[2],"red,line width=0.8pt") -- upper edge
+g:Show()
+\end{luadraw}

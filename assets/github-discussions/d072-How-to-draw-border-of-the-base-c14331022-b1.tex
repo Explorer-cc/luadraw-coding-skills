@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/72#discussioncomment-14331022 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/612373/how-to-draw-this-cone
+\begin{luadraw}{name=special_cone2}
+local g = graph3d:new{window={-2,4,-2,5},viewdir={-40,70},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local a = 3
+local O,A,B,C=M(0,0,0), M(a,0,0),M(0,a,0),M(0,0,a)
+local I = (A+B+C)/3
+local R = pt3d.abs(I-A)
+g:Dcone(O,I,R,{color="orange"})
+g:Dcircle3d(I,R,-I,"red,line width=0.8pt") -- << just add this line
+g:Dpolyline3d({{O,A},{O,B},{O,C},{A,B,C,A}})
+g:Dpolyline3d({{O,I}},"dashed")
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{pos="E"}, "$C$",C,{pos="N"},"$O$",O,{pos="S"},"$I$",I,{pos="E"})
+g:Ddots3d({O,A,B,C,I})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,33 @@
+% source: https://github.com/pfradin/luadraw/discussions/203#discussioncomment-17266483 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=cylinder_ellipsoid}
+  local ld = luadraw
+  local pt3d = ld.pt3d
+  local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+  local g = ld.graph3d:new{size={10,10}, viewdir = {50, 55},  bbox=false}
+  local a = 1.5  
+  local b = 1.0  
+  local r = 0.1   
+  local theta = math.asin(r / b)
+  local p = function(t) 
+    return M(a * math.cos(t), b * math.sin(t), 0) 
+  end
+  local L = ld.parametric3d(p, theta, math.pi - theta)[1]
+  local A, B = L[1], L[#L]
+  local C = ld.linspace(B,A,10)
+  table.remove(C,1)
+  local S = ld.rotline( ld.concat(L,C), {Origin, vecI}, 0, 360, {nbdots=40})
+  g:Dfacet(S, {
+      usepalette = {ld.palRainbow, "z"},
+      edgestyle = "noline",
+      twoside = false,
+      backcull = false, 
+      opacity=0.8
+    })
+  g:Show()
+\end{luadraw}
+\end{document}

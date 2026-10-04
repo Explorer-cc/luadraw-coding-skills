@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/87#discussioncomment-14434252 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=two_cylinders}
+local g = graph3d:new{size={12,12},window={-6,6,-3,3},viewdir={30,70}}
+local R = 1.5
+local C1 = cylinder(-5*vecJ,R,5*vecJ,45,true)
+local C2 = cylinder(-5*vecI,R,5*vecI,45,true)
+local P1 = {Origin,vecI+vecJ}
+local I1 = g:Intersection3d(C1,P1)
+local P2 = {Origin,vecI-vecJ}
+local I2 = g:Intersection3d(C1,P2)
+local L1 = scale3d( concat(I1.visible,I1.hidden), 1.01) -- To “peel off” the polygonal line from the facets.
+local L2 = scale3d( concat(I2.visible,I2.hidden), 1.01)
+
+g:Dscene3d(
+    g:addPoly(C1, {color="Chocolate",contrast=0.5}),
+    g:addPoly(C2, {color="Chocolate",contrast=0.5}),
+    g:addPolyline( concat(L1,L2), {hidden=true,color="blue",width=8})
+    )
+g:Show()
+\end{luadraw} 
+\end{document} 

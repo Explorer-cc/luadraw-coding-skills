@@ -1,0 +1,25 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-linprog.tex (demo: The \emph{ld.linprogSolve3d())
+\begin{luadraw}{name=linear_prog3}
+local ld = luadraw
+local cpx = ld.cpx
+local pt3d = ld.pt3d
+local Z, M = cpx.Z, pt3d.M
+local O, I, J, K = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{ window={-2,2,-3,3}, size={10,12,0},window3d={0,3,0,2,0,4.5}, 
+    viewdir={"central",-35,65,15,M(1.5,1,2.25)}}
+require 'luadraw_linprog'
+local C = {'2*x+3*y+z<5', '4*x+4*y+2*z<9', '3*x+4*y+2*z<8'}
+local poly, sol = ld.linprogSolve3d(C,0,5,0,5,0,5,{"5*x+4*y+3*z"})
+local P = sol[1].maxplane
+local A = sol[1].maxdot
+local max = sol[1].max
+g:Dboxaxes3d({grid=true,gridcolor="LightGray",fillcolor="lightgray", drawbox=true})
+g:Dscene3d(
+    g:addPlane(P, {color="blue", edge=true, opacity=0.3, scale=1}),
+    g:addPoly(poly, {color="Crimson",opacity=0.7, edge=true, edgecolor="Gold", edgewidth=8}),
+    g:addDots(A, {scale=0.75, color="white"})
+    )
+g:Dlabel3d("Max=$"..max.."$", A, {pos="N", dir={I,K}, node_options="text=white"})
+g:Dpolyline3d({ld.pz(A), A, ld.px(A)}, "white")
+g:Show()
+\end{luadraw}

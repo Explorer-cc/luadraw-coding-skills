@@ -1,0 +1,57 @@
+% source: https://tex.stackexchange.com/a/760396 (question 760391, score 6, block 1)
+% Source - https://tex.stackexchange.com/q/760391
+% Posted by Octavius, modified by community. See post 'Timeline' for change history
+% Retrieved 2026-03-03, License - CC BY-SA 4.0
+
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{tikz}
+\begin{document}
+
+\begin{luadraw}{name=paraboloid}
+
+local g = graph3d:new{
+    window3d = {-2,2,-2,2,0,8},
+    window = {-4.5,4,-3,9.5},
+    size = {10,10,0},
+    viewdir = perspective("central",30,50,20)
+}
+g:Labelsize("small")
+local t = 1.5
+
+-- Surface
+local S = cartesian3d(function(x,y) return x^2+y^2 end, 2,-2,-2,2)
+-- we cut the surface S with the yz plane to manage the visible and hidden parts of the axes.
+local S1, S2 = cutfacet(S, {Origin,-vecI})
+
+-- Direction
+local c = Origin
+local u = M(1,0,0)
+local N = pt3d.prod(u, vecK)
+
+-- Intersection curve
+local Curve = g:Intersection3d(S, {c,N})
+
+-- Draw surface and axes
+g:Dpolyline3d({{-2*vecI,2*vecI},{-2*vecJ,2*vecJ}}, "-stealth") -- x-axis and y-axis
+g:Dfacet(S1, {usepalette={palGasFlame,"z"}, edgecolor="gray", clip=true})
+g:Dseg3d({Origin,8*vecK},"-stealth") --z-axis
+g:Dfacet(S2, {usepalette={palGasFlame,"z"}, edgecolor="gray", clip=true})
+g:Dpolyline3d({{-2*vecI,2*vecI},{-2*vecJ,2*vecJ},{Origin, 8*vecK}}, "dotted,-stealth") -- axes
+
+-- Draw curve
+g:Dedges(Curve, {hidden=true, color="Navy", width=12})
+
+g:Dseg3d({t*vecI,M(t,0,t^2)},"dotted")
+g:Dseg3d({c,c+u}, "->") 
+g:Ddots3d({c,t*vecI, M(t,0,t^2)},"scale=0.75")
+
+g:Dlabel3d( "$c$", c, {pos="S"}, "$u$", c+u/2, {}, "$t$", t*vecI, {},
+ "$F(t)$", M(t,0,t^2), {pos="W",node_options="Navy"}, "$x$",2*vecI,{pos="S"},
+ "$y$",2*vecJ,{}, "$z$",8*vecK,{pos="N"}
+)
+g:Show()
+\end{luadraw}
+\end{document}

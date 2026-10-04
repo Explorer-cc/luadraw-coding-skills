@@ -1,0 +1,43 @@
+% source: https://tex.stackexchange.com/a/761765 (question 143123, score 5, block 1)
+% Source - https://tex.stackexchange.com/a/760979
+% Posted by Explorer
+% Retrieved 2026-03-18, License - CC BY-SA 4.0
+
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\begin{document}
+\begin{luadraw}{name=calabi_yau}
+local g = graph3d:new{ 
+    window3d={-1.5,1.5,-1.5,1.5,-1.5,1.5}, 
+    window={-2.5,2.5,-2.5,2.5},
+    size={12,12}, viewdir={45,65} }
+g:Labelsize("footnotesize")
+local options =  { mode = mShadedOnly, usepalette = {palRainbow, "z"}, contrast = 1.5, twoside = false }
+local pi, sin, cos = math.pi, math.sin, math.cos
+local n, alpha = 5, 0.3*pi
+local all_facets = {}
+local num = 1
+for k1 = 0, n - 1 do
+    for k2 = 0, n - 1 do
+    local function cy(u, v)
+        u = u^3 -- u^3 is better than u
+        local w = Z(u,v)
+        local z1, z2
+        local cw = cpx.cosh(w)
+        local sw = cpx.sinh(w)
+        local r1 = cpx.exp(cpx.I * (2 * pi * k1 / n))
+        local r2 = cpx.exp(cpx.I * (2 * pi * k2 / n))
+        z1, z2 = r1 * cpx.pow(cw, 2/n), r2 * cpx.pow(sw, 2/n)
+        local x, z, y = z2.re, z1.re, cos(alpha) * z1.im + sin(alpha) * z2.im
+        return M(x, y, z)
+    end
+  
+    insert(all_facets,surface(cy, -1,1, 0, pi/2, {22, 18}))
+    end
+end
+g:Dboxaxes3d({ grid=true, fillcolor="lightgray", xyzstep=0.5, zlabelstyle="W", zlabelsep=0, ylabelsep=0.375})
+g:Dfacet(all_facets, options)
+g:Show()
+\end{luadraw}
+\end{document}

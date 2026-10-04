@@ -1,0 +1,22 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Clipping Example)
+\begin{luadraw}{name=polygon_with_different_line_color_and_rounded_corners}
+local ld = luadraw
+local g = ld.graph:new{window={-5,5,-5,5},size={10,10}}
+local i = ld.cpx.I
+local Dcolored_polyreg = function(c,a,nb,r,wd,colors)
+-- c=center, a=vertex, nb=number of sides, r=radius, wd=width in point, colors=list of colors
+    local L = ld.polyreg(c,a,nb)
+    table.append(L,{r,"cla"}) --polygon with rounded corners (radius=r)
+    local angle = 360/nb
+    local b = a
+    for k = 1, nb do
+        a = b; b = ld.rotate(a,angle,c)
+        g:Beginclip({2*a-c,c,2*b-c,"l"}) -- definition of an angular sector for clipping
+        g:Dpath(L,"line width="..wd.."pt,color="..colors[k])
+        g:Endclip()
+    end
+end
+Dcolored_polyreg(3+2*i,5+2*i,5,0.8,12,{"red","blue","orange","green","yellow"}) -- pentagon
+Dcolored_polyreg(-2.5-2*i,-5-2*i,7,1,24,ld.getpalette(ld.palGasFlame,7)) -- heptagon
+g:Show()
+\end{luadraw}

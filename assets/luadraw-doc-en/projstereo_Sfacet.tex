@@ -1,0 +1,30 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc-en-Ext-spherical.tex (demo: Stereographic Projection of a Circle and a Spherical Facet)
+\begin{luadraw}{name=projstereo_Sfacet}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M = pt3d.M
+require 'luadraw_spherical'
+local sM = ld.sM
+local g = ld.graph3d:new{window={-7,10,-8,4}, size={10,10}, viewdir={10,70}}
+local O, R = M(0,0,0), 3
+g:Define_sphere( {color="orange", opacity=0.7} )
+local A, B, C, D, N = sM(-10,90), sM(0, 50), sM(50,65), sM(50,120), sM(0,0)
+local F = {A,B,C,D}
+local p = ld.projstereo(F, {O,R}, N, -R)
+local T1 = ld.projstereo_Sfacet(F, N, -R)
+local T2 = ld.projstereo_Scircle(ld.plane(A,B,C), N, -R)
+g:Dplane({M(2,2,-R), M(0,0,1)}, M(0,1,0), 12.5,24.5, "fill=lightgray")
+g:DSpolyline( {{N,A},{N,B},{N,C},{N,D}}, {color="gray", hidden=false})
+g:DSfacet(F, {fill="cyan"})
+g:DScircle(ld.plane(A,B,C), {color="red"})
+g:DSstars({A,B,C,D,N}, {fill="black"})
+g:Dspherical()
+g:Dpath3d(T1, "fill=cyan!30")
+g:Dpath3d(T2, "red")
+for k,A in ipairs(F) do 
+    g:Dpolyline3d( {A,p[k]}, "gray")
+end
+g:Ddots3d(p)
+g:Dlabel3d("$N$",N,{pos="N"})
+g:Show()
+\end{luadraw}

@@ -1,0 +1,104 @@
+% source: https://github.com/pfradin/luadraw/discussions/183#discussioncomment-15647828 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=axes}
+local frac = function(val, max)  -- converts val to a fraction (string for TeX)
+    max = max or 10000 -- to stop if the process is too long
+    local sg, den =  "", 1
+    if val < 0 then sg = "-"; val = -val end
+    local num = val
+    while (den <= max) and (math.abs(num-nearest(num))>1e-8) do den = den+1; num = val*den end
+    if den > max then 
+        return sg..strReal(val) -- failure
+    else
+        num, den = simplifyFrac(nearest(num), den)
+        if num == 0 then return 0
+        elseif den > 1 then 
+            return sg.."\\frac{"..num.."}{"..den.."}"
+        else
+            return sg..num
+        end
+    end
+end
+
+local tosqrt = function(val)
+    local x = math.sqrt(val)
+    local n = nearest(x)
+    if (math.abs(x-n)<=1e-8) then return n
+    else
+        local rep = frac(val)
+        if rep == 0 then return 0
+        else 
+            return "\\sqrt{"..rep.."}" 
+        end
+    end
+end
+
+local distpointplane = function(point, plane)
+    local A, n = table.unpack(plane)
+    local d2 = pt3d.dot(A-point,n)^2 / pt3d.abs2(n)
+    return tosqrt(d2)
+end
+
+local distpointline3d = function(point, line)
+    local A, u = table.unpack(line)
+    local v = point - A
+    local d2 = pt3d.abs2(pt3d.prod(v, u)) / pt3d.abs2(u)
+    return tosqrt(d2)
+end
+
+local distpointpoint3d = function(A, B)
+    local d2 = pt3d.abs2(B - A)
+    return tosqrt(d2)
+end
+
+local distlineline3d = function(line1, line2)
+    local A, u = table.unpack(line1)
+    local B, v = table.unpack(line2)
+    local n = pt3d.prod(u, v)
+    local d2 = pt3d.dot(B - A, n)^2 / pt3d.abs2(n)
+    return tosqrt(d2)
+end
+
+
+function graph3d:Dcoord3d(...)
+    local args = {}
+    local name, dot
+    for k, aux in ipairs{...} do
+        if k%3 == 1 then
+            name = aux
+        elseif k%3 == 2 then
+            dot = aux
+        else
+            insert(args,{"$"..name.."("..frac(dot.x)..","..frac(dot.y)..","..frac(dot.z)..")$", dot, aux})
+        end
+    end
+    self:Dlabel3d(table.unpack(args))
+end
+local a = 1
+local A,B,C,D,S = M(0,0,0),M(a,0,0),M(a,a,0),M(0,2*a,0),M(0,0,3*a)
+local G = (A+B+S)/3
+local P = pyramid( {A,B,C,D}, S)
+local K = dproj3d(A,{S,S-D})
+local lineSD = {S, D-S} 
+local Q = {S, pt3d.prod(S-C,S-D)}
+local H = proj3d(G,Q)
+local x1,x2,y1,y2,z1,z2 = getbounds3d( {A,B,C,D,S} ) -- 3d bounding box
+local dl = math.max(x2-x1,y2-y1,z2-z1) + 1 -- the greatest length, plus one
+
+local g = graph3d:new{window3d={x1,x2+1,y1,y2+1,z1,z2+1}, adjust2d=true, viewdir={20,70},size={10,10}}
+Hiddenlinestyle = "dashed";Hiddenlines = true;
+
+g:Dpolyline3d({{x1*vecI,(x1+dl)*vecI},{y1*vecJ,(y1+dl)*vecJ},{z1*vecK,(z1+dl)*vecK}}, "arrows={-Stealth[scale=1.5]}") -- axes
+g:Dpoly(P, {color="orange", mode=mShadedHidden})
+ g:Dlabel3d("$S$",S,{pos="W"},"$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{pos="S"}, "$H$",H,{pos="S"}, "$G$",G,{},"$x$",(x1+dl)*vecI,{pos="S"},"$y$",(y1+dl)*vecJ,{pos="S"},"$z$",(z1+dl)*vecK,{pos="E"})
+g:Ddots3d({A,B,C,D,S,G,H})
+g:Dlabel3d( "$\\mathrm d(G,(SCD))="..distpointplane(G,Q).."$", (G+H)/2, {pos="E"})
+g:Dlabel3d( "$\\mathrm d(A,SD)="..distpointline3d(A,lineSD).."$", (S+D)/2, {pos="W"})
+g:Dlabel3d( "$SA="..distpointpoint3d(A,S).."$", (S+A)/2, {pos="W"})
+g:Show()
+\end{luadraw}
+\end{document}  

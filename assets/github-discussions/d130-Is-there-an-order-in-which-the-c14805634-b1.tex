@@ -1,0 +1,37 @@
+% source: https://github.com/pfradin/luadraw/discussions/130#discussioncomment-14805634 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=sorted_spheres}
+local g = graph3d:new{window={-1.5,4.25,-2.5,4.5},size={10,10}, viewdir={30,70}}
+local sqrt = math.sqrt
+local A,B,C = M(0,0,0), M(0,2,0), M(sqrt(3),1,0) -- not M(1,sqrt(3),0)
+local H = (B+C)/2 -- useful ?
+local G = (A+B+C)/3
+local S = M(G.x,G.y,sqrt(69)/3) -- not M(1/3, (2+sqrt(3))/3, sqrt(69)/3)
+local R = 1
+local spheres = {}
+
+local add_sphere = function(param) -- to add a sphere in list
+    local coef = pt3d.dot(param[1],g.Normal)
+    table.insert(spheres,{coef,param})
+end
+-- we add the spheres in list
+add_sphere( {A,R,{color="Orange", mode=2,opacity=0.8}} ) -- paramaters of sphere A
+add_sphere( {B,R,{color="Blue",mode=2, opacity=0.8}} )
+add_sphere( {C,R,{color="Red",mode=2, opacity=0.8}} )
+add_sphere( {S,2*R,{color="Green",mode=2,opacity=0.8}} )
+-- we sort the list
+table.sort(spheres, function(e1,e2) return e1[1] < e2[1] end)  -- we compare coef to sort spheres list
+-- we can draw
+for _, obj in ipairs(spheres) do
+    g:Dsphere(table.unpack(obj[2]))
+end
+g:Ddots3d({A,B,C,G,H,S})
+g:Dpolyline3d( {{A,S},{B,S},{S,C},{A,G},{B,G},{G,C},{A,B,C,A}}, "dashed")
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{},"$C$",C,{pos="S"},"$S$",S,{pos="N"},"$G$",G,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document} 

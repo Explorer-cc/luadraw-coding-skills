@@ -1,0 +1,38 @@
+% source: https://github.com/pfradin/luadraw/discussions/278#discussioncomment-17241026 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=tilt_cylinder}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{window3d={-5,5,-5,5,-5,10},window={-6,6,-2,6},viewdir={"yz",0.45,50},size={10,10}}
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+local R = 1.75
+local A = 0.2*vecK
+local cyl_normal = M(0,1,3)
+local B = A + 1.5*cyl_normal
+local Cyl = ld.cylinder(A,R,cyl_normal,B,100, true)
+local P = {Origin,vecK}
+local P_bottom = {A,cyl_normal}
+local Cyl1 = ld.cutfacet(Cyl, P)
+local Cyl1V, Cyl1H = g:Classifyfacet(Cyl1)
+local angle = cpx.arg( g:Proj3dV(cyl_normal) )*ld.rad
+local I = g:Intersection3d(Cyl, P)
+local I1, I2 = I.visible[1][1], I.hidden[1][#I.hidden[1]]
+local I3 = 2*A-I2+1.5*cyl_normal
+
+g:Dplane(P,vecI,6,10,15,"fill=magenta!20")
+g:Dpolyline3d( ld.border(Cyl1H), "left color=orange!25, right color=orange!50")
+g:Dpolyline3d( ld.border(Cyl1V), "left color=orange!25, right color=orange, middle color=orange!10, shading angle="..angle)
+g:Dcylinder(A,R,cyl_normal,B, {mode=ld.mWireframe, edgestyle="dashed"})
+g:Dedges(I, {hidden=true, visible=false})
+g:Ddots3d({A, B, I1, I2, I3} )
+g:Dpolyline3d({I1,I2},"teal,dashed")
+g:Dpolyline3d({I1,I3}, "dashed")
+g:Dlabel3d( "$A$", I1, {pos="S"}, "$B$", I2, {pos="N"}, "$C$", I3, {}, "$O_1$",A,{pos="W"}, "$O_2$",B,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

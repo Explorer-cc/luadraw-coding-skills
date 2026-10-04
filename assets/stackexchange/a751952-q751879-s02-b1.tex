@@ -1,0 +1,38 @@
+% source: https://tex.stackexchange.com/a/751952 (question 751879, score 2, block 1)
+\documentclass[border=5pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/751879/sequence-of-venn-diagrams-2-sets-and-3-sets-as-subfigures
+\begin{document}
+\begin{luadraw}{name=sequence_of_venn_diagrams}
+local g = graph:new{window={0,16,0,4},margin={0,0,0,0}}
+g:Labelsize("footnotesize")
+local i = cpx.I
+local A, B, C, U = set(i,0), set(-2-i,25), set(2-i,-25), {-6-6*i,6-6*i,6+6*i,-6+6*i,"l","cl"}
+local C1, C2, C3 = path(A), path(B), path(C) -- conversion chemin -> liste de complexes
+
+local draw = function(L, legend)
+    g:Dpolyline(L,true,"draw=none,fill=lightgray,even odd rule")
+    g:Dpath(U); g:Dpath(A); g:Dpath(B); g:Dpath(C)
+    g:Dlabel("$U$",-6+6*i,{pos="NE"},"$A$",4.75*i,{pos="N"},"$B$",-4+3*i,{pos="W"},"$C$",4+3*i,{pos="E"},
+    legend,-6.5-6.5*i,{})
+end
+
+g:Saveattr(); g:Viewport(0,4,0,4); g:Coordsystem(-7,7,-7,7)
+draw( {setminus(cap(C1,C2),C3), setminus(cap(C1,C3),C2), setminus(cap(C3,C2),C1)}, "a...." )
+g:Restoreattr()
+
+g:Saveattr(); g:Viewport(4,8,0,4); g:Coordsystem(-7,7,-7,7)
+draw( {setminus(C1,C2), setminus(C2,C1)}, "b...." )
+g:Restoreattr()
+
+g:Saveattr(); g:Viewport(8,12,0,4); g:Coordsystem(-7,7,-7,7)
+draw( {setminus(C1,cup(C2,C3)), setminus(C3,cup(C1,C2))}, "c...." )
+g:Restoreattr()
+
+g:Saveattr(); g:Viewport(12,16,0,4); g:Coordsystem(-7,7,-7,7)
+draw( concat(path(U)[1], cup(C1,cup(C2,C3))), "d...." )
+g:Restoreattr()
+g:Show()
+\end{luadraw}
+\end{document}

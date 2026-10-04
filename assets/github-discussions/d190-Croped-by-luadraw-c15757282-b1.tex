@@ -1,0 +1,48 @@
+% source: https://github.com/pfradin/luadraw/discussions/190#discussioncomment-15757282 (pfradin, block 1)
+\documentclass{standalone}
+
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+\begin{luadraw}{name = palette}
+local PAL = palRainbow
+
+local WIDTH = 10
+
+local PALSIZE  = #PAL
+local PALDIM   = .6
+local PALDELTA = .1
+
+local g = graph:new{
+  window = {-WIDTH - 5, WIDTH + 5, -5, 4.4},
+  bbox   = false
+}
+
+g:Linewidth(2)
+g:Labelsize("footnotesize")
+
+local A = Z(-WIDTH, 4)
+local v = Z(0, -PALDIM)
+
+for k = 1, PALSIZE do
+  local color = rgb(PAL[k])
+
+  g:Drectangle(
+    A, A + PALDIM, A + PALDIM + v,
+    "color = black, fill = " .. color
+  )
+
+  g:Dlabel(
+    "$" .. k .. "$",
+    A + PALDIM / 2,
+    {pos = "N", node_options="inner sep=0pt, outer ysep=0.5pt"}
+  )
+
+  A = A + PALDIM + PALDELTA
+end
+
+g:Show()
+\end{luadraw}
+
+\end{document}

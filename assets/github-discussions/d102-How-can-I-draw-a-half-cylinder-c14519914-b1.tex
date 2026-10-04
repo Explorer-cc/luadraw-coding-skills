@@ -1,0 +1,37 @@
+% source: https://github.com/pfradin/luadraw/discussions/102#discussioncomment-14519914 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=half_cylinder}
+local g = graph3d:new{size={10,10},viewdir={70,60}}
+Hiddenlines = true; Hiddenlinestyle = "dashed"
+
+function graph3d:addHalf_cylinder(A,r,B,n,options)
+-- n is a vector which must be orthogonal to B-A
+-- the cylinder is cuted by the plane {A,n}
+    local Cyl = cylinder(A,r,B,150)
+    local P, w = {A,n}, B-A
+    Cyl = cutpoly(Cyl,P)
+    local L = self:Outline(Cyl)
+    L = concat(L.visible,L.hidden)
+    n = r*pt3d.normalize(n)
+    local B1, B2 = rotate3d(B+n,-90,{B,w})
+    local B2 = 2*B-B1
+    local A1, A2 = B1-w, B2-w
+    local ret = {}
+    insert(ret,self:addPoly(Cyl,options))
+    insert(ret,self:addPolyline(L,{color=options.edgecolor,width=options.edgewidth}))
+    insert(ret, g:addArc(B1,B,B2,r,1,w) )
+    insert(ret, g:addArc(A1,A,A2,r,1,w) )
+    return ret
+end
+
+local r,h = 3,4
+g:Dscene3d(
+    g:addHalf_cylinder(M(0,-h/2,1.5),r,M(0,h/2,1.5),vecK,{color="orange"}),
+    g:addHalf_cylinder(M(0,0,-5),1,M(0,0,-1),-vecI,{color="SteelBlue"})
+)
+ g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/761563 (question 709668, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/709668/how-is-it-possible-to-draw-2-merging-spherical-caps-with-tikz
+\begin{document}
+\begin{luadraw}{name=spheres_intersection}
+local g = graph3d:new{window3d={-4,8,-4,4,0,4}, 
+    viewdir=perspective("central",45,60,25), 
+    window={-7.5,5,-5,4}, size={12,12}}
+local R, h = 2.5, 1
+local x0 = 3.5
+local pi = math.pi
+local S1 = surface(function(u,v) return Ms(R,u,v) end, pi, -pi, 0, pi/2,{40,30})
+S1 = cutfacet(S1, {h*vecK, vecK})
+local S2 = shift3d(S1, x0*vecI)
+local I = g:Intersection3d(S2, {M(x0,0,0),vecI})
+local J = g:Intersection3d(S1, {M(0,0,0),vecI})
+local A, n, r, r2 = x0/2*vecI, vecI, math.sqrt(R^2-x0^2/4), math.sqrt(R^2-h^2)
+S1 = cutfacet(S1, {A,-n})
+S2 = cutfacet(S2, {A,n})
+S1a, S1b = g:Classifyfacet(S1)
+S2a, S2b = g:Classifyfacet(S2)
+g:Dfacet( g:Plane2facet({h*vecK, vecK},0.75), {color="Beige"})
+g:Dpolyline3d(border(S1b), "ball color=blue!50,opacity=0.6")
+g:Dpolyline3d({{M(-3,0,h), M(7,0,h)}, {M(0,-4,h), M(0,4,h)}, {M(0,0,h), 4*vecK}}, '->')
+g:Dpolyline3d(border(S1a), "ball color=blue, opacity=0.6")
+g:Dpolyline3d(border(S2b), "ball color=green!50, opacity=0.6")
+g:Dpolyline3d({ M(x0,r2,h),M(x0,0,h), M(x0,0,R)} )
+g:Dlabel3d("$H_0$",M(x0,0,(R+h)/2),{pos="E", dir={vecJ,vecK}}, "$R_0$", M(x0,r2/2,h),{pos="S", dir={vecJ,-vecI}})
+g:Dpolyline3d(border(S2a), "ball color=green, opacity=0.6")
+g:Dedges(I, {hidden=true, hiddenstyle="dashed"})
+g:Dedges(J, {hidden=true, hiddenstyle="dashed"})
+g:Dpolyline3d({R*vecK,4*vecK}, '->')
+g:Dlabel3d( "$x$", M(7,0,h),{pos="S"}, "$y$", M(0,4,h), {}, "$z$", M(0,0,4), {pos="N"})
+g:Show()
+\end{luadraw}
+\end{document}

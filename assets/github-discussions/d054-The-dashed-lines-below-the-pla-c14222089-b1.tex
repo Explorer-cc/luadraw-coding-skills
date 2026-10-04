@@ -1,0 +1,29 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222089 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=cube_one_color}
+local g = graph3d:new{window={-6,1.5,-3,5},viewdir={120,70},size={10,10},border=true}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"
+local a, h = 4,4
+local P = parallelep(Origin, a*vecI,a*vecJ,h*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+g:Dpoly(P,{mode=4,color="LightBlue"})
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",F,{}, "$G$",G,{}, "$H$",H,{})
+g:Show()
+\end{luadraw}
+
+\begin{luadraw}{name=cube_several_colors}
+local g = graph3d:new{window={-6,1.5,-3,5},viewdir={120,70},size={10,10}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"
+local a, h = 4,4
+local P = parallelep(Origin, a*vecI,a*vecJ,h*vecK)
+local A,B,C,D,E,F,G,H = table.unpack(P.vertices)
+local F1, F2, F3 = getfacet(P,{1,2}), getfacet(P,{3,4}), getfacet(P,{5,6})
+g:Dmixfacet(F1, {color="ForestGreen"}, F2, {color="blue"}, F3, {color="LightBlue"})
+g:Dpoly(P,{mode=0}) -- if you want hiddenlines
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",F,{}, "$G$",G,{}, "$H$",H,{})
+g:Show()
+\end{luadraw}
+ \end{document} 

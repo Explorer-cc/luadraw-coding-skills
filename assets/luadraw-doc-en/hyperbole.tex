@@ -1,0 +1,21 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Hyperbola: cone-plane intersection)
+\begin{luadraw}{name=hyperbole}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window={-8,6,-9,9},bbox=false, 
+    viewdir={"central",45,65}, size={10,10}}
+ld.Hiddenlinestyle = "dashed"; ld.Hiddenlines = true
+local C1 = ld.cone(Origin,4*vecK,3,35,true)
+local C2 = ld.cone(Origin, -4*vecK,3,35,true)
+local P = {M(1,-1,-2),vecI} -- sectional plane
+local I1 = g:Intersection3d(C1,P) -- intersection between cone C1 and plane P
+local I2 = g:Intersection3d(C2,P) -- intersection between cone C2 and plane P
+-- I1 and I2 are of the Edges type
+g:Dcone(Origin,4*vecK,3,{color="orange"}); g:Dcone(Origin,-4*vecK,3,{color="orange"})
+g:Lineoptions("solid","Navy",8)
+g:Dedges(I1); g:Dedges(I2) -- drawing of edges I1 and I2
+g:Dplane(P, vecK,14,9)
+g:Show()
+\end{luadraw}

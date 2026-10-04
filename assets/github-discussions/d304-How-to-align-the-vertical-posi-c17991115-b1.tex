@@ -1,0 +1,49 @@
+% source: https://github.com/pfradin/luadraw/discussions/304#discussioncomment-17991115 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=tower_frustum}
+    local ld = luadraw
+    local pt3d= ld.pt3d
+    local M = pt3d.M
+    local Origin, vecI, vecJ, vecK = M(0,0,0), M(1,0,0), M(0,1,0), M(0,0,1)
+    local g = ld.graph3d:new{ size={10,10},window={-10,7,0,17}, viewdir = {0,80} }
+
+    local nn = 5
+    local sep, H, r, R = 0.25, 15, 1, 5
+    local funnel_vertex = Origin
+    local H0 = H * r / R
+    local H1 = (H - H0) - sep * (nn - 1)
+    local h0 = H1 / nn
+    local radiusA, radiusB, height = {}, {}, {}
+    for i = 1, nn do
+        lambdaA, lambdaB = (i-1)*(h0+sep)/H1, (i*(h0+sep)-sep)/H1
+        table.insert(radiusA, (1-lambdaA) * r + lambdaA * R)
+        table.insert(radiusB, (1-lambdaB) * r + lambdaB * R)
+        table.insert(height, H0 + (i-1) * (h0+sep))
+    end
+    local palette = ld.palRainbow
+    local Colors = ld.getpalette(palette, nn, true)
+
+    for i = 1, nn do
+        g:Dfrustum(
+            funnel_vertex+(height[i])*vecK, 
+            radiusA[i], 
+            radiusB[i], 
+            funnel_vertex+(height[i] + h0)*vecK,
+            {
+                hiddenstyle="noline", 
+                color=Colors[i],
+                gradside={100,100,100}, 
+                gradsection={100,100,100}
+            }
+        )
+
+        local label_pos = g:Proj3d(funnel_vertex + (height[i] + h0/2)*vecK)-radiusA[i]
+        g:Dlabel("some text",label_pos,{pos="W",dist=0.25})
+    end
+    g:Show()
+\end{luadraw}
+\end{document}

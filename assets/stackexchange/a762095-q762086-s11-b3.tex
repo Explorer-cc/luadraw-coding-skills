@@ -1,0 +1,63 @@
+% source: https://tex.stackexchange.com/a/762095 (question 762086, score 11, block 3)
+\documentclass[]{standalone} % compile with -enable-write18
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+\usepackage{animate}
+
+% images creation
+\begin{luacode*}
+nbimages = 19
+local g = graph3d:new{window3d={-1,1,-1,1,-1,1}, window={-2,5,-2,1.5}, 
+    viewdir=perspective("central",30,60), size={12,12}, bg="white"}
+-- declarations
+local L = {Origin, M(0,1,-1), M(0,1,1)} -- the triangle
+local axis, plane = {Origin, vecK}
+local S = rotline(L, axis, 90, 0, {close=true, nbdots=10})
+table.insert(S, L)
+table.insert(S, reverse( rotate3d(L, 90, axis) ))
+local H = linspace(-1,1,nbimages)
+-- create the image number k, this function must be global
+function makeframe(k) -- do not modify this line
+    -- draw image number k here
+    local z = H[k]
+    local vz = math.abs(z)
+    plane = {z*vecK, vecK}
+    local S1, S2 = cutfacet(S, plane)
+    local section 
+    if vz>1e-4 then
+        section = {M(0,1,z),"m",z*vecK,M(-1,0,z),1,1,"ca",M(-vz,0,z),"l",z*vecK,M(0,vz,z),math.abs(z),1,"ca",M(0,1,z),"l","cl"}
+    else
+        section = {M(0,1,z),"m",z*vecK,M(-1,0,z),1,1,"ca",M(-vz,0,z),M(0,1,z),"l","cl"}
+    end
+    g:Setviewdir(perspective("central",30,60))
+    g:Dboxaxes3d({grid=true, gridcolor="gray", fillcolor="lightgray"})
+    g:Dfacet(S2, {color="blue!40!white", opacity=0.6, edgewidth=1, edgecolor="blue"})
+    g:Dpath3d(section, "draw=none,pattern=north west lines")
+    g:Dfacet(S1, {color="blue!40!white", opacity=0.6, edgewidth=1, edgecolor="blue"})
+    g:Lineoptions("dotted",nil,6)
+    g:Dcylinder(-vecK,1,vecK, {mode=mWireframe})
+    g:Dpolyline3d({{vecK,-vecK}, {M(-1,0,1),M(1,0,1)}, {M(0,-1,1),M(0,1,1)}})
+    -- right side
+    g:Lineoptions("solid")
+    g:Saveattr(); g:Viewport(1.5,5,-2,1.5); g:Coordsystem(-2,1.5,-2,1.5)
+    g:Setviewdir("xOy")
+    g:Dpath3d(section, "draw=blue!40,pattern=north west lines, pattern color=blue!40")
+    g:Dcircle3d(Origin,1,vecK, "dotted"); g:Dcircle3d(Origin,vz,vecK, "dotted")
+    g:Daxes({0,1,1},{ limits={{-1.5,1.5},{-1.5,1.5}}, originpos={"none","none"}, legend={"$x$","$y$"}, arrows="-stealth",labelshift={0.25,0.25} })
+    g:Restoreattr()
+    -- send image number k
+    g:Sendtotex()  -- do not modify
+    g:Cleargraph() -- do not modify
+end
+\end{luacode*}
+\def\nb{\directlua{tex.print(nbimages)}}
+\def\makeframe#1{\directlua{makeframe(#1)}}%
+
+\begin{document}
+\begin{animateinline}[poster=first,controls,palindrome]{6}
+\multiframe{\nb}{ik=1+1}{%
+\makeframe{\ik}%
+}%
+\end{animateinline}
+\end{document} 

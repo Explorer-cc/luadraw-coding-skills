@@ -1,0 +1,40 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-4-Faceted-Solids.tex (demo: Cone section with multiple views)
+\begin{luadraw}{name=several_views}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+
+local g = ld.graph3d:new{window3d={-3,3,-3,3,-3,3}, size={10,10}, margin={0,0,0,0}}
+g:Labelsize("footnotesize")
+local y0, R = 1, 2.5
+local C = ld.cone(M(0,0,3),-6*vecK,R,35,true) -- open cone
+local P1 = {M(0,0,0),vecK+vecJ} -- first plane
+local P2 = {M(0,y0,0),vecJ} -- second plane
+local I, I2
+local dessin = function() -- one drawing per view
+    g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray"})
+    I1 = g:Intersection3d(C,P1) -- intersection entre le cône C et les plans P1 et P2
+    I2 = g:Intersection3d(C,P2) -- I1 and I2 are the Edges type
+    g:Dpolyline3d( {{M(0,-3,3),M(0,0,3),M(0,0,-3),M(3,0,-3)}, {M(0,0,-3),M(0,3,-3)}},"red,line width=0.4pt" )
+    g:Dcone( M(0,0,3),-6*vecK,R, {color="cyan"})
+    g:Dedges(I1, {hidden=true,color="Navy", width=8})
+    g:Dedges(I2, {hidden=true,color="DarkGreen", width=8})
+end
+-- In the upper left corner, the view in space, we add the plans to the drawing
+g:Saveattr(); g:Viewport(-5,0,0,5); g:Coordsystem(-7,6,-6,5,1); g:Setviewdir("central"); dessin()
+g:Dpolyline3d( {M(-3,-3,3),M(3,-3,3),M(3,3,-3),M(-3,3,-3)},"Navy,line width=0.8pt")
+g:Dpolyline3d( {M(-3,y0,3),M(3,y0,3),M(3,y0,-3)},"DarkGreen,line width=0.8pt")
+g:Dlabel3d( "$P_1$",M(3,-3,3),{pos="SE",dir={-vecI,-vecJ+vecK},node_options="Navy, draw"})
+g:Dlabel3d( "$P_2$",M(-3,y0,3),{pos="SW",dir={-vecI,vecK},node_options="DarkGreen,draw"})
+g:Restoreattr()
+-- top right, projection onto the xy-plane
+g:Saveattr(); g:Viewport(0,5,0,5); g:Coordsystem(-6,6,-6,5,1); g:Setviewdir("xOy"); dessin()
+g:Restoreattr()
+-- bottom left, projection onto the xz-plane
+g:Saveattr(); g:Viewport(-5,0,-5,0); g:Coordsystem(-6,6,-6,5,1); g:Setviewdir("xOz"); dessin()
+g:Restoreattr()
+-- bottom right, projection onto the yz-plane
+g:Saveattr(); g:Viewport(0,5,-5,0); g:Coordsystem(-6,6,-6,5,1); g:Setviewdir("yOz"); dessin()
+g:Restoreattr()
+g:Show()
+\end{luadraw}

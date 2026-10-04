@@ -1,0 +1,26 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc3d-en-section-3-Graphics-Methods.tex (demo: Viewing Angles)
+\begin{luadraw}{name=viewdir}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK 
+local g = ld.graph3d:new{ size={8,8} }
+local i, M = ld.cpx.I, ld.pt3d.M
+local O, A = Origin, M(4,4,4)
+local B, C, D, E = ld.pxy(A), ld.px(A), ld.py(A), ld.pz(A) --projected from A onto the xOy plane and onto the axes
+g:Dpolyline3d( {{O,A},{-5*vecI,5*vecI},{-5*vecJ,5*vecJ},{-5*vecK,5*vecK}}, "->") -- axes
+g:Dpolyline3d( {{E,A,B,O}, {C,B,D}}, "dashed")
+g:Dpath3d( {C,O,B,2.5,1,"ca",O,"l","cl"}, "draw=none,fill=cyan,fill opacity=0.8") --angular sector
+g:Darc3d(C,O,B,2.5,1,"->") -- arc de cercle pour theta
+g:Dpath3d( {E,O,A,2.5,1,"ca",O,"l","cl"}, "draw=none,fill=cyan,fill opacity=0.8") --angular sector
+g:Darc3d(E,O,A,2.5,1,"->") -- arc of a circle for phi
+g:Dballdots3d(O) -- the point of origin in the form of a small sphere
+g:Labelsize("footnotesize")
+g:Dlabel3d(
+  "$x$", 5.25*vecI,{}, "$y$", 5.25*vecJ,{}, "$z$", 5.25*vecK,{},
+  "towards the observer", A, {pos="E"},
+  "$O$", O, {pos="NW"},
+  "$\\theta$", (B+C)/2, {pos="N", dist=0.15},
+  "$\\varphi$", (A+E)/2, {pos="S",dist=0.25})
+g:Dlabel('viewdir=\\{"ortho",$\\theta,\\varphi$\\} (in degrees)',-5*i,{pos="N"}) -- label 2D
+g:Show()
+\end{luadraw}

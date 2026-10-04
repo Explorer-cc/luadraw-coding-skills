@@ -1,0 +1,36 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222102 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=solid_circle}
+local g = graph3d:new{window={-6.5,6.5,-6,6},viewdir={-70,60},bg="lightgray",size={12,12}}
+g:Linejoin("round"); Hiddenlinestyle = "dashed"
+local S = function(x) return 1.5-math.sin(x/2) end
+local a, x, b, d = -4, 0, 4, 3
+local A, B, X = M(a,0,0), M(b,0,0), M(x,0,0)
+local Pa, Px, Pb = {A,vecI}, {X,vecI}, {B,vecI}
+local v = rotate3d(vecK,-30,{Origin,vecI})
+local C, D = A+S(a)*v, A-S(a)*v
+local p1 = function(t) return t*vecI+S(t)*v end
+local p2 = function(t) return t*vecI-S(t)*v end
+local C1 = parametric3d( p1, a, b, 20, false, 2)
+local C2 = parametric3d( p2, a, b, 20, false, 2)
+g:Dscene3d(
+    g:addPlane(Pa,{edge=true,color="Beige",contrast=0.25,opacity=0.8}),
+    g:addPlane(Px,{edge=true,color="Beige",contrast=0.25,opacity=0.8}),
+    g:addPlane(Pb,{edge=true,color="Beige",contrast=0.25,opacity=0.8}),
+    g:addLine({A-d*vecK,vecI}),
+    g:addPolyline(C1, {width=8, color="darkgray"}),
+    g:addPolyline(C2, {width=8, color="darkgray"})
+)
+g:Dcircle3d(A,S(a),vecI)
+g:Dcircle3d(X,S(x),vecI,"fill=gray")
+g:Dcircle3d(B,S(b),vecI)
+g:Dpolyline3d({{A,A-d*vecK}, {X,X-d*vecK},{B,B-d*vecK}}, "dashed")
+g:Dlabel3d("$a$",A-d*vecK,{pos="S"}, "$x$",X-d*vecK,{},"$b$",B-d*vecK,{},
+    "$P$", M(a,3.75,3.75),{pos="SW",dir={vecJ,vecK},node_options="draw"},
+    "$Q$", M(b,3.75,3.75),{})
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/751611 (question 751606, score 15, block 1)
+\documentclass[10pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/751606/plotting-functions-without-sampling-artefacts
+\begin{document}
+\begin{luadraw}{name=surface_artefact}
+local g = graph3d:new{window3d={0,1,0,1,-1.5,0},window={-0.25,1.5,-2,0.5},size={10,10},viewdir={-50,60}}
+g:Labelsize("footnotesize")
+local p = function(y,z) return M(-z^2+math.tan(y),y,z) end -- parametrization x=tan(y)-z^2
+local q = function(y,z) return M(z^2+math.tan(y),y,z) end  -- parametrization x=tan(y)+z^2
+local s1 = surface(p, 0,1,-1,0,{30,30})  -- first part
+s1 = cutfacet(s1,{Origin,vecI}) -- to keep x>=0
+s1 = cutfacet(s1,{vecI,-vecI})  -- to kepp x<=1
+local s2 = surface(q, 0,1,-1,0,{30,30})  -- second part
+s2 = cutfacet(s2,{vecI,-vecI})  -- to keep x<=1
+
+g:Dboxaxes3d({grid=true,gridcolor="gray",fillcolor="LightGray",zstep=0.5,ystep=0.5,xstep=0.5,drawbox=true})
+g:Dfacet(s1, {color="Gold",opacity=0.8})
+g:Dfacet(s2, {color="Gold",opacity=0.8})
+g:Dparametric3d( function(t) return M(math.tan(t),t,0) end, {t={0,math.pi/4},draw_options="line width=0.8pt,red"})
+g:Dlabel3d( "$x=\\tan(y)$", M(math.tan(0.5),0.5,0),{pos="N",node_options="red"})
+g:Show()
+\end{luadraw}
+\end{document}

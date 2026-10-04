@@ -1,0 +1,46 @@
+% source: https://tex.stackexchange.com/a/762981 (question 705118, score 5, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/705118/draw-a-foliation-on-the-sphere
+\begin{document}
+\begin{luadraw}{name=foliation}
+local ld = luadraw
+local pt3d = ld.pt3d
+local cpx = ld.cpx
+local Z, M = cpx.Z, pt3d.M
+
+local g = ld.graph3d:new{viewdir={10,70}, window={-3,3,-3,3}, size={12,12}}
+require 'luadraw_spherical'
+ld.Hiddenlines = true; ld.Hiddenlinestyle= "dashed"; g:Linewidth(6)
+g:Define_sphere({color="orange=!30"})
+local R, A, B, C, D = 3, ld.sM(-45,90), ld.sM(45,90), ld.sM(135,90), ld.sM(-135,90)
+local A1 = ld.projstereo(A, {M(0,0,0),R}, M(-R,0,0), -R)
+local c = -A1.y
+
+local curve = function(b)
+    local a = math.sqrt(c^2+b^2)
+    local f = function(t) -- ellipse in the plane x=R (with foci y=c and y=-c)
+        return M(R,a*math.cos(t), b*math.sin(t))
+    end
+    local t1, t2 = -math.pi, math.pi
+    if b == 0 then t1 = 0 end
+    --we bring the ellipse onto the sphere by stereography
+    return ld.inv_projstereo(ld.parametric3d(f,t1,t2,100), {M(0,0,0),R}, M(-R,0,0))
+end
+
+-- drawing
+for _, b in ipairs({0,1,1.5}) do
+    local L = curve(b)
+    g:DScurve(L, {color="red"})
+    g:DScurve( ld.rotate3d(L,90,{M(0,0,0),M(0,0,1)}), {color="blue"})
+    g:DScurve( ld.rotate3d(L,180,{M(0,0,0),M(0,0,1)}), {color="red"})
+    g:DScurve( ld.rotate3d(L,-90,{M(0,0,0),M(0,0,1)}), {color="blue"})
+end
+g:DSstars({A,B, C, D}, {color="green"})
+g:DSbigcircle({M(R,0,0),M(0,0,R)}, {color="blue"})
+g:Dspherical()
+g:Show()
+\end{luadraw}
+\end{document}

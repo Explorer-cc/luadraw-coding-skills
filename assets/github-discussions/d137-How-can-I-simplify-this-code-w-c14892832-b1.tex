@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/137#discussioncomment-14892832 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=box23}
+local x = 1.3
+local win2d = {-5,10,-8,1.5}
+local g = graph3d:new{window3d={0,7+2*x,0,10+2*x,-1,1}, margin={0,0,0,0},window={-5,5,-5,5},viewdir={30,70}, size={12,12}}
+Hiddenlines = true; Hiddenlinestyle = "dashed" 
+
+local draw_box = function(alpha, beta) -- angles of rotation
+    local A, B, C, D, E, F, G = M(0,x,0), M(x,x,0), M(2*x,x,0), M(2*x,0,0), M(7+2*x,0,0), M(7+2*x,x,0), M(7+3*x,x,0)
+    local N, M, L, K, J, I, H = table.unpack( sym3d({A,B,C,D,E,F,G}, {M(0,5+x,0),vecJ}) )
+    A,B,M,N = table.unpack (rotate3d({A,B,M,N}, alpha, {C,vecJ}) ) --first we rotate A,B,M,N around (CL)
+    A,N = table.unpack (rotate3d({A,N}, beta, {B,vecJ}) ) -- then we rotate A,N around (BM)
+    D,E = table.unpack (rotate3d({D,E}, alpha, {C,-vecI}) ) -- and so on
+    G,H = table.unpack (rotate3d({G,H}, alpha, {F,-vecJ}) )
+    J,K = table.unpack (rotate3d({J,K}, alpha, {I,vecI}) )
+    local facets = {{A,N,M,B},{B,M,L,C},{C,L,I,F},{D,C,F,E},{F,I,H,G},{L,K,J,I} }
+    g:Dscene3d(
+        g:addFacet(facets, {color="Orange",edge=true}))
+end
+
+-- first (top left)
+g:Saveattr(); g:Viewport(-5,0,0,5); g:Coordsystem(table.unpack(win2d))
+draw_box(0,0)
+g:Restoreattr()
+
+-- second (top right)
+g:Saveattr(); g:Viewport(0,5,0,5); g:Coordsystem(table.unpack(win2d))
+draw_box(20,45)
+g:Restoreattr()
+
+-- third (bottom left)
+g:Saveattr(); g:Viewport(-5,0,-5,0); g:Coordsystem(table.unpack(win2d))
+draw_box(45,90)
+g:Restoreattr()
+
+-- fourth (bottom right)
+g:Saveattr(); g:Viewport(0,5,-5,0); g:Coordsystem(table.unpack(win2d))
+draw_box(70,130)
+g:Restoreattr()
+
+g:Show() 
+\end{luadraw}
+\end{document}

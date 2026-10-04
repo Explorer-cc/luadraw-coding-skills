@@ -1,0 +1,32 @@
+% source: https://github.com/pfradin/luadraw/discussions/292#discussioncomment-17659187 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=sphere}
+local ld = luadraw
+require 'luadraw_spherical'
+local pt3d = ld.pt3d
+local M, Mc, O, vecK,vecJ, vecI = pt3d.M, pt3d.Mc, pt3d.Origin,  pt3d.vecK,pt3d.vecJ,pt3d.vecI
+local sin, cos, pi, sqrt = math.sin, math.cos, math.pi, math.sqrt
+local g = ld.graph3d:new{window={-6,8,-6,8},viewdir={30,60},size={10,10}}
+ld.Hiddenlinestyle = "dashed"
+ld.Hiddenlines = true
+g:Linewidth(6)
+local R = 5
+local N, S,D = M(0,0,R), M(0,0,-R),M(0,0,R+2)
+ local kox,koy,koz= 6, 2, 4
+local cos, sin, sqrt = math.cos, math.sin, math.sqrt
+g:Define_sphere({radius=R, arrowBstyle="{-Stealth[scale=1.5]}"})
+g:DScircle( {O,vecK},{color="red"} )
+g:DScircle( {O,vecJ},{color="blue"} )
+g:DScircle( {O,vecI},{color="green"} )
+g:DSpolyline( {{O, M(R+kox,0,0)},{O, M(0,R+koy,0)},{ M(0,0,-R), M(0,0,R+koz)}}, {arrows=1,hidden=true})
+g:Dspherical()
+g:Darc3d(D+vecJ+vecI,D,D+vecI,0.5,1,vecK,"arrows={->[scale=0.75]}") 
+g:Dlabel3d("$O$",O,{pos="S"},"$x$",O + (kox +R)*vecI,{pos="SW"},"$y$",O+(R+koy)*vecJ,{pos="E"},"$z$",O+(R+koz)*vecK,{pos="E"})
+g:Ddots3d({O,S,N})
+--g:Dlabel3d("$N$",N,{pos="N"},"$O$",O,{pos="W"},"$S$",S,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,38 @@
+% source: https://tex.stackexchange.com/a/748925 (question 161588, score 6, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=cutted_sphere1}
+local g = graph3d:new{window={-5,5,-5,5},viewdir={30,25},size={10,10}}
+g:Linejoin("round")
+local R, h = 4, 3.5
+local S = poly2facet( sphere(Origin,R,35,35) )
+S = cutfacet(S, {h*vecK,-vecK}) -- to cut the top of S
+S = cutfacet(S, {-h*vecK,vecK}) -- to cut the bottom of S
+local V, H = g:Classifyfacet(S)
+local rainbow = {Purple,Indigo,Blue,Green,Yellow,Orange,Red}
+local facet_listH, facet_listV = {}, {}
+for _,F in ipairs(H) do
+    local z = isobar3d(F).z
+    local index = (z+h)/(2*h)
+    table.insert(facet_listH,F)
+    table.insert(facet_listH, {color=palette(rainbow,index,true)})
+end
+for _,F in ipairs(V) do
+    local z = isobar3d(F).z
+    local index = (z+h)/(2*h)
+    table.insert(facet_listV,F)
+    table.insert(facet_listV, {color=palette(rainbow,index,true),opacity=0.6})
+end
+
+g:Dmixfacet( table.unpack(facet_listH) )
+local r = math.sqrt(R^2-h^2)
+g:Dpoly( cylinder(M(0,0,-h),2*h*vecK,r,35,true), {mode=5,color="DarkGray",contrast=0.5})
+g:Dmixfacet( table.unpack(facet_listV) )
+g:Show()
+\end{luadraw}
+
+
+\end{document}

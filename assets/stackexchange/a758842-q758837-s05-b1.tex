@@ -1,0 +1,20 @@
+% source: https://tex.stackexchange.com/a/758842 (question 758837, score 5, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/758837/how-to-thicken-the-subpaths-segment-with-specific-position
+\begin{document}
+\begin{luadraw}{name=thick_subpath}
+local g = graph:new{window={-1,7,-1,2}, margin={0,0,0,0}, size={10,10}, bbox=true}
+local p = {0,Z(3,3),Z(4,-1),6,"b"}
+local C = path(p) -- conversion to polyline
+local f = curvilinear_param(C) -- f is a function and C = {f(t); t in [0;1]}
+local options = "cyan,line width=3pt"
+g:Dgrid({Z(-1,-1),Z(7,2)})
+g:Dpath(p,"red,thick")
+g:Dparametric(f,{t={0.3,0.5}, draw_options=options})
+g:Dparametric(f,{t={0.75,0.9}, draw_options=options})
+g:Show()
+\end{luadraw}
+\end{document}

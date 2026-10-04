@@ -1,0 +1,82 @@
+% source: https://tex.stackexchange.com/a/754350 (question 754333, score 13, block 1)
+\documentclass{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{luadraw}%https://github.com/pfradin/luadraw/
+%https://tex.stackexchange.com/questions/754333/i-want-a-command-which-can-take-two-arbitrary-ellipses-and-shade-the-region-bet
+\begin{document}
+\begin{luadraw}{name=two_ellipse}
+local g = graph:new{window={-5,5,-3,6}}
+local i,sin,cos,pi = cpx.I, math.sin,math.cos,math.pi
+-- ellipse 1 (E1) : center c1, half axes a1 (directed by the vector u1) and b1
+-- ellipse 2 (E2) : center c2, half axes a2 (directed by the vector u2) and b2
+local c1,a1,b1,u1 = -1,4,2,1+i/2 -- (E1)
+local c2,a2,b2,u2 -- (E2)
+local example = function(k) -- to choose (E2)
+    if k == 1 then -- (E2) inside (E1)        
+        c2,a2,b2,u2 = 0.5+i/2, 1.5, 1, 1-i 
+    elseif k == 2 then -- (E2) outside (E1)
+        c2,a2,b2,u2 = 2+4*i, 1.5, 1, 1-i
+    elseif k == 3 then -- (E2) cuts (E1) in 2 points
+        c2,a2,b2,u2 = -1+2*i, 2, 1, 1-i
+    elseif k == 4 then -- (E2) cuts (E1) in 4 points
+        c2,a2,b2,u2 = 2*i, 4, 1, 1-i 
+    end
+end
+example(2) -- we choose a example
+u1 = u1/cpx.abs(u1); u2 = u2/cpx.abs(u2)
+-- we will place ourselves in the coordinate system {c1,u1,i*u1}, where the ellipse (E1) has the equation x^2/a1^2+y^2/b1^2=1
+local matrix = {c1,u1,i*u1}
+local invm = invmatrix(matrix)
+c2 = applymatrix(c2,invm) -- center of the ellipse (E2) in the new coordinate system
+u2 = applyLmatrix(u2,invm) -- major axis of the ellipse (E2) in the new coordinate system
+local alpha = cpx.arg(u2)*rad -- inclination of (E2) in the new coordinate system
+
+local p = function(t) -- parametrization of (E2)
+    return c2+a2*cos(t)*u2+b2*sin(t)*i*u2
+end
+local dp = function(t) -- derivation
+    return -a2*sin(t)*u2+b2*cos(t)*i*u2
+end
+local ps = function(z1,z2) -- dot product related to (E1)
+    return z1.re*z2.re/a1^2+z1.im*z2.im/b1^2
+end
+local N2 = function(z) -- squared norm
+    return ps(z,z)
+end
+-- Let A=p(t) and u=dp(t), we seek t such that the equation N2(A+lambda*u)=1 has a single solution lambda, the discriminant must be zero.
+local T = solve(function(t) return ps(p(t),dp(t))^2-N2(dp(t))*(N2(p(t))-1) end, -pi, pi)
+if T == nil then T = {} end
+local sol = {}
+for _,t in ipairs(T) do
+    local lambda = -ps(p(t),dp(t))/N2(dp(t)) -- solution double
+    local A, u = p(t), dp(t)
+    local B = A+lambda*u
+    --there are 4 common tangents; you must select those for which the two centers are on the same side.
+    if cpx.dot(A,i*u)*cpx.dot(A-c2,i*u) >=0 then
+        insert(sol,{A,B})
+    end
+end
+-- now we draw
+g:Setmatrix(matrix) -- to return to the initial coordinate system
+if #sol > 0 then
+    print(#sol)
+    local A,D,B,C = table.unpack(sol) -- first solution, the four points must be arranged in the correct order.
+    local sens = -1;
+    if cpx.det(B-A,D-A)<0 then sens = 1 end
+    g:Dpath( {A,c2,B,a2,b2,sens,alpha,"ea",C,"l",0,D,a1,b1,sens,"ea","cl"}, "draw=none,fill=Pink");
+    g:Lineoptions(nil,"blue",8); g:Dellipse(0,a1,b1); g:Dellipse(c2,a2,b2,alpha)
+    g:Linecolor("ForestGreen")
+    g:Dline(A,D); g:Dline(B,C)
+    for k = 5, #sol-1, 2 do -- other tangents solutions ?
+        g:Dline(sol[k],sol[k+1],"gray,dashed")
+    end
+    g:Dlabel("$(E_1)$",0,{}, "$(E_2)$",c2,{},
+        "$A$", A, {pos="S",dist=0}, "$B$",B,{pos="N"}, "$C$",C,{}, "$D$",D,{pos="S"})
+else
+    g:Lineoptions(nil,"blue",8); g:Dellipse(0,a1,b1); g:Dellipse(c2,a2,b2,alpha)
+    g:Dlabel("$(E_1)$",-a1,{pos="W"}, "$(E_2)$",c2+b2*i*u2,{pos="E"}, "no solution",-3*i,{pos="N"})
+end
+g:IDmatrix()
+g:Show()
+\end{luadraw}
+\end{document}

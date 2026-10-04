@@ -1,0 +1,52 @@
+% source: https://github.com/pfradin/luadraw/discussions/323#discussioncomment-18236397 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=spherical_triangles}
+require 'luadraw_spherical'
+require 'luadraw_decorations'
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin = pt3d.Origin
+local g = ld.graph3d:new{
+    window3d = {-4.5,4.5,-4.5,4.5,-4.5,4.5},
+    window = {-4.5,4.5,-4.5,4.5},
+    viewdir = {30,65}
+}
+g:Define_sphere{edgestyle = "noline"}
+
+function ld.graph3d:DSangle(B,A,C,r,sens,options)
+    A = ld.toSphere(A); B = ld.toSphere(B); C = ld.toSphere(C); 
+    local Ct, R = Origin, 3 --<-- there was a bug here (C instead of Ct) (Ct=center, R=radius)
+    local alpha = r/R*ld.rad
+    local C1 = ld.rotate3d(A, alpha, {Ct,pt3d.prod(A-Ct,C-Ct)})
+    local B1 = ld.rotate3d(A, alpha, {Ct,pt3d.prod(A-Ct,B-Ct)})
+    self:Begindeferred() -- drawn at the end of the graph
+        self:Darc3d(B1,A,C1,r,sens,options)
+    self:Enddeferred()
+end
+
+sM = ld.sM
+local A,B,C = sM(30,25), sM(-20,80), sM(80,85)
+
+g:DSfacet({A,B,C}, {fill = "blue!50",color = "blue",fillopacity=0.7,width=10})
+
+local options = function(name)
+    return {label=name, dist=0.5, pos="center", arc_options="line width=1"}
+end
+g:DSangle(B,A,C,1,1, options("$\\alpha$"))
+g:DSangle(A,B,C,1,1,options("$\\beta$"))
+g:DSangle(A,C,B,1,1,options("$\\gamma$"))
+
+g:Dspherical()
+g:Dballdots3d({A,B,C},"black",1.5)
+g:Dlabel3d(
+    "$B$",B,{pos="SW"},
+    "$C$",C,{pos="SE"},
+    "$A$",A,{pos="N",dist=0.1}
+)
+g:Show()
+\end{luadraw}
+\end{document}

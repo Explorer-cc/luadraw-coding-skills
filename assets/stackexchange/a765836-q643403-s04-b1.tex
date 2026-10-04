@@ -1,0 +1,34 @@
+% source: https://tex.stackexchange.com/a/765836 (question 643403, score 4, block 1)
+\documentclass{standalone}
+\usepackage{fourier-otf}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+%https://tex.stackexchange.com/questions/643403/how-to-draw-a-shaded-boundary-using-tikz
+\begin{luadraw}{name=shaded_boundary}
+local ld = luadraw
+local M, vecI, vecJ = ld.pt3d.M, ld.pt3d.vecI, ld.pt3d.vecJ
+local g = ld.graph3d:new{ window3d={0,5,0,5,0,5}, adjust2d=true, viewdir={-20,70}, size={10,10} }
+local a = -2
+local k = function(u,v)
+    local N = math.sqrt(1+v*(a+v))/v
+    return M(1/v + N*math.exp(u), 1/v + N*math.exp(-u), v)
+end
+local S = ld.surface(k,-5,5,1e-4,5,{60,30})
+S = ld.cutfacet(S, {M(5,0,0),-vecI})
+S = ld.cutfacet(S, {M(0,5,0),-vecJ})
+local Sv, Sh = g:Classifyfacet(S)
+local Fx = ld.parametric3d( function(t) return M(5,(t+5+a)/(5*t-1),t) end, (10+a)/24,5)[1]
+local Fy = ld.parametric3d( function(t) return M((t+5+a)/(5*t-1),5,t) end, (10+a)/24,5)[1]
+local Fz = ld.parametric3d( function(t) return M(t,(t+5+a)/(5*t-1),5) end, (10+a)/24,5)[1]
+table.insert(Fx, M(5,5,5)); table.insert(Fy, M(5,5,5)); table.insert(Fz, M(5,5,5))
+g:Dboxaxes3d({grid=true, gridcolor="gray", drawbox=true,zlegendsep=0.25})
+g:Fillopacity(0.8)
+g:Dpolyline3d( Fy, true,"left color=green!20, right color=green")
+g:Dpolyline3d( ld.border(Sh), "left color=cyan!20, right color=cyan")
+g:Dpolyline3d( ld.border(Sv), "left color=blue!30, right color=blue, middle color=blue!25")
+g:Dpolyline3d( Fx, true,"left color=yellow!20, right color=yellow")
+g:Dpolyline3d( Fz, true,"left color=red!20, right color=red")
+g:Show()
+\end{luadraw}
+\end{document}

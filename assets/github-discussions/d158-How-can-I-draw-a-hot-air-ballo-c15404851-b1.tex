@@ -1,0 +1,100 @@
+% source: https://github.com/pfradin/luadraw/discussions/158#discussioncomment-15404851 (pfradin, block 1)
+\documentclass[border=5pt]{standalone} %run lulatex -shell-escape
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usetikzlibrary{shapes.symbols}
+
+\begin{document}
+
+\begin{luadraw}{name=balloon4}
+local i = cpx.I
+local g = graph3d:new{window={-3,3,-1.5,5.5}, margin={0,0,0,0}, bg="LightBlue!50",viewdir={0,90}, size={12,12}}
+require 'luadraw_compile_tex'
+usepackage = "\\usepackage{amsmath,amssymb}\n\\usepackage{fourier}\n\\usepackage[vietnamese]{babel}"
+
+-- we redefine then compile_tex function which will replace that of the extension:
+function compile_tex(text,out)
+    local name = "tex2FlatPs"
+    out = out or name
+    local f = io.open(name..".tex","w")
+    if f ~= nil then
+        f:write(preamble)
+        f:write(usepackage)
+        f:write("\\pagestyle{empty}\n")
+        f:write("\\begin{document}\n")
+        f:write(text.."\n")
+        f:write("\\end{document}\n")
+        f:close()
+        os.execute("pdflatex -interaction=nonstopmode "..name..".tex "..name..".pdf" ) -- here we change lualatex with pdlatex
+        os.execute("pdf2ps "..name..".pdf")
+        os.execute("pstoedit -dt -pta -f ps -psarg  -r2400 "..name..".ps "..out..".eps")
+        os.remove(name..".tex")
+        os.remove(name..".pdf")
+        os.remove(name..".ps")
+        os.remove(name..".log")
+        os.rename(out..".eps", cachedir..out..".eps")
+        os.remove(name..".eps")
+        os.remove(name..".aux")
+    end
+    return read_compiled_tex(out)
+end
+-- Now we can go back to the example
+function curve_on_sphere(curve,sphere,screenNormal)
+    -- curve is a 3d polyline on a sphere,
+    -- sphere = {A,r,B}
+    -- this function separate the visible part from the hidden part of the curve
+    local A,r = table.unpack(sphere)
+    
+    local visibility_function = function(N)
+        return (pt3d.dot(N-A,screenNormal) >= 0)
+    end
+    return split_points_by_visibility(curve,visibility_function)
+end
+
+g:Lineoptions("solid","Navy",12)
+
+local arc = function(u1,u2)
+    return {(u1+u2)/2, u2, cpx.abs(u2-u1)/2, 1, "ca"}
+end
+
+local a, b1, b2, b3, b4, b5 = 5*i, -0.7, -0.5, -0.3, -0.1, 0.1
+local c1,c2,c3,c4,c5 = table.unpack( mtransform({b1,b2,b3,b4,b5}, {-1.125*i,Z(0.6,0),i}) )
+local k = 1.2
+local d1,d2,d3,d4,d5 = b1+k*(c1-b1), b2+k*(c2-b2), b3+k*(c3-b3), b4+k*(c4-b4), b5+k*(c5-b5)
+local path1 = {b1,b1-3+4*i,a-1,a,"b",a+1, -b1+3+4*i,-b1,"b","cl"}
+local path2 = {a,a-1, b2-2.5+3.5*i,b2,"b"}
+local path3 = {a,a-1,b3-1.5+2.5*i,b3,"b"}
+local path4 = {a,a-0.5, b4-0.5+1.5*i,b4,"b"}
+local path5 = concat( {c1,b1,"l"}, arc(b1,b2), arc(b2,b3), arc(b3,b4), arc(b4,b5), arc(b5,-b4), arc(-b4,-b3), arc(-b3,-b2), arc(-b2,-b1),{-c1.re+i*c1.im,"l","cl"})
+local mat = {Z(0,0),Z(-1,0),Z(0,1)} -- symmetry with respect to Oy
+g:Setmatrix({Z(0,0),Z(1.125,0),i}) -- scale 1.25 on Ox
+
+-- cloud
+g:Writeln("\\node[cloud,draw,fill=gray!15,scale=4,aspect=2] at"..g:Coord(Z(-2.5,3)).." {};")
+g:Writeln("\\node[cloud,draw,fill=gray!10,scale=5,aspect=2] at"..g:Coord(Z(1.75,4.5)).." {};")
+g:Writeln("\\node[cloud,draw,fill=gray!50,scale=2,aspect=3] at"..g:Coord(Z(2,-0.5)).." {};")
+g:Writeln("\\node[cloud,draw,fill=gray!50,scale=2,aspect=3] at"..g:Coord(Z(-1.5,1)).." {};")
+g:Dpath(path1, "ball color=orange")
+g:Dpath({-3+4.5*i,-3+5.5*i,-2+5.5*i,1,1,"ca",-3+5.5*i,"l"},"draw=none,fill=Gold")
+-- write on balloon
+local Ct, r = 3.25*vecK, 2.25
+local S = {Ct,r}
+local text = "\\centering Định lý \\par \\(e^{i\\pi}=-1\\)"
+local L = compile_tex(text, "essai") -- compile with shell-escape the first time to create "essai.eps" file
+local C = g:Compiled_tex2path3d(L,{scale=3, anchor=M(r,Ct.y,Ct.z), dir={vecJ,vecK}, polyline=true})
+-- C is the text converted into 3d polylines, in the plane passing through anchor and basic direction dir, with a scale of 3.
+local f = function(A) return Ct+r*pt3d.normalize(A-Ct) end -- returns the image of a point A on the cylinder by winding
+C = ftransform3d(C,f) -- plane curve -> spherical curve transformation
+local Cv = curve_on_sphere(C, S, g.Normal) -- visible part and hidden part of C, this may take some time
+Cv = polyline2path3d(Cv) -- visible part, conversion to path
+g:Dpath3d(Cv, "draw=none, fill=ForestGreen")
+-- end of write on balloon
+g:Dpath(path2); g:Dpath(mtransform(path2,mat))
+g:Dpath(path3); g:Dpath(mtransform(path3,mat))
+g:Dpath(path4); g:Dpath(mtransform(path4,mat))
+g:Dpath(path5, "fill=Maroon")
+g:Drectangle(d3,-d3.re+i*d3.im,d3+0.175*i,"pattern = north east lines")
+g:Dpolyline( {{b1,d1,-d1.re+i*d1.im,-b1},{b2,d2},{b3,d3},{b4,d4},{b5,d5},{-b4,-d4.re+i*d4.im}, {-b3,-d3.re+i*d3.im}, {-b2,-d2.re+i*d2.im}})
+g:Show()
+\end{luadraw}
+\end{document} 

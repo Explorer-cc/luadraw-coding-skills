@@ -1,0 +1,19 @@
+% source: https://github.com/pfradin/luadraw/discussions/139#discussioncomment-14909094 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+\begin{luadraw}{name=AMC_Problems_Problem_20}
+local g = graph3d:new{window={-10,12,-10,12},bbox=false,size={12,12}}
+Hiddenlinestyle = "dashed"; Hiddenlines = true
+local A,B,C,D,E,F,G,H= Origin, M(13,0,0),  M(13,8,0), M(0,8,0), M(3,4,12), M(10,4,12),M(3,4,0),M(10,4,0)
+local L = {A,B,C,D,E,F}
+g:Dscene3d(
+    g:addFacet(cvx_hull3d(L), {color="Orange",edge=true}),
+    g:addPolyline({{E,G},{F,H},{A,G,D},{B,H,C},{H,G}})
+    )
+g:Dlabel3d("$A$",A,{pos="S"}, "$B$",B,{}, "$C$",C,{}, "$D$",D,{},"$E$",E,{pos="N"}, "$F$",F,{}, "$G$",G,{pos="S"}, "$H$",H,{})
+g:Show()
+\end{luadraw}
+\end{document}

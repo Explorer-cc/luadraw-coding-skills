@@ -1,0 +1,7 @@
+# source: https://github.com/pfradin/luadraw/discussions/49#discussioncomment-14153982 (pfradin, block 1)
+Sauvegarde du fichier .tkz : le graphique est exporté au format tikz dans un fichier (avec l’extension tkz), 
+par défaut celui-ci est sauvegardé dans le dossier courant. 
+Mais il est possible d’imposer un chemin spécifique en définissant dans le document,
+la commande \luadrawTkzDir, par exemple : \def\luadrawTkzDir{tikz/},
+ ce qui permettra d’enregistrer les fichiers *.tkz dans le sous-dossier tikz du dossier courant, 
+à condition toutefois que ce sous-dossier existe !

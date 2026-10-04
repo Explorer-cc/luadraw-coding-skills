@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222180 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+
+\begin{luadraw}{name=curvated_cylinder}
+local g = graph3d:new{window={-8,8,-8,8},viewdir={30,60},size={12,12}}
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+
+local r,h = 1.5,4
+local A, B, C, D = M(0,-3,-h), M(0,3,-h), M(0,-1.5,0), M(0,-3,h)
+local u = pt3d.prod(vecK,g.Normal)
+u = r*pt3d.normalize(u)
+local P = {Origin,vecK}
+g:Dpolyline3d({ {M(0,-6,-4.5),M(0,-6,4.5)}, {M(0,-6,h),M(0,-6+0.25,h)},{M(0,-6,0),M(0,-6+0.25,0)}, {M(0,-6,-h),M(0,-6+0.25,-h)}})
+-- bottom cylinder
+g:Lineoptions("solid","orange",8)
+g:Dcylinder(B,h*vecK,r,{mode=0,color="Orange"})
+local C1, C2, A1, A2, t = C-u,C+u,A-u,A+u, 2
+g:Filloptions("gradient","left color=white, right color=orange")
+g:Dpath3d({C1,C1-t*vecK,A1+vecK,A1,"b",A,A2,r,1,vecK,"ca",A2+vecK,C2-t*vecK,C2,"b",C,C1,r,1,vecK,"ca"})
+g:Filloptions("none")
+g:Darc3d(C1,C,C2,r,1,vecK); g:Darc3d(A2,A,A1,r,1,vecK,"dashed")
+--plane
+g:Lineoptions(nil,"Navy",8)
+g:Dplane(P,vecJ,12,8,15,"fill=green,fill opacity=0.5")
+-- top cylinders
+g:Lineoptions("solid","orange",8)
+g:Dcylinder(B+h*vecK,h*vecK,r,{mode=0,color="Orange"})
+A = C; C = D
+local C1, C2, A1, A2, t = C-u,C+u,A-u,A+u, 2
+g:Filloptions("gradient","left color=white, right color=orange")
+g:Dpath3d({C1,C1-vecK,A1+t*vecK,A1,"b",A,A2,r,1,vecK,"ca",A2+t*vecK,C2-vecK,C2,"b",C,C1,r,1,vecK,"ca"})
+g:Filloptions("none")
+g:Darc3d(C1,C,C2,r,1,vecK); g:Darc3d(A2,A,A1,r,1,vecK,"dashed")
+
+g:Dpolyline3d( {{M(0,-6,-h),M(0,6,-h)},{M(0,-6,h),M(0,6,h)}},"red,dashed")
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,47 @@
+% source: https://github.com/pfradin/luadraw/discussions/245#discussioncomment-16867268 (pfradin, block 1)
+\documentclass[border=2 mm]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+
+\begin{luacode*}
+local ld = luadraw
+function ld.critical_points(f,x1,x2)
+    local df = function(x)
+        local h = 1e-6
+        local a, b = ld.evalf(f,x+h), ld.evalf(f,x-h)
+        if (a~=nil) and (b~=nil) then return (a-b)/(2*h) end
+    end
+    return ld.solve(df,x1,x2) -- approximate solutions in [x1;x2] of f'(x)=0
+end
+\end{luacode*}
+
+\begin{document}
+\begin{luadraw}{name=case6}
+local ld = luadraw
+local cpx = ld.cpx
+local Z, i = cpx.Z, cpx.I
+local xmin, xmax, ymin, ymax = -3, 4, -1, 6
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax}}  
+g:Linewidth(6)
+g:Daxes({0,1,1}, {grid=true, arrows="-Stealth", legend={"$x$","$y$"}})
+local f = function(x) return x+2+1/(x-1)  end
+local h = function(x) return x+2 end
+local k = function(x) return 0 end
+local x0 = 1   
+local S = ld.critical_points(f,xmin,xmax)
+local Critic = {}
+for _,x in ipairs(S) do
+    table.insert(Critic, Z(x,f(x)))
+end
+g:Dpolyline({{Z(x0,ymin),Z(x0,ymax)}},"color = blue")
+g:Dpolyline({{Z(2,h(2)),Z(2,f(2))}, {Z(3,h(3)),Z(3,f(3))}},"color = blue")
+g:Dpolyline(Critic,"color = red")
+g:Linecolor("magenta")
+g:Dcartesian(f, {x={xmin, xmax}, discont=true,  nbdiv=10})
+g:Dcartesian(h, {draw_options="blue"}); 
+g:Dinequalities({f,'<', h,'>'}, {view={2,3,3,7},draw_options="draw=none,fill=green,fill opacity=0.6"})
+g:Dinequalities({f,'<', k,'>'}, {view={-2,0.99,-5,2},draw_options="pattern = north east lines"})
+g:Show()
+\end{luadraw}
+\end{document} 

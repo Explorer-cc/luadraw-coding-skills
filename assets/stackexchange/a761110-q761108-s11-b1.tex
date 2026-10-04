@@ -1,0 +1,42 @@
+% source: https://tex.stackexchange.com/a/761110 (question 761108, score 11, block 1)
+% Source - https://tex.stackexchange.com/q/761108
+% Posted by Matthew Leingang
+% Retrieved 2026-03-21, License - CC BY-SA 4.0
+
+% !TEX TS-program = LuaLaTeX
+\documentclass[5pt]{standalone}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=wedge}
+    local a, b, c = 8, 6, 4
+    local xmax, ymax, zmax = a+1, b+1, c+1
+    local g = graph3d:new{
+      window3d = {0,xmax,0,ymax,0,zmax},
+      adjust2d = true,  -- adjust 2D window
+      viewdir = {30,60},
+      size={10,10,0},
+      bbox = false
+    }
+    local xIntcpt, yIntcpt, zIntcpt = M(a,0,0), M(0,b,0), M(0,0,c)
+    local P = M(4,0,0)
+    local Q = interDD({P,vecJ},{xIntcpt,yIntcpt-xIntcpt})
+    local R = interDD({P,vecK},{xIntcpt,zIntcpt-xIntcpt})
+    g:Dpolyline3d({
+        {Origin,xmax*vecI},
+        {Origin,ymax*vecJ},
+        {Origin,zmax*vecK},
+      })
+    g:Dpolyline3d({xIntcpt,yIntcpt,zIntcpt},true,"cyan")
+    g:Dfacet(
+        {P,Q,R},
+        {color="cyan",opacity=0.5, edgecolor="cyan", edgestyle="dashed"}
+      )
+    g:Dlabel3d(
+        "\\(x\\)",P,{pos="NW",dist=0.1},
+        c,zIntcpt,{}, -- options unchanged
+        a,xIntcpt,{}, -- options unchanged
+        b,yIntcpt,{pos="N"} -- pos has changed but not dist
+      )
+    g:Show()
+\end{luadraw}
+\end{document}

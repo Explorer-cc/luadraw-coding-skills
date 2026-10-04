@@ -1,0 +1,19 @@
+% source: luadraw-v3.5/luadraw/doc/src/body-en/luadraw-doc2d-en-section-2-Graphics-Methods.tex (demo: Floor function, Ddomain1 and Ddomain3 functions)
+\begin{luadraw}{name=courbe}
+local ld = luadraw
+local Z = ld.cpx.Z
+local g = ld.graph:new{ window={-5,5,-5,5}, bg="", size={10,10} }
+local f = function(x) return (x-2)^2-2 end
+local h = function(x) return 2*math.cos(x-2.5)-2.25 end
+g:Daxes( {0,1,1},{grid=true,gridstyle="dashed", arrows="->"})
+g:Filloptions("full","brown",0.3)
+g:Ddomain1( math.floor, { x={-2.5,3.5} })
+g:Filloptions("none","white",1); g:Lineoptions("solid","red",12)
+g:Dstepfunction({ld.range(-5,5), ld.range(-5,4)},{draw_options="arrows={Bracket-Parenthesis}"})
+g:Labelcolor("red")
+g:Dlabel("Floor function",Z(-3,3),{node_options="fill=white"})
+g:Ddomain3(f,h,{draw_options="fill=blue,fill opacity=0.6"})
+g:Dcartesian(f, {x={0,5}, draw_options="blue"})
+g:Dcartesian(h, {x={0,5}, draw_options="green"})
+g:Show()
+\end{luadraw}

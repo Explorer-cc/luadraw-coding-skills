@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/291#discussioncomment-17650860 (pfradin, block 1)
+\documentclass[tikz]{standalone}
+\usepackage{fourier-otf}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+
+\begin{document}
+
+\begin{luadraw}{name=saddle_surface}
+local ld = luadraw
+local M = ld.pt3d.M
+local g = ld.graph3d:new{size={10,10},window3d={-2,2,-2,2,-2,2},window={-3,3,-2.5,1.5}, viewdir={-115,60}}
+--window={-2,1.5,-3,1.5}
+local f = function(x,y) return x^2/4-y^2/3 end
+local dot = function(x,y) return M(x,y,f(x,y)) end
+local A, B, C = dot(0,0.5), dot(-1.4,-1.65), dot(1.4,-1.65) -- three points on the surface
+local a, b, c = ld.pxy(A,-2), ld.pxy(B,-2), ld.pxy(C,-2) -- their projections on the z=-2 plane
+local P = ld.prism({a,b,c},M(0,0,4))
+local S = ld.cartesian3d(f,-2,2,-2,2,{30,30})
+local S2 = ld.clip3d(S, P) -- part of S inside P
+g:Dfacet(S,{color="black",mode=ld.mShaded,edge=true,edgecolor="white"})
+g:Dpolyline3d(ld.border(S2),true,"draw=red,line width=1.5pt")
+g:Show()
+\end{luadraw}
+\end{document}

@@ -1,0 +1,17 @@
+% source: https://github.com/pfradin/luadraw/discussions/156#discussioncomment-15104256 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=incenter2}
+local g = graph3d:new{window={-3,3,-2,6.5},viewdir={20,60},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local A, B, C = M(0,0,0), M(3,0,0), M(0,0,5)
+local I, r, n = circumcircle3d(A,B,C)
+g:Dlabel3d( "$A$",A,{pos="E"}, "$B$",B,{pos="W"}, "$C$",C,{pos="W"}, "$I$",I,{pos="SE"})
+g:Dpolyline3d({A,B,C},true)
+g:Darc3d(C,I,B,r,1,n)
+g:Ddots3d(I)
+g:Show()
+\end{luadraw}
+\end{document} 

@@ -1,0 +1,42 @@
+% source: https://github.com/pfradin/luadraw/discussions/278#discussioncomment-17247822 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\begin{document}
+\begin{luadraw}{name=tilt_cylinder}
+local ld = luadraw
+local pt3d, cpx = ld.pt3d, ld.cpx
+local Origin, vecI, vecJ, vecK, M = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M
+local g = ld.graph3d:new{window3d={-5,5,-5,5,-5,10},window={-6,6,-2,7},viewdir={"yz",0.45,50},size={10,10}}
+ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"
+local A = M(2,1,0) -- we choose A 
+local B = ld.sym3d(A, {Origin,vecI}) -- symmetric to A with respect to the plane x=0
+local R, H = pt3d.abs(A), 5 -- radius, height of the cylinder
+local C = -B+H*vecK --diametrically opposite to B
+local alpha = pt3d.angle(C-A,vecK)*ld.rad -- angle between the line (AC) and the vertical
+C = ld.rotate3d(C, alpha, {A, B-A}) --we rotate around (AB) so that the line (AC) becomes vertical
+local cyl_normal = ld.rotate3d(H*vecK, alpha, {Origin, B-A}) -- cylinder direction
+local O1 = ld.rotate3d(Origin, alpha, {A,B-A})
+local O2 = O1 +cyl_normal
+local Cyl = ld.cylinder(O1,R,cyl_normal,O2,100, true)
+local P = {Origin,vecK} -- plane
+local Cyl1 = ld.cutfacet(Cyl, P)
+local Cyl1V, Cyl1H = g:Classifyfacet(Cyl1) -- visible and hiddden part of Cyl1
+local angle = cpx.arg( g:Proj3dV(cyl_normal) )*ld.rad -- for the shading angle
+local I = g:Intersection3d(Cyl, P)
+--drawing
+g:Dplane(P,vecI,7,10,15,"fill=magenta!20,line width=0.6")
+g:Dpolyline3d( ld.border(Cyl1H), "left color=orange!25, right color=orange!50")
+g:Dpolyline3d( ld.border(Cyl1V), "left color=orange!25, right color=orange, middle color=orange!10, shading angle="..angle)
+g:Dcylinder(O1,R,cyl_normal,O2, {mode=ld.mWireframe, edgestyle="dashed"})
+g:Dedges(I, {hidden=true, visible=false})
+g:Ddots3d({O1, O2, A, B, C} )
+g:Dpolyline3d({A,B},"teal,dashed")
+g:Dpolyline3d({A,C}, "dashed")
+g:Dlabel3d( "$A$", A, {pos="SW"}, "$B$", B, {pos="N"}, "$C$", C, {}, "$O_1$", 
+    O1,{pos="W"}, "$O_2$",O2,{pos="N"})
+g:Dplane(P,vecI,7,10,15,"dashed,line width=0.4")
+g:Show()
+\end{luadraw}
+\end{document}

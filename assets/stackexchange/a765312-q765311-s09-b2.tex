@@ -1,0 +1,39 @@
+% source: https://tex.stackexchange.com/a/765312 (question 765311, score 9, block 2)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/765311/how-can-i-draw-the-plane-and-intersection-curve-on-a-one-sheet-hyperboloid-in-ti
+\begin{document}
+
+\begin{luadraw}{name=hyperboloid}
+local ld = luadraw
+local pt3d = ld.pt3d
+local Origin, vecI, vecJ, vecK, M, Mc = pt3d.Origin, pt3d.vecI, pt3d.vecJ, pt3d.vecK, pt3d.M, pt3d.Mc
+local ch, sh, pi = math.cosh, math.sinh, math.pi
+local g = ld.graph3d:new{ window3d={-3,3,-3,3,-2,2}, viewdir={45,60}, 
+    window={-4,4,-3.5,3.5}, size={12,12}}
+require 'luadraw_povray'
+ld.Hiddenlinestyle = "dashed"; g:Linewidth(6)
+local P = {M(0,0,1), M(2,0,1)} -- 2x+z=1
+local p = function(u,v) 
+    return Mc(ch(u),v,sh(u)) 
+end
+local S = ld.surface(p,-2,2,-pi,pi,{25,51}) -- hyperboloid
+local I = g:Intersection3d(S, P)
+local L = ld.clippolyline3d( ld.concat(I.visible,I.hidden), g:Box3d() )
+g:Pov_new()
+g:Pov_plane(P, {color=ld.Pink, edge=true, scale=1})
+g:Pov_surface(p, -2,2,-pi,pi, { grid={25,51}, color=ld.Crimson, clip=true})
+g:Pov_polyline(L, {color=ld.Blue, width=8})
+g:Pov_axes(Origin, {arrows=1})
+g:Pov_exec() -- compile with --shell-escape option
+g:Pov_show()
+g:Dlabel3d( "$x$",3*vecI,{pos="W"},"$y$",3*vecJ,{pos="E"},"$z$",2*vecK,{pos="N"})
+g:Linewidth(4) -- hiddenlines
+g:Dpolyline3d({{-3*vecI,3*vecI},{-3*vecJ,3*vecJ},{-2*vecK,2*vecK}}, "dashed")
+g:Dpolyline3d(L, "blue,dashed")
+g:Dpolyline3d( g:Plane2facet(P), true, "dashed")
+g:Show()
+\end{luadraw}
+\end{document}

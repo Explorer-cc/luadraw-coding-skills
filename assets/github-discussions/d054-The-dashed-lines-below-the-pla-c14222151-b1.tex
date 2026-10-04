@@ -1,0 +1,23 @@
+% source: https://github.com/pfradin/luadraw/discussions/54#discussioncomment-14222151 (pfradin, block 1)
+\documentclass[12pt]{standalone}%compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage{fouriernc}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+%https://tex.stackexchange.com/questions/729038/drawing-latitudinal-line-on-a-sphere-associated-with-a-given-angle-of-elevation
+\begin{document}
+\begin{luadraw}{name=dom}
+local g = graph3d:new{window={-5,5,-5,5},viewdir={30,70},size={10,10}}
+local i = cpx.I
+g:Linejoin("round"); g:Linewidth(6); Hiddenlines = true; Hiddenlinestyle = "dashed"
+local P = {-2*vecK,vecK}
+local S = sphere(Origin,3)
+local I = g:Intersection3d(S,P)
+local V = I.visible[1]
+local A, B = V[#V], V[1] 
+g:Dsphere(Origin,3,{color="LightBlue",mode=2})
+g:Dedges(I,{hidden=true,color="red"})
+g:Ddots3d({A,B})
+g:Dlabel3d( "$A$",A,{pos="SW"},"$B$",B,{pos="SE"})
+g:Show()
+\end{luadraw}
+\end{document}

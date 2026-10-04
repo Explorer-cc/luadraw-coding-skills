@@ -1,0 +1,142 @@
+% source: https://github.com/pfradin/luadraw/discussions/183#discussioncomment-15651638 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+%%%%%%%%%%%%%
+% uses luacas and xintfrac
+\usepackage{luacas}
+\usepackage{xintfrac}
+%% TeX  macros for distance calculs, 
+%% The parameters must be of the form M(x,y,z) only, luacas must parse and convert the numbers x, y and z.
+%% The formulas are explained so that the calculations can be performed by luacas.
+\def\distpointpoint#1#2{%
+\begin{CAS}
+vars('y')
+local A, B = #1, #2
+local d = (B.x-A.x)^2+(B.y-A.y)^2+(B.z-A.z)^2
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+\def\distpointplane#1#2#3{%
+\begin{CAS}
+vars('y')
+local A, B, n = #1, #2, #3
+local d = ( (B.x-A.x)*n.x + (B.y-A.y)*n.y + (B.z-A.z)*n.z)^2 / (n.x^2+n.y^2+n.z^2)
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+\def\distpointline#1#2#3{%
+\begin{CAS}
+vars('y')
+local A, B, v = #1, #2, #3
+local u = M(A.x-B.x,A.y-B.y,A.z-B.z)
+local n = M(u.y*v.z-v.y*u.z, u.z*v.x-v.z*u.x, u.x*v.y-v.x*u.y)
+local d = (n.x^2+n.y^2+n.z^2) / (v.x^2+v.y^2+v.z^2)
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+
+
+\def\distlineline#1#2#3#4{%
+\begin{CAS}
+vars('y')
+local A, u, B, v = #1, #2, #3, #4
+local n = M( u.y*v.z-v.y*u.z, u.z*v.x-v.z*u.x, u.x*v.y-v.x*u.y)
+local d =  ((B.x-A.x)*n.x+(B.y-A.y)*n.y+(B.z-A.z)*n.z)^2 / (n.x^2+n.y^2+n.z^2)
+local a = simplify( SqrtExpression( d, 2 ) )
+tex.print(a:tolatex())
+\end{CAS}
+}%
+% end of TeX macros
+%%%%%%%%%%%
+
+\begin{document}
+\begin{luadraw}{name=axes}
+local frac = function(val, max)  -- converts val to a fraction " sign A / B"
+    max = max or 10000 -- to stop if the process is too long
+    if val == nil then return "" end
+    local sg, den =  "", 1
+    if val < 0 then sg = "-"; val = -val end
+    local num = val
+    while (den <= max) and (math.abs(num-nearest(num))>1e-8) do den = den+1; num = val*den end
+    if den > max then 
+        return sg..strReal(val) -- failure
+    elseif den == 1 then
+        return sg..nearest(num)
+    else
+        return sg..nearest(num).."/"..den
+    end
+end
+
+local tofrac = function(A) -- converts the coordinates of A
+    return "M("..frac(A.x)..","..frac(A.y)..","..frac(A.z)..")"
+end
+
+local distpointpoint3d = function(A, B)
+    return "\\distpointpoint{"..tofrac(A).."}{"..tofrac(B).."}"
+end
+
+local distpointplane = function(point, plane)
+    local A, n = table.unpack(plane)
+    return "\\distpointplane{"..tofrac(point).."}{"..tofrac(A).."}{"..tofrac(n).."}"
+end
+
+local distpointline3d = function(point, line)
+    local A, u = table.unpack(line)
+    return "\\distpointline{"..tofrac(point).."}{"..tofrac(A).."}{"..tofrac(u).."}"
+end
+
+local distlineline3d = function(line1, line2)
+    local A, u = table.unpack(line1)
+    local B, v = table.unpack(line2)
+    return "\\distlineline{"..tofrac(A).."}{"..tofrac(u).."}{"..tofrac(B).."}{"..tofrac(v).."}"
+end
+
+function graph3d:Dcoord3d(...)
+    local args = {}
+    local name, dot
+    for k, aux in ipairs{...} do
+        if k%3 == 1 then
+            name = aux
+        elseif k%3 == 2 then
+            dot = aux
+        else
+            insert(args,{"$"..name.."(\\xintTeXsignedFrac {"..frac(dot.x).."},\\xintTeXsignedFrac {"..frac(dot.y).."},\\xintTeXsignedFrac {"..frac(dot.z).."})$", dot, aux})
+        end
+    end
+    self:Dlabel3d(table.unpack(args))
+end
+local a = 1.5
+local A,B,C,D,S = M(0,0,0),M(a,0,0),M(a,a,0),M(0,2*a,0),M(0,0,3*a)
+local G = (A+B+S)/3
+local P = pyramid( {A,B,C,D}, S)
+local K = dproj3d(A,{S,S-D})
+local lineSD = {S, D-S} 
+local Q = {S, pt3d.prod(S-C,S-D)}
+local H = proj3d(G,Q)
+local x1,x2,y1,y2,z1,z2 = getbounds3d( {A,B,C,D,S} ) -- 3d bounding box
+local dl = math.max(x2-x1,y2-y1,z2-z1) + 1 -- the greatest length, plus one
+
+print(distlineline3d({A,B-A},{S,D-S}))
+
+local g = graph3d:new{window3d={x1,x2+1,y1,y2+1,z1,z2+1}, adjust2d=true, viewdir={20,70}, size={10,10}, margin={1.5,1.5,0,0.25}}
+Hiddenlinestyle = "dashed";Hiddenlines = true;
+
+g:Dpolyline3d({{x1*vecI,(x1+dl)*vecI},{y1*vecJ,(y1+dl)*vecJ},{z1*vecK,(z1+dl)*vecK}}, "arrows={-Stealth[scale=1.5]}") -- axes
+g:Dpoly(P, {color="orange", mode=mShadedHidden})
+ g:Dlabel3d("$A$",A,{pos="S"}, "$H$",H,{pos="S"}, "$G$",G,{},"$x$",(x1+dl)*vecI,{pos="S"},"$y$",(y1+dl)*vecJ,{pos="S"},"$z$",(z1+dl)*vecK,{pos="E"})
+g:Ddots3d({A,B,C,D,S,G,H})
+g:Dlabel( "$\\mathrm d(G,(SCD))="..distpointplane(G,Q).."$", Z(2,5) , {pos="E"},
+    "$\\mathrm d(A,SD)="..distpointline3d(A,lineSD).."$", Z(2,4), {},
+    "$\\mathrm d(AB,SD)="..distlineline3d({A,B-A},lineSD).."$", Z(2,3), {},
+    "$SA="..distpointpoint3d(A,S).."$", Z(2,2), {})
+g:Dcoord3d("S",S,{pos="E"}, "C",C,{pos="S"}, "B",B,{pos="W"}, "D",D,{pos="S"})
+g:Show()
+\end{luadraw}
+\end{document}  

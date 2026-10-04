@@ -1,0 +1,53 @@
+% source: https://tex.stackexchange.com/a/763996 (question 130802, score 3, block 1)
+\documentclass[border=5pt]{standalone}% compile with lualatex only
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}%https://github.com/pfradin/luadraw
+\usepackage{fourier-otf}
+%https://tex.stackexchange.com/questions/750541/pyramid-with-colors
+\begin{document}
+\begin{luadraw}{name=Dcontour130802}
+local ld = luadraw
+local cpx = ld.cpx
+local x1, x2, y1, y2 = 1, 3, 74, 86
+
+local g = ld.graph:new{window={x1-0.25,x2+0.65,y1-2,y2+2},size={14,10,0},bbox=false}
+require 'luadraw_shadedforms'
+local Z, cos = cpx.Z, math.cos
+local z = 0
+local f = function(x,y) return -2.051^3*1000/(2*3.1415*(2.99*10^2)^2)/(x^2*cos(y*ld.deg)^2)-z end
+local function bounds(f,x1,x2,y1,y2,grid)
+    grid = grid or {50,50}
+    local nbx, nby = table.unpack( grid )
+    local Min, Max = math.huge, -math.huge
+    local x, xstep, ystep, y = x1, (x2-x1)/(nbx-1), (y2-y1)/(nby-1)
+    for _ = 1, nbx do
+        y = y1
+        for _ = 1, nby do
+            local s = ld.evalf(f,x,y)
+            if s ~= nil then
+                if s < Min then Min = s end
+                if s > Max then Max = s end
+            end
+            y = y + ystep
+        end
+        x= x + xstep
+    end
+    return Min, Max
+end
+local z1, z2 = bounds(f,x1,x2,y1,y2)
+local N = 20
+local zLevels = ld.linspace(z1,z2,N)
+local pal = { {0.3,0.06,0.5}, {0.9,0.9,0.85} }
+local Colors = ld.getpalette(pal,N) 
+local barWidth = 0.15
+-- drawing
+for k = 1, N do
+    z = zLevels[k]
+    g:Dimplicit_inequalities({f,'>'}, {view={x1,x2,y1,y2}, draw_options="fill="..Colors[k]})
+end
+g:Labelsize("footnotesize")
+g:Dgradbox({Z(x1,y1),Z(x2,y2),0.25,2},{legend={"$x$","$y$"}, title="Filled contours ($z=f(x,y)$)"})
+g:Dcolorbar(Z(x2,y1)+barWidth+0.1, pal, {minmax={z1,z2}, width=barWidth, length=y2-y1, values=N, digits=2})
+g:Show()
+\end{luadraw}
+\end{document}

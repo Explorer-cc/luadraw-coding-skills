@@ -1,0 +1,56 @@
+% source: https://github.com/pfradin/luadraw/discussions/343#discussioncomment-18549947 (pfradin, block 1)
+\documentclass[12pt]{article}
+\usepackage{luadraw}
+\usepackage[svgnames]{xcolor}
+\usepackage{fourier-otf}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm] {geometry}
+\begin{document}
+\begin{figure}
+  \centering
+\begin{luadraw}{name=Intersection}
+local ld = luadraw
+local cpx = ld.cpx
+local sqrt = math.sqrt
+local int = ld.int
+local pi = math.pi
+local Z, i = cpx.Z, cpx.I
+local xmin, xmax, ymin, ymax = -15, 25, -5, 15
+local g = ld.graph:new{window={xmin, xmax, ymin, ymax},size={10,10}}
+g:Daxes({0,10,10},{arrows="-Stealth",legend={"$x$","$y$"}})
+g:Linewidth(12)
+g:Linecap("round")
+
+local A = Z(0, 3)
+local B = Z(0, 5)
+
+local f = function(x) return 1/500*x^3 - 3/100*x^2 - 1/5*x + 5 end
+local h = function(x) return 1/500*x^3 - 1/50*x^2 - 3/10*x + 3 end
+
+g:Ddomain3(f,h, {draw_options="draw=none,fill=green,fill opacity=0.6"})
+g:Dcartesian(f,{x={xmin,xmax},nbdots=100,draw_options="teal"})
+g:Dcartesian(h,{x={xmin,xmax},nbdots=100,draw_options="blue"})
+
+-- Tính toán giao điểm tự động
+local t1, t2 = table.unpack(ld.solve(function(x) return f(x)-h(x) end, xmin, xmax))
+
+local P_inter = {A, B, Z(t1,f(t1)), Z(t2,f(t2))}
+
+g:Dpolyline({{Z(t1,0),Z(t1,f(t1))},{Z(t2,0),Z(t2,f(t2))}}, "dashed, line width = 0.5pt")
+
+g:Linewidth(3)
+g:Ddots(P_inter, "color = red")
+
+g:Dlabel("$3$", A, {pos="SE"}, "$5$", B, {pos="NE"})
+local area = int(function(x) return math.abs(f(x) - h(x)) end, t1, t2)
+g:Dlabel(string.format("$S \\approx %.2f$", area), Z(10, 5), {pos="N"})
+g:Show()
+\end{luadraw}
+  \caption{}
+\end{figure}
+
+The area of the region bounded by the two graphs is:
+\[S = \int_{-10}^{20} (f(x) - h(x)) \mathrm d x = \int_{-10}^{20} \left( \left(\frac{1}{500}x^3 - \frac{3}{100}x^2 - \frac{1}{5}x + 5\right) - \left(\frac{1}{500}x^3 - \frac{1}{50}x^2 - \frac{3}{10}x + 3\right) \right) \mathrm d x.\]
+
+The direct calculation result via LuaTeX is:
+$S \approx \luadirect{tex.sprint(luadraw.int(function(x) return (1/500*x^3 - 3/100*x^2 - 1/5*x + 5) - (1/500*x^3 - 1/50*x^2 - 3/10*x + 3) end, -10, 20))}$.
+\end{document}

@@ -1,0 +1,25 @@
+% source: https://github.com/pfradin/luadraw/discussions/59#discussioncomment-14255047 (pfradin, block 1)
+\documentclass[12pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fouriernc}
+\begin{document}
+%https://tex.stackexchange.com/questions/171169/how-to-draw-a-simple-cone-with-height-and-radius-with-tikz?noredirect=1&lq=1
+\begin{luadraw}{name=triangle2}
+local g = graph3d:new{window={-6,6,-5,6},viewdir={70,70},size={10,10}}
+g:Linejoin("round"); g:Linewidth(4); Hiddenlinestyle = "dashed"
+local A,B,R=M(0,0,0), M(2,3,6),4
+local sin,cos = math.sin, math.cos
+local n = pt3d.normalize(B-A)
+local u = pt3d.prod(n,vecJ)
+if pt3d.N1(u) < 1e-12 then u = pt3d.prod(n,vecI) end -- if u is nul
+u = pt3d.normalize(u)
+local v = pt3d.prod(n,u)
+local t = -45 -- you choose t (angle) 
+local M = A+R*math.cos(t*deg)*u+R*math.sin(t*deg)*v -- on the base of the cone
+g:Dcone(B,A-B,R,{color="gray"}) 
+g:Dlabel3d("B", B,{pos="N"}, "$A$",A,{pos="S"}, "$M$",M,{pos="E"})
+g:Dpolyline3d({M,A,B},"dashed"); g:Dpolyline3d({B,M})
+g:Show()
+\end{luadraw}
+\end{document} 

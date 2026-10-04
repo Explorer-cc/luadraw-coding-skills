@@ -1,0 +1,117 @@
+% source: https://github.com/pfradin/luadraw/discussions/320#discussioncomment-18219103 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage[svgnames]{xcolor}
+
+% Color palette definitions (Ocean Blue + Light Green Cartographic Theme)
+\definecolor{earthocean}{RGB}{148,196,237}   % Ocean Blue
+\definecolor{earthland}{RGB}{196,226,182}    % Pastel Cartographic Light Green
+\definecolor{earthcoast}{RGB}{110,165,210}   % Crisp Shoreline Blue
+\definecolor{earthedge}{RGB}{110,165,210}    % Spherical Horizon Outline
+\definecolor{earthaxis}{RGB}{160,45,45}      % Earth Axis Burgundy
+
+\begin{document}
+\begin{luadraw}{name=globe_110m_simple}
+    local ld = luadraw
+    require "luadraw_spherical"
+
+    -- Initialize 3D viewport and spherical graph
+    local g = ld.graph3d:new{
+        window3d = {-4, 4, -4, 4, -4, 4},
+        window = {-4, 4, -4, 4},
+        viewdir = {30, 65},
+        size = {12, 12}
+    }
+
+    -- Helper to load Lua dataset with dual path resolution
+    local function load_dataset(filename)
+        local path = "generated/" .. filename
+        local f = io.open(path, "r")
+        if f then
+            f:close()
+            return dofile(path)
+        end
+        return dofile("demo/generated/" .. filename)
+    end
+
+    -- 1. Load 3 core 110m datasets
+    local ocean = load_dataset("ocean_110m.lua")
+    local land = load_dataset("land_110m.lua")
+    local coastline = load_dataset("coastline_110m.lua")
+
+    -- Axial tilt (Obliquity of the ecliptic: 23.44 deg)
+    local axial_tilt = -23.439281
+
+    -- Helper to project (lon, lat) points onto the 3D sphere surface with axial tilt
+    local function convert(points)
+        local result = {}
+        for _, point in ipairs(points) do
+            table.insert(result, ld.sM(point.lon, 90 - point.lat)) --<- change here
+        end
+        return ld.rotate3d(result, axial_tilt, {ld.pt3d.Origin, ld.pt3d.vecJ})
+    end
+
+    -- Base Sphere definition
+    g:Define_sphere{
+        color = "earthocean",
+        edgecolor = "earthedge",
+        edgewidth = 2.5,
+        back = false, inside = false --<- for version 3.5
+    }
+
+    -- Draw tilted Earth axis (passing through center and protruding slightly beyond poles)
+    local axis_direction = ld.rotate3d(ld.pt3d.vecK, axial_tilt, {ld.pt3d.Origin, ld.pt3d.vecJ})
+    local axis_path = {-4.1 * axis_direction, 4.1 * axis_direction}
+    g:Dseg3d(axis_path, "earthaxis,line width=1.2") --<- drawn behind the sphere
+    g:DSseg(axis_path, {color="earthaxis", width=12}) --<- with this, only the front part is visible
+
+    -- Layer 1: Ocean Polygons
+    for _, feature in ipairs(ocean) do
+        for _, ring in ipairs(feature.rings) do
+            g:DSregion(convert(ring.points), {
+                style = "noline",
+                fill = "earthocean",
+                fillopacity = 1
+            })
+        end
+    end
+
+    -- Layer 2a: Land Outer Rings (Continents and Islands)
+    for _, feature in ipairs(land) do
+        for _, ring in ipairs(feature.rings) do
+            if ring.role == "outer" then
+                g:DSregion(convert(ring.points), {
+                    style = "noline",
+                    fill = "earthland",
+                    fillopacity = 1
+                })
+            end
+        end
+    end
+
+    -- Layer 2b: Land Inner Rings (Inland holes / Caspian Sea backfill)
+    for _, feature in ipairs(land) do
+        for _, ring in ipairs(feature.rings) do
+            if ring.role == "inner" then
+                g:DSregion(convert(ring.points), {
+                    style = "noline",
+                    fill = "earthocean",
+                    fillopacity = 1
+                })
+            end
+        end
+    end
+
+    -- Layer 3: Coastline Curves
+    for _, feature in ipairs(coastline) do
+        g:DScurve(convert(feature.points), {
+            color = "earthcoast",
+            width = 0.55
+        })
+    end
+
+    -- Compute 3D spherical visibility and occlusion, then emit TikZ code
+    g:Dspherical()
+    g:Show()
+\end{luadraw}
+\end{document}

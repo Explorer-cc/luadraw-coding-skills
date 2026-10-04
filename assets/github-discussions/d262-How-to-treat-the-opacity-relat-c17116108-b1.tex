@@ -1,0 +1,79 @@
+% source: https://github.com/pfradin/luadraw/discussions/262#discussioncomment-17116108 (pfradin, block 1)
+\documentclass{standalone}
+\usepackage[3d]{luadraw}
+\usepackage{fourier}
+\usepackage[svgnames]{xcolor}
+\usetikzlibrary{bending}
+\begin{document}
+\begin{luadraw}{name=light_reflection}
+    local ld = luadraw
+    local pt3d = ld.pt3d
+    require "luadraw_decorations"
+    local Origin = pt3d.Origin
+    local vecI, vecJ, vecK = pt3d.vecI, pt3d.vecJ, pt3d.vecK
+    local normalize = pt3d.normalize
+    local sin, cos = math.sin, math.cos
+    local g = ld.graph3d:new{
+        window3d={0,6,-6,6,-6,6},
+        window={-8,8,-8,8},size={10,10},
+        viewdir={"yz", 0.65, 50},
+    }
+    local theta_i = 50 * ld.deg
+    local theta_t = 33 * ld.deg
+    local Pt_i = 4.5 * (-sin(theta_i) * vecJ + cos(theta_i) * vecK)
+    local Pt_r = 4.5 * (sin(theta_i) * vecJ + cos(theta_i) * vecK)
+    local Pt_t = 4.5 * (sin(theta_t) * vecJ - cos(theta_t) * vecK)
+    local C_i,C_r,C_t = 0.55 * Pt_i, 0.55 * Pt_r, 0.55 * Pt_t
+    local V_i, V_r, V_t = 0.3*pt3d.prod(-vecI,Pt_i), 0.3*pt3d.prod(-vecI,Pt_r), 0.3*pt3d.prod(vecI,Pt_t)
+
+    ld.Hiddenlines = true; ld.Hiddenlinestyle = "dashed"; 
+    ld.Hiddenlinescale = 2/3 -- version 3.2
+    
+    g:Dscene3d(
+        g:addPlane({Origin, vecK}, {color="gray!40!white", edge=true, rectangle={vecI, 9, 9}}),
+        g:addPlane({Origin, vecI}, {color="white", edge=true, rectangle={vecK, 9, 9}}),
+        
+        g:addPolyline({Pt_i, 0.05*Pt_i}, {color="black", width=12}),
+        g:addPolyline({Pt_i, Origin}, {color="black", width=2, hidden=false, arrows=1}),
+        g:addPolyline({C_i, C_i+V_i}, {color="black", width=4, arrows=1}),
+        
+        
+        g:addPolyline({Origin, 0.95*Pt_r}, {color="black", width=12}),
+        g:addPolyline({Origin, Pt_r}, {color="black", width=2, hidden=false, arrows=1}),
+        g:addPolyline({C_r, C_r+V_r}, {color="black", width=2, arrows=1}),        
+        
+        g:addPolyline({Origin, 0.95*Pt_t}, {color="black!40!gray", width=12}),
+        g:addPolyline({Origin, Pt_t}, {color="black!40!gray", width=2, hidden=false, arrows=1}),
+        
+        g:addAxes(Origin, {
+              color="black",
+              width=6, arrows=1,
+              labels={"$x$", "$y$", "$z$"}
+        })
+    )
+    g:Dpolyline3d({C_t, C_t+V_t}, "black!40!gray,dashed,line width=0.4pt,-latex")
+    g:Dlabel3d(
+            "Incident", Pt_i, {pos="NW"},
+            "Reflected", Pt_r, {pos="NE"},
+            "Transmitted", Pt_t, {pos="SE"},
+            "$E_s$",C_i,{pos="SW"}, "$E_p$",C_i+V_i,{pos="N"},
+            "$E_s$",C_r,{pos="NW"}, "$E_p$",C_r+V_r,{pos="E"},
+            "$E_s$",C_t,{pos="SW"}, "$E_p$",C_t+V_t,{pos="E", node_options="black!40!gray"}
+        )
+    g:Darc3d(vecK, Origin, Pt_i, 1.25, 1, {
+        arc_options="black,Stealth-Stealth",
+        label="$\\theta_i$",angle=-5
+    })
+    g:Darc3d(vecK, Origin, Pt_r, 1.25, 1, {
+        arc_options="black,Stealth-Stealth",
+        label="$\\theta_r$",angle=-5
+    })
+    local color = "black!40!gray" -- to simulate transparency
+    g:Linecolor(color); g:Labelcolor(color)
+    g:Darc3d(-vecK, Origin, Pt_t, 1.5, 1, {
+        arc_options="Stealth-Stealth",
+        label="$\\theta_t$",angle=5
+    })
+    g:Show()
+    \end{luadraw}
+\end{document}

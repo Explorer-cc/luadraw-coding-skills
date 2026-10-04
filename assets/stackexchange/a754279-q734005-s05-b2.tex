@@ -1,0 +1,25 @@
+% source: https://tex.stackexchange.com/a/754279 (question 734005, score 5, block 2)
+\documentclass{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+%https://tex.stackexchange.com/questions/734005/tikz-3d-graphic-background-foreground-intersections
+\begin{document}
+\begin{luadraw}{name=answer2}
+local g = graph3d:new{window3d = {0,5,0,9,0,9}, window={-2,9,-3,9},viewdir={20,70},size={10,10}}
+Hiddenlinestyle = "dotted"; g:Linewidth(6);
+local a, b, h,k = 4,8,5,8
+local P = parallelep(Origin, a*vecI,b*vecJ,h*vecK)
+local S = P.vertices
+local A,B,C,D,E,F,G,H = table.unpack(S)
+local L, M = M(a/2,3*b/4,k), M(a/2,b/4,k)
+local S = concat(S, {L,M} )
+P = facet2poly( cvx_hull3d(S) )
+local A = g:Edges(P)
+
+g:Dscene3d( g:addAxes(Origin, {arrows=1, hidden=true}), g:addPoly(P, {contrast=0}) )
+g:Dpolyline3d({{H,E,F},{E,M}}, "dotted") -- if we use A.hidden here, the rendering will not be correct.
+g:Dpolyline3d({{F,G},{C,G,L}},"line width=3pt,draw=white,double=black,double distance=0.6pt") -- these points depend on the angle of view.
+g:Dpolyline3d(A.visible)
+g:Show()
+\end{luadraw}
+\end{document}

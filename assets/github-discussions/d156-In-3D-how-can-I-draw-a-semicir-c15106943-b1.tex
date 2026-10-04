@@ -1,0 +1,24 @@
+% source: https://github.com/pfradin/luadraw/discussions/156#discussioncomment-15106943 (pfradin, block 1)
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\begin{document}
+\begin{luadraw}{name=incenter2}
+local g = graph3d:new{window={-10,10,-8,8},viewdir={220,60},size={10,10}}
+Hiddenlinestyle = "dashed"; Hiddenlines = true
+local sqrt=math.sqrt
+local a=8
+local  C,A, B,D,G,P,H,Q = M(0,0,0),  M(a,a,0),M(0,a,0), M(a,0,0),M(a/4,5,0), M(a/4,5,sqrt(3)),M(a/2,a/4,0), M(a/2,a/4,2*sqrt(3))
+local E = (C+ D)/2
+local I, r, n = circumcircle3d(A,B,P)
+local J, R, n1 = circumcircle3d(C,D,Q)
+
+g:Dpolyline3d({{A,B,C,D,A},{G,H,E}}) -- the polygonal line
+g:Dpath3d({A,I,B,r,-1,n,"ca","cl"}, "fill=white") -- half filled disc
+g:Dpath3d({D,J,C,R,1,n1,"ca","cl"}, "fill=white") -- half filled disc
+g:Dpolyline3d({{A,B,C,D,A},{G,H,E}},Hiddenlinestyle) -- the dashed polygonal line
+g:Ddots3d({A,B,C,D,E,H,I,G,P,Q})
+g:Dlabel3d( "$A$",A,{pos="N"}, "$C$",C,{pos="S"},"$P$",P,{pos="S"}, "$Q$",Q,{pos="N"},"$D$",D,{pos="E"}, "$B$",B,{pos="S"},"$E$",E,{pos="E"},"$H$",H,{pos="S"},"$G$",G,{pos="S"}, "$I$",I,{pos="N"})
+g:Show()
+\end{luadraw}
+\end{document} 
