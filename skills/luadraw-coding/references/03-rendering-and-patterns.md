@@ -1,6 +1,6 @@
 # Rendering routes and practical patterns
 
-Canonical full text: `../../luadraw-coding-guide-en.md`, sections 7.1–7.9.
+Canonical full text: `../luadraw-coding-guide-en.md`, sections 7.1–7.9.
 
 ## Route selection
 
@@ -41,7 +41,24 @@ Canonical full text: `../../luadraw-coding-guide-en.md`, sections 7.1–7.9.
 - For lines lying on facets, use the documented small geometric offset to
   avoid z-fighting.
 - Use transparency only after the correct visible geometry has been selected.
+- Declare the scene instead of scripting the painting: define geometry data,
+  then render it with `Dscene3d`, or with `Classifyfacet` and an explicit
+  back-to-front order. Never draw a whole enclosing solid in one call when
+  objects inside it must show through or in front.
+- Object inside a transparent box: `local V,H = g:Classifyfacet(P)`, then draw
+  `H`, the solid, and `V` (low opacity) in that order. Alternative: one
+  `g:Dscene3d(g:addPoly(solid,{...}), g:addPolyline(ld.facetedges(P),{hidden=true,...}))`.
+  Complete example: `examples/glass-box-3d.tex`.
+- Split a solid with `local V,H = g:Classifyfacet(S)` (facet list or polyhedron;
+  it applies the current 3D matrix and returns visible and hidden facets).
+  `local V = g:Classifyfacet(S)` keeps only the visible facets. Draw back to
+  front: hidden part, objects behind or inside, visible part. Use
+  `Dfacet(H/V,...)` for shaded facets, or `Dpolyline3d(border(H),"...color...")`
+  for a gradient silhouette. For a cut solid, `ld.cutfacet` first, then
+  classify each piece. Corpus (optional `assets/` archive):
+  `luadraw-doc-en/rotcurve.tex`, `spherical_strip.tex`, `Dandelin.tex`;
+  `github-discussions/d127-*`, `d330-*`; `stackexchange/a764304-*`.
 
-Every pattern above has complete examples in `assets/luadraw-doc-en/` or in
-the source locations listed by the full guide. Search those examples before
-creating a new abstraction.
+Every pattern above has complete examples in the manual source (`src/body-en/`),
+in the optional `assets/luadraw-doc-en/` archive, or in the source locations
+listed by the full guide. Search those before creating a new abstraction.

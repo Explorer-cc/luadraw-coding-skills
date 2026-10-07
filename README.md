@@ -9,21 +9,24 @@ skills/luadraw-coding/
 ├── SKILL.md                         # skill入口
 ├── VERSION                          # 0.1.0
 ├── README.md                        # skill内部说明
-├── LICENSE                          # MIT License
+├── LICENSE                          # MIT License(与仓库根目录相同)
+├── luadraw-coding-guide-en.md       # 完整英文指南(与仓库根目录副本一致)
 ├── examples/
-│   └── minimal-2d.tex               # 最小LuaLaTeX示例
-├── references/                      # 按主题拆分的操作参考
+│   ├── minimal-2d.tex               # 最小LuaLaTeX示例
+│   └── glass-box-3d.tex             # 3D声明式场景示例(Classifyfacet + g:Shift)
+├── references/                      # 按主题拆分的操作参考(01-05,05为全语料技巧索引)
 └── scripts/
     └── check-skill.lua              # 结构与元数据检查
 ```
 
-完整的原始英文指南仍保留在仓库根目录：
+skill 目录自包含：引导文档和许可证的副本就在 `skills/luadraw-coding/` 内。仓库根目录的
+`luadraw-coding-guide-en.md` 是源文件，修改后需要复制到 skill 目录，两份必须逐字节一致：
 
-```text
-luadraw-coding-guide-en.md
+```bash
+cp luadraw-coding-guide-en.md skills/luadraw-coding/luadraw-coding-guide-en.md
 ```
 
-该文件是完整参考文档；`skills/luadraw-coding/` 是供 agent 加载的精简操作层。两者职责不同，避免把整篇长文直接作为每次调用的入口。
+`skills/luadraw-coding/` 是供 agent 加载的操作层，完整指南是它的参考附件。
 
 ## 1. 发布仓库 README
 
@@ -79,13 +82,11 @@ skill 面向 Luadraw v3.5，编译示例需要：
 - Luadraw v3.5 的 Lua 模块；
 - TikZ、`xcolor`、`luacode` 等 TeX 依赖。
 
-仓库中的 `luadraw-v3.5/` 被 `.gitignore` 忽略，不会因为普通 Git 提交自动发布。使用完整仓库时，应自行把 Luadraw v3.5 放到：
+skill 不打包 Luadraw 源码和手册，而是从 TeX 安装中读取：`kpsewhich luadraw.sty` 给出 Luadraw 源码目录，
+手册位于同一 TeX 树的 `doc/lualatex/luadraw/`。`luadraw.sty` 必须声明 version 3.5。
 
-```text
-luadraw-v3.5/luadraw/files/
-```
-
-如果使用系统 TeX Live 安装的 Luadraw，则不需要该本地目录；只要 `luadraw.sty` 和 Luadraw Lua 模块能被 LuaLaTeX 找到即可。
+仓库中的 `luadraw-v3.5/` 被 `.gitignore` 忽略，只是本地可选的源码副本，skill 不依赖它。
+如需用它编译示例，见第 6 节的 `TEXINPUTS` 写法。
 
 ## 5. 安装与独立路径
 
@@ -110,27 +111,12 @@ cd luadraw-skills
 
 ### 只安装 skill 目录
 
-复制以下目录即可获得基本 skill 入口：
+复制 `skills/luadraw-coding/` 即可，不需要仓库的其他内容。该目录内所有链接都指向目录内部，
+`scripts/check-skill.lua` 会检查这一点。`assets/` 语料库是可选的，不随 skill 分发；
+文档中出现的 `assets/...` 文件名只是来源标注，存在时才读取。
 
-```text
-skills/luadraw-coding/
-```
-
-但当前参考页中的路径是按完整仓库布局写的，例如：
-
-```text
-../../luadraw-coding-guide-en.md
-../../assets/
-../../luadraw-v3.5/
-```
-
-因此，若只复制 skill 目录，需要同时满足以下任一条件：
-
-1. 保持它位于完整仓库的 `skills/` 下；
-2. 将 `luadraw-coding-guide-en.md`、精选 `assets/` 和所需 Luadraw 源码复制到对应相对路径；
-3. 将引用改写为安装包内部路径。
-
-当前版本推荐使用方式 1，即从完整仓库加载。
+完整指南沿用上游仓库布局的路径（`luadraw-v3.5/luadraw/files/`、`assets/`），
+`SKILL.md` 的 Resources 一节给出了到 TeX 安装的映射。
 
 ### ZIP 安装
 
@@ -152,6 +138,7 @@ skills/luadraw-coding/
 
 ```text
 skills/luadraw-coding/examples/minimal-2d.tex
+skills/luadraw-coding/examples/glass-box-3d.tex
 ```
 
 在完整仓库根目录执行：

@@ -5,25 +5,28 @@ knowledge in the repository.
 
 ## Source of truth
 
-- Full guide: `../../luadraw-coding-guide-en.md`
-- Official package and documentation: `../../luadraw-v3.5/`
-- Curated code corpus: `../../assets/`
+- Full guide: `luadraw-coding-guide-en.md` (byte-identical copy of the
+  repository-root guide; it uses the upstream layout, see the path mapping in
+  `SKILL.md`, Resources)
+- Luadraw v3.5 package and manual: the TeX installation (`kpsewhich luadraw.sty`)
+- Code corpus `assets/`: optional, not shipped with this skill
 
-The root guide is intentionally left unchanged. The files here organize its
-rules for skill use; they are not a replacement for the complete reference.
+The files here organize the guide's rules for skill use; they are not a
+replacement for the complete reference.
 
 ## Release metadata
 
 - Version: `0.1.0` (`VERSION` and `SKILL.md` front matter).
-- License: repository-level `../../LICENSE` (MIT License).
-- Minimal compile example: `examples/minimal-2d.tex`.
+- License: `LICENSE` (MIT License, copy of the repository-level file).
+- Compile examples: `examples/minimal-2d.tex` (2D),
+  `examples/glass-box-3d.tex` (3D, declarative scene, `g:Shift` layout).
 - Structural validator: `scripts/check-skill.lua`.
 
 ## Dependencies
 
-The skill targets Luadraw v3.5 and LuaLaTeX. The local `luadraw-v3.5/`
-source tree is intentionally ignored by Git; install Luadraw separately or
-provide it at the repository path documented in the root `README.md`.
+The skill targets Luadraw v3.5 and LuaLaTeX. It reads the Luadraw source and
+manual from the TeX installation (`kpsewhich luadraw.sty`) and does not bundle
+them. The `assets/` corpus is optional and not part of the skill.
 
 ## Files
 
@@ -36,9 +39,15 @@ provide it at the repository path documented in the root `README.md`.
   common geometric patterns.
 - `references/04-sources-and-validation.md`: source priority, asset naming,
   link conventions, and verification requirements.
+- `references/05-corpus-techniques.md`: index of techniques found by re-reading
+  the whole corpus (geometry as data, 3D primitives, scene elements,
+  visibility and projection variants, 2D helpers).
 
 ## Maintenance rule
 
 When the API or corpus changes, update the full guide first, then update the
 relevant reference page and `SKILL.md` only when the operational rule changes.
-Do not duplicate the full guide into this directory.
+`luadraw-coding-guide-en.md` here is a deliberate copy of the repository-root
+guide so the skill is self-contained; copy it over after every change to the
+root file and keep the two byte-identical. Do not copy other repository content
+into this directory.

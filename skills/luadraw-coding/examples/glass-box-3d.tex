@@ -1,0 +1,28 @@
+% Luadraw v3.5: a cylinder and a sphere inside a transparent cube.
+% Pattern from tex.stackexchange answer 766923 (question 174930).
+\documentclass[border=5pt]{standalone}
+\usepackage[svgnames]{xcolor}
+\usepackage[3d]{luadraw}
+\usepackage{fourier-otf}
+
+\begin{document}
+\begin{luadraw}{name=glass-box-3d}
+local ld = luadraw
+local pt3d = ld.pt3d
+local M, Origin = pt3d.M, pt3d.Origin
+local vecI, vecJ, vecK = pt3d.vecI, pt3d.vecJ, pt3d.vecK
+local g = ld.graph3d:new{window3d={-5,5,-5,5,-5,5}, window={-8,8,-4,4}, viewdir={30,70}, size={12,12}}
+local R, r = 2, 1.5
+local P = ld.parallelep(M(-R,-R,-R),2*R*vecI,2*R*vecJ,2*R*vecK)
+local V, H = g:Classifyfacet(P)
+g:Shift(-4)
+g:Dfacet(H,{color="Cyan!50!White",opacity=0.3,edgecolor="Gray",edgewidth=8})
+g:Dcylinder(-R*vecK,r,R*vecK,{color="DeepPink",opacity=0.8,edgewidth=8})
+g:Dfacet(V,{color="Cyan!50!White",opacity=0.2,contrast=0,edgecolor="Gray!50",edgewidth=8})
+g:Shift(8)
+g:Dfacet(H,{color="Cyan!50!White",opacity=0.3,edgecolor="Gray",edgewidth=8})
+g:Dsphere(Origin,r,{color="DeepPink",opacity=0.8,edgewidth=8})
+g:Dfacet(V,{color="Cyan!50!White",opacity=0.2,contrast=0,edgecolor="Gray!50",edgewidth=8})
+g:Show()
+\end{luadraw}
+\end{document}

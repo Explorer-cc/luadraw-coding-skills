@@ -1,18 +1,22 @@
 # Sources and validation
 
-Canonical full text: `../../luadraw-coding-guide-en.md`.
+Canonical full text: `../luadraw-coding-guide-en.md`.
 
 ## Source priority
 
-1. `luadraw-v3.5/luadraw/doc/src/body-en/` — official documentation;
-2. `luadraw-v3.5/luadraw/files/` and `extensions/` — implementation and
-   extension APIs;
-3. `assets/luadraw-doc-en/` — complete official demos;
-4. `assets/stackexchange/` — author answers, with score as a quality signal;
-5. `assets/github-discussions/` — discussion examples and fixes.
+1. Installed manual: `luadraw-doc-en.pdf` and `src/body-en/` (see `SKILL.md`,
+   Resources) — official documentation;
+2. Installed Luadraw source (directory of `luadraw.sty`, plus `extensions/`) —
+   implementation and extension APIs;
+3. `assets/luadraw-doc-en/` — complete official demos (optional archive);
+4. `assets/stackexchange/` — author answers, with score as a quality signal
+   (optional archive);
+5. `assets/github-discussions/` — discussion examples and fixes (optional
+   archive).
 
-The assets are an archive. A short snippet may be useful as an API reference
-without being a standalone compilable document.
+Items 3–5 are an archive that this skill does not ship; items 1–2 suffice. An
+archived snippet may be useful as an API reference without being a standalone
+compilable document.
 
 ## Asset conventions
 
@@ -22,8 +26,9 @@ without being a standalone compilable document.
 - `.obj`: Wavefront OBJ data; source comment uses `#`.
 - `.txt`: terminal output or prose; source comment uses `#`.
 
-Use repository-relative paths and treat `file:line` references as navigational
-hints. After moving or editing an asset, recheck every reference to it.
+Cite Luadraw source as `file:line` relative to the directory of `luadraw.sty`;
+treat line numbers as navigational hints for v3.5. After moving or editing an
+asset, recheck every reference to it.
 
 ## Verification levels
 
@@ -37,7 +42,15 @@ hints. After moving or editing an asset, recheck every reference to it.
 A successful syntax check does not prove that a Luadraw method exists or that
 TikZ options render correctly. Report the actual check performed.
 
+## Option defaults
+
+Before omitting or writing an option, open the method in
+the installed Luadraw source (directory of `luadraw.sty`) and read the current code, plus the matching manual
+section. Report the file and line used. Experience, memory and example code are
+not evidence of a default. Header comments can be stale; the code is
+authoritative.
+
 ## Full checklist
 
 The complete submission checklist is the appendix of
-`../../luadraw-coding-guide-en.md`.
+`../luadraw-coding-guide-en.md`.

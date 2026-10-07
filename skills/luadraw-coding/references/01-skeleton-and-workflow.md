@@ -1,17 +1,18 @@
 # Skeleton and workflow
 
-Canonical full text: `../../luadraw-coding-guide-en.md`, sections 2–5.
+Canonical full text: `../luadraw-coding-guide-en.md`, sections 2–5.
 
 ## Corpus entry path
 
-Use the official demos first. The repository's recommended progression is:
+Use the official demos first: the `luadraw` blocks in the manual source
+(`src/body-en/*.tex`). The optional `assets/luadraw-doc-en/` archive holds them
+one per file, named by `name=`. Recommended progression:
 
-1. `assets/luadraw-doc-en/champ.tex` — 2D skeleton;
-2. `assets/luadraw-doc-en/orthocentre.tex` — geometric construction;
-3. `assets/luadraw-doc-en/torus.tex` — surface of revolution, `addWall`, and
-   rendering-route decisions;
-4. `assets/github-discussions/d137-*-c14894434-b1.tex` — multiple views and
-   GIF export.
+1. `champ` — 2D skeleton;
+2. `orthocentre` — geometric construction;
+3. `torus` — surface of revolution, `addWall`, and rendering-route decisions;
+4. `d137-*-c14894434-b1.tex` in the optional `assets/github-discussions/`
+   archive — multiple views and GIF export.
 
 ## Stable LuaLaTeX skeleton
 
@@ -52,6 +53,14 @@ Every state-opening operation requires its matching close operation:
 
 Reset matrices after local transformations with `IDmatrix()` or
 `IDmatrix3d()`.
+
+## Side-by-side figures
+
+Use `g:Shift(-4)` then `g:Shift(8)` for two figures next to each other. Reserve
+`Saveattr` / `Viewport` / `Coordsystem` / `Restoreattr` for genuinely
+independent panels (different windows or view directions).
+For two figures it adds a paired state and a second coordinate system for
+nothing.
 
 ## Animation
 
