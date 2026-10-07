@@ -1,6 +1,6 @@
 # Style and state rules
 
-Canonical full text: `../luadraw-coding-guide-en.md`, section 6.
+Canonical full text: `00-guide-en.md`, section 6.
 
 ## Options and objects
 

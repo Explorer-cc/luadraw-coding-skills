@@ -1,6 +1,6 @@
 # Rendering routes and practical patterns
 
-Canonical full text: `../luadraw-coding-guide-en.md`, sections 7.1–7.9.
+Canonical full text: `00-guide-en.md`, sections 7.1–7.9.
 
 ## Route selection
 
@@ -55,10 +55,10 @@ Canonical full text: `../luadraw-coding-guide-en.md`, sections 7.1–7.9.
   front: hidden part, objects behind or inside, visible part. Use
   `Dfacet(H/V,...)` for shaded facets, or `Dpolyline3d(border(H),"...color...")`
   for a gradient silhouette. For a cut solid, `ld.cutfacet` first, then
-  classify each piece. Corpus (optional `assets/` archive):
+  classify each piece. Corpus (optional `corpus/` archive):
   `luadraw-doc-en/rotcurve.tex`, `spherical_strip.tex`, `Dandelin.tex`;
   `github-discussions/d127-*`, `d330-*`; `stackexchange/a764304-*`.
 
 Every pattern above has complete examples in the manual source (`src/body-en/`),
-in the optional `assets/luadraw-doc-en/` archive, or in the source locations
+in the optional `corpus/luadraw-doc-en/` archive, or in the source locations
 listed by the full guide. Search those before creating a new abstraction.

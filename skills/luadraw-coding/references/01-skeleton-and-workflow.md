@@ -1,17 +1,17 @@
 # Skeleton and workflow
 
-Canonical full text: `../luadraw-coding-guide-en.md`, sections 2–5.
+Canonical full text: `00-guide-en.md`, sections 2–5.
 
 ## Corpus entry path
 
 Use the official demos first: the `luadraw` blocks in the manual source
-(`src/body-en/*.tex`). The optional `assets/luadraw-doc-en/` archive holds them
+(`src/body-en/*.tex`). The optional `corpus/luadraw-doc-en/` archive holds them
 one per file, named by `name=`. Recommended progression:
 
 1. `champ` — 2D skeleton;
 2. `orthocentre` — geometric construction;
 3. `torus` — surface of revolution, `addWall`, and rendering-route decisions;
-4. `d137-*-c14894434-b1.tex` in the optional `assets/github-discussions/`
+4. `d137-*-c14894434-b1.tex` in the optional `corpus/github-discussions/`
    archive — multiple views and GIF export.
 
 ## Stable LuaLaTeX skeleton

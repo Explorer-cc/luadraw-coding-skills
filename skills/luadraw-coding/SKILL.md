@@ -9,8 +9,8 @@ description: >
 
 # Luadraw coding skill
 
-Use this skill for Luadraw v3.5 work. The complete corpus guide remains at
-`luadraw-coding-guide-en.md`; the files under `references/` are the operational
+Use this skill for Luadraw v3.5 work. The complete corpus guide is
+`references/00-guide-en.md`; the files under `references/` are the operational
 split by concern.
 
 ## Scope
@@ -33,17 +33,17 @@ that compiles the document. Nothing outside the installed TeX tree is required.
 - Manual: `luadraw-doc-en.pdf` and its source `src/body-en/*.tex` in the
   `doc/lualatex/luadraw/` directory of the same TeX tree (replace `tex/` by
   `doc/` in the source directory's path).
-- Full guide: `luadraw-coding-guide-en.md` in this directory.
+- Full guide: `references/00-guide-en.md`.
 - Version: `luadraw.sty` must declare version 3.5. If it does not, say so; do
   not silently use another version.
-- Optional corpus archive `assets/` (official demos, StackExchange answers,
+- Optional corpus archive `corpus/` (official demos, StackExchange answers,
   GitHub Discussions): not shipped with this skill. File names such as
-  `assets/luadraw-doc-en/torus.tex` are provenance; open them only if the
-  archive exists next to the skill. Without it, use the manual source and
-  `references/05-corpus-techniques.md`.
+  `corpus/luadraw-doc-en/torus.tex` are provenance; open them only if the
+  archive exists in the repository that contains this skill. Without it, use
+  the manual source and `references/05-corpus-techniques.md`.
 - Path mapping for the full guide, which uses the upstream repository layout:
   `luadraw-v3.5/luadraw/files/` is the Luadraw source directory above,
-  `luadraw-v3.5/luadraw/doc/src/body-en/` is the manual source, and `assets/`
+  `luadraw-v3.5/luadraw/doc/src/body-en/` is the manual source, and `corpus/`
   is the optional archive.
 
 ## Required workflow
@@ -54,7 +54,7 @@ that compiles the document. Nothing outside the installed TeX tree is required.
 3. Search the installed Luadraw manual and source (see Resources) before
    inventing an API; check `references/05-corpus-techniques.md` for an existing
    one-call form.
-4. Use the optional `assets/` corpus (StackExchange answers, GitHub Discussions)
+4. Use the optional `corpus/` archive (StackExchange answers, GitHub Discussions)
    only when it exists and the official documentation does not answer the
    question; otherwise skip this step.
 5. Prefer the existing two-layer design: `ld.*` computes; `g:D*` draws.
@@ -118,4 +118,4 @@ that compiles the document. Nothing outside the installed TeX tree is required.
 - Corpus navigation and validation: `references/04-sources-and-validation.md`.
 - Compute-side constructors, 3D primitives, scene elements, projections, 2D
   helpers found by reading every corpus file: `references/05-corpus-techniques.md`.
-- Full prose and complete checklist: `luadraw-coding-guide-en.md`.
+- Full prose and complete checklist: `references/00-guide-en.md`.

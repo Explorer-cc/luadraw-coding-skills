@@ -1,6 +1,6 @@
 # Sources and validation
 
-Canonical full text: `../luadraw-coding-guide-en.md`.
+Canonical full text: `00-guide-en.md`.
 
 ## Source priority
 
@@ -8,10 +8,10 @@ Canonical full text: `../luadraw-coding-guide-en.md`.
    Resources) — official documentation;
 2. Installed Luadraw source (directory of `luadraw.sty`, plus `extensions/`) —
    implementation and extension APIs;
-3. `assets/luadraw-doc-en/` — complete official demos (optional archive);
-4. `assets/stackexchange/` — author answers, with score as a quality signal
+3. `corpus/luadraw-doc-en/` — complete official demos (optional archive);
+4. `corpus/stackexchange/` — author answers, with score as a quality signal
    (optional archive);
-5. `assets/github-discussions/` — discussion examples and fixes (optional
+5. `corpus/github-discussions/` — discussion examples and fixes (optional
    archive).
 
 Items 3–5 are an archive that this skill does not ship; items 1–2 suffice. An
@@ -53,4 +53,4 @@ authoritative.
 ## Full checklist
 
 The complete submission checklist is the appendix of
-`../luadraw-coding-guide-en.md`.
+`00-guide-en.md`.

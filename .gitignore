@@ -13,15 +13,14 @@
 
 # Luadraw generated/cache outputs
 *.tkz
+_luadraw/
 *.dvi
 *.bbl
 *.blg
 
-# Skill validation output
+# Local scratch: Luadraw source copies, validation output
+.local/
 build/
-
-# Local Luadraw version trees and files
-luadraw-v*
 
 # Editor and runtime noise
 .DS_Store

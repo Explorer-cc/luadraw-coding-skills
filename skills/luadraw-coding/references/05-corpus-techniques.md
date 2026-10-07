@@ -1,6 +1,6 @@
 # Corpus techniques: look here before hand-writing geometry
 
-Canonical full text: `../luadraw-coding-guide-en.md`, sections 7.10–7.15.
+Canonical full text: `00-guide-en.md`, sections 7.10–7.15.
 Found by re-reading every corpus file. Each name was checked in
 the installed Luadraw v3.5 source (directory of `luadraw.sty`); re-read the function header before relying on an
 argument order.
